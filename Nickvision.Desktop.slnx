@@ -1,0 +1,4 @@
+<Solution>
+    <Project Path="Nickvision.Desktop.Tests/Nickvision.Desktop.Tests.csproj" Id="7c4073ac-b4e5-41e9-a180-e535e19ded2f"/>
+    <Project Path="Nickvision.Desktop/Nickvision.Desktop.csproj"/>
+</Solution>

@@ -1,0 +1,543 @@
+﻿using Nickvision.Desktop.Keyring;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+using System.Text;
+using System.Threading.Tasks;
+#if OS_WINDOWS
+using Vanara.InteropServices;
+using Vanara.PInvoke;
+#elif OS_MAC || OS_LINUX
+using System.Diagnostics;
+#endif
+
+namespace Nickvision.Desktop.System;
+
+[SupportedOSPlatform("windows")]
+[SupportedOSPlatform("linux")]
+[SupportedOSPlatform("macos")]
+public class SecretService : ISecretService
+{
+    public bool Add(Secret secret)
+    {
+        if (secret.Empty)
+        {
+            return false;
+        }
+        if (Get(secret.Name) is not null)
+        {
+            return false;
+        }
+#if OS_WINDOWS
+#pragma warning disable CA1416
+        var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
+        var res = AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
+        {
+            AttributeCount = 0,
+            Attributes = nint.Zero,
+            Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
+            Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
+            TargetName = new StrPtrAuto(secret.Name),
+            UserName = new StrPtrAuto("default"),
+            CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
+            CredentialBlob = stringPtr
+        }, 0);
+        Marshal.FreeHGlobal(stringPtr);
+        return res;
+#pragma warning restore CA1416
+#elif OS_MAC
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "security",
+                Arguments = $"add-generic-password -a default -s '{secret.Name}' -w '{secret.Value}'",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        process.WaitForExit();
+        return process.ExitCode == 0;
+#elif OS_LINUX
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "secret-tool",
+                Arguments = $"store --label={secret.Name} schema Nickvision.Desktop application {secret.Name}",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        var stdin = process.StandardInput;
+        stdin.Write(secret.Value);
+        stdin.Close();
+        process.WaitForExit();
+        return process.ExitCode == 0;
+#else
+        return false;
+#endif
+    }
+
+    public async Task<bool> AddAsync(Secret secret)
+    {
+        if (secret.Empty)
+        {
+            return false;
+        }
+        if (await GetAsync(secret.Name) is not null)
+        {
+            return false;
+        }
+#if OS_WINDOWS
+#pragma warning disable CA1416
+        var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
+        var res = await Task.Run(() => AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
+        {
+            AttributeCount = 0,
+            Attributes = nint.Zero,
+            Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
+            Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
+            TargetName = new StrPtrAuto(secret.Name),
+            UserName = new StrPtrAuto("default"),
+            CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
+            CredentialBlob = stringPtr
+        }, 0));
+        Marshal.FreeHGlobal(stringPtr);
+        return res;
+#pragma warning restore CA1416
+#elif OS_MAC
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "security",
+                Arguments = $"add-generic-password -a default -s '{secret.Name}' -w '{secret.Value}'",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        await process.WaitForExitAsync();
+        return process.ExitCode == 0;
+#elif OS_LINUX
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "secret-tool",
+                Arguments = $"store --label={secret.Name} schema Nickvision.Desktop application {secret.Name}",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        var stdin = process.StandardInput;
+        await stdin.WriteAsync(secret.Value);
+        stdin.Close();
+        await process.WaitForExitAsync();
+        return process.ExitCode == 0;
+#else
+        return false;
+#endif
+    }
+
+    public Secret? Create(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return null;
+        }
+        if (Get(name) is not null)
+        {
+            return null;
+        }
+        var secret = new Secret(name, new PasswordGenerator().Next(64));
+        return Add(secret) ? secret : null;
+    }
+
+    public async Task<Secret?> CreateAsync(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return null;
+        }
+        if (await GetAsync(name) is not null)
+        {
+            return null;
+        }
+        var secret = new Secret(name, new PasswordGenerator().Next(64));
+        return await AddAsync(secret) ? secret : null;
+    }
+
+    public bool Delete(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return false;
+        }
+#if OS_WINDOWS
+#pragma warning disable CA1416
+        return AdvApi32.CredDelete(name, AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC);
+#pragma warning restore CA1416
+#elif OS_MAC
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "security",
+                Arguments = $"delete-generic-password -a default -s '{name}'",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        process.WaitForExit();
+        return process.ExitCode == 0;
+#elif OS_LINUX
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "secret-tool",
+                Arguments = $"clear schema Nickvision.Desktop application {name}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        process.WaitForExit();
+        return process.ExitCode == 0;
+#else
+        return false;
+#endif
+    }
+
+    public async Task<bool> DeleteAsync(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return false;
+        }
+#if OS_WINDOWS
+#pragma warning disable CA1416
+        return await Task.Run(() => AdvApi32.CredDelete(name, AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC));
+#pragma warning restore CA1416
+#elif OS_MAC
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "security",
+                Arguments = $"delete-generic-password -a default -s '{name}'",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        await process.WaitForExitAsync();
+        return process.ExitCode == 0;
+#elif OS_LINUX
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "secret-tool",
+                Arguments = $"clear schema Nickvision.Desktop application {name}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        await process.WaitForExitAsync();
+        return process.ExitCode == 0;
+#else
+        return false;
+#endif
+    }
+
+    public Secret? Get(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return null;
+        }
+#if OS_WINDOWS
+#pragma warning disable CA1416
+        if (!AdvApi32.CredRead(name, AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC, out var credential))
+        {
+            return null;
+        }
+        return credential.CredentialBlob is not null
+            ? new Secret(name, Encoding.Unicode.GetString(credential.CredentialBlob))
+            : null;
+#pragma warning restore CA1416
+#elif OS_MAC
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "security",
+                Arguments = $"find-generic-password -a default -w -s '{name}'",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        process.WaitForExit();
+        if (process.ExitCode != 0)
+        {
+            return null;
+        }
+        var stdout = process.StandardOutput.ReadToEnd();
+        return new Secret(name, stdout.Split('\n')[^1]);
+#elif OS_LINUX
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "secret-tool",
+                Arguments = $"lookup schema Nickvision.Desktop application {name}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        process.WaitForExit();
+        if (process.ExitCode != 0)
+        {
+            return null;
+        }
+        var stdout = process.StandardOutput.ReadToEnd();
+        return new Secret(name, stdout.Split('\n')[^1]);
+#else
+        return null;
+#endif
+    }
+
+    public async Task<Secret?> GetAsync(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            return null;
+        }
+#if OS_WINDOWS
+#pragma warning disable CA1416
+        var credential = await Task.Run<AdvApi32.CREDENTIAL_MGD?>(() =>
+        {
+            if (AdvApi32.CredRead(name, AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC, out var c))
+            {
+                return c;
+            }
+            return null;
+        });
+        return credential?.CredentialBlob is not null
+            ? new Secret(name, Encoding.Unicode.GetString(credential.Value.CredentialBlob))
+            : null;
+#pragma warning restore CA1416
+#elif OS_MAC
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "security",
+                Arguments = $"find-generic-password -a default -w -s '{name}'",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        await process.WaitForExitAsync();
+        if (process.ExitCode != 0)
+        {
+            return null;
+        }
+        var stdout = await process.StandardOutput.ReadToEndAsync();
+        return new Secret(name, stdout.Split('\n')[^1]);
+#elif OS_LINUX
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "secret-tool",
+                Arguments = $"lookup schema Nickvision.Desktop application {name}",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        await process.WaitForExitAsync();
+        if (process.ExitCode != 0)
+        {
+            return null;
+        }
+        var stdout = await process.StandardOutput.ReadToEndAsync();
+        return new Secret(name, stdout.Split('\n')[^1]);
+#else
+        return null;
+#endif
+    }
+
+    public bool Update(Secret secret)
+    {
+        if (secret.Empty)
+        {
+            return false;
+        }
+#if OS_WINDOWS
+#pragma warning disable CA1416
+        if (Get(secret.Name) is null)
+        {
+            return false;
+        }
+        var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
+        var res = AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
+        {
+            AttributeCount = 0,
+            Attributes = nint.Zero,
+            Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
+            Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
+            TargetName = new StrPtrAuto(secret.Name),
+            UserName = new StrPtrAuto("default"),
+            CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
+            CredentialBlob = stringPtr
+        }, 0);
+        Marshal.FreeHGlobal(stringPtr);
+        return res;
+#pragma warning restore CA1416
+#elif OS_MAC
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "security",
+                Arguments = $"add-generic-password -a default -s '{secret.Name}' -w '{secret.Value}' -U",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        process.WaitForExit();
+        return process.ExitCode == 0;
+#elif OS_LINUX
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "secret-tool",
+                Arguments = $"store --label='{secret.Name}' schema Nickvision.Desktop application {secret.Name}",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        var stdin = process.StandardInput;
+        stdin.Write(secret.Value);
+        stdin.Close();
+        process.WaitForExit();
+        return process.ExitCode == 0;
+#else
+        return false;
+#endif
+    }
+
+    public async Task<bool> UpdateAsync(Secret secret)
+    {
+        if (secret.Empty)
+        {
+            return false;
+        }
+#if OS_WINDOWS
+#pragma warning disable CA1416
+        if (await GetAsync(secret.Name) is null)
+        {
+            return false;
+        }
+        var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
+        var res = await Task.Run(() => AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
+        {
+            AttributeCount = 0,
+            Attributes = nint.Zero,
+            Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
+            Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
+            TargetName = new StrPtrAuto(secret.Name),
+            UserName = new StrPtrAuto("default"),
+            CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
+            CredentialBlob = stringPtr
+        }, 0));
+        Marshal.FreeHGlobal(stringPtr);
+        return res;
+#pragma warning restore CA1416
+#elif OS_MAC
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "security",
+                Arguments = $"add-generic-password -a default -s '{secret.Name}' -w '{secret.Value}' -U",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        await process.WaitForExitAsync();
+        return process.ExitCode == 0;
+#elif OS_LINUX
+        using var process = new Process()
+        {
+            StartInfo = new ProcessStartInfo()
+            {
+                FileName = "secret-tool",
+                Arguments = $"store --label='{secret.Name}' schema Nickvision.Desktop application {secret.Name}",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        process.Start();
+        var stdin = process.StandardInput;
+        await stdin.WriteAsync(secret.Value);
+        stdin.Close();
+        await process.WaitForExitAsync();
+        return process.ExitCode == 0;
+#else
+        return false;
+#endif
+    }
+}
