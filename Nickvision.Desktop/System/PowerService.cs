@@ -63,26 +63,28 @@ public class PowerService : IPowerService
         {
             return false;
         }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "osascript",
-            Arguments = "-e 'tell application \"System Events\" to log out'",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
+        Process.Start(
+            new ProcessStartInfo()
+            {
+                FileName = "osascript",
+                Arguments = "-e 'tell application \"System Events\" to log out'",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
         return true;
 #elif OS_LINUX
         if (string.IsNullOrEmpty(Environment.FindDependency("gnome-session-quit")))
         {
             return false;
         }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "gnome-session-quit",
-            Arguments = "--logout",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
+        Process.Start(
+            new ProcessStartInfo()
+            {
+                FileName = "gnome-session-quit",
+                Arguments = "--logout",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
         return true;
 #else
         return false;
@@ -92,8 +94,9 @@ public class PowerService : IPowerService
     public bool PreventSuspend()
     {
 #if OS_WINDOWS
-        return Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS |
-                                                Kernel32.EXECUTION_STATE.ES_SYSTEM_REQUIRED) != 0;
+        return Kernel32.SetThreadExecutionState(
+                   Kernel32.EXECUTION_STATE.ES_CONTINUOUS | Kernel32.EXECUTION_STATE.ES_SYSTEM_REQUIRED) !=
+               0;
 #elif OS_MAC
         if (_preventSuspendProcess != null)
         {
@@ -161,26 +164,28 @@ public class PowerService : IPowerService
         {
             return false;
         }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "osascript",
-            Arguments = "-e 'tell application \"System Events\" to restart'",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
+        Process.Start(
+            new ProcessStartInfo()
+            {
+                FileName = "osascript",
+                Arguments = "-e 'tell application \"System Events\" to restart'",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
         return true;
 #elif OS_LINUX
         if (string.IsNullOrEmpty(Environment.FindDependency("systemctl")))
         {
             return false;
         }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "systemctl",
-            Arguments = "reboot",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
+        Process.Start(
+            new ProcessStartInfo()
+            {
+                FileName = "systemctl",
+                Arguments = "reboot",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
         return true;
 #else
         return false;
@@ -207,22 +212,24 @@ public class PowerService : IPowerService
         {
             return false;
         }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "osascript",
-            Arguments = "-e 'tell application \"System Events\" to shut down'",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
+        Process.Start(
+            new ProcessStartInfo()
+            {
+                FileName = "osascript",
+                Arguments = "-e 'tell application \"System Events\" to shut down'",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
         return true;
 #elif OS_LINUX
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "systemctl",
-            Arguments = "poweroff",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
+        Process.Start(
+            new ProcessStartInfo()
+            {
+                FileName = "systemctl",
+                Arguments = "poweroff",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
         return true;
 #else
         return false;
@@ -238,26 +245,28 @@ public class PowerService : IPowerService
         {
             return false;
         }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "osascript",
-            Arguments = "-e 'tell application \"System Events\" to sleep'",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
+        Process.Start(
+            new ProcessStartInfo()
+            {
+                FileName = "osascript",
+                Arguments = "-e 'tell application \"System Events\" to sleep'",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
         return true;
 #elif OS_LINUX
         if (string.IsNullOrEmpty(Environment.FindDependency("systemctl")))
         {
             return false;
         }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "systemctl",
-            Arguments = "suspend",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
+        Process.Start(
+            new ProcessStartInfo()
+            {
+                FileName = "systemctl",
+                Arguments = "suspend",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
         return true;
 #else
         return false;

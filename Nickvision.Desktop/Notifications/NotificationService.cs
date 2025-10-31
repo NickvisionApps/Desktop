@@ -2,8 +2,10 @@
 using System;
 #if OS_WINDOWS
 using Microsoft.Toolkit.Uwp.Notifications;
+
 #elif OS_MAC
 using System.Diagnostics;
+
 #elif OS_LINUX
 using System.Diagnostics;
 using System.IO;
@@ -37,7 +39,13 @@ public class NotificationService : IDisposable, INotificationService
     public static partial nint notify_notification_new([MarshalAs(UnmanagedType.LPStr)] string summary, [MarshalAs(UnmanagedType.LPStr)] string body, [MarshalAs(UnmanagedType.LPStr)] string icon);
 
     [LibraryImport("libnotify.so.4")]
-    private static unsafe partial void notify_notification_add_action(nint notification, [MarshalAs(UnmanagedType.LPStr)] string action, [MarshalAs(UnmanagedType.LPStr)] string label, NotifyActionCallback callback, nint user_data, GDestroyNotify free_func);
+    private static unsafe partial void notify_notification_add_action(
+        nint notification,
+        [MarshalAs(UnmanagedType.LPStr)] string action,
+        [MarshalAs(UnmanagedType.LPStr)] string label,
+        NotifyActionCallback callback,
+        nint user_data,
+        GDestroyNotify free_func);
 
     [LibraryImport("libnotify.so.4")]
     private static partial void notify_notification_set_urgency(nint notifcation, uint urgency);
@@ -104,7 +112,8 @@ public class NotificationService : IDisposable, INotificationService
         var builder = new ToastContentBuilder();
         builder.AddText(notification.Title);
         builder.AddText(notification.Message);
-        if (notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam))
+        if (notification.Action == "open" &&
+            !string.IsNullOrEmpty(notification.ActionParam))
         {
             builder.AddButton(_openTranslatedText, ToastActivationType.Protocol, $"file://{notification.ActionParam}");
         }
@@ -125,18 +134,21 @@ public class NotificationService : IDisposable, INotificationService
         return true;
 #elif OS_LINUX
         var notify = notify_notification_new(notification.Title, notification.Message, _appInfo.Id);
-        if (notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam))
+        if (notification.Action == "open" &&
+            !string.IsNullOrEmpty(notification.ActionParam))
         {
             notify_notification_add_action(notify, "open", _openTranslatedText, _openActionCallback, Marshal.StringToHGlobalAnsi(notification.ActionParam), _destroyCallback);
         }
-        notify_notification_set_urgency(notify, notification.Severity switch
-        {
-            NotificationSeverity.Information => 1,
-            NotificationSeverity.Success => 1,
-            NotificationSeverity.Warning => 2,
-            NotificationSeverity.Error => 2,
-            _ => 0
-        });
+        notify_notification_set_urgency(
+            notify,
+            notification.Severity switch
+            {
+                NotificationSeverity.Information => 1,
+                NotificationSeverity.Success => 1,
+                NotificationSeverity.Warning => 2,
+                NotificationSeverity.Error => 2,
+                _ => 0
+            });
         var res = notify_notification_show(notify, nint.Zero);
         g_object_unref(notify);
         return res;

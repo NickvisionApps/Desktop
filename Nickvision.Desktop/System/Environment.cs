@@ -47,7 +47,8 @@ public static class Environment
         }
     }
 
-    public static string? FindDependency(string dependency,
+    public static string? FindDependency(
+        string dependency,
         DependencySearchOption search = DependencySearchOption.Global)
     {
 #if OS_WINDOWS
@@ -58,7 +59,8 @@ public static class Environment
 #endif
         if (Dependencies.TryGetValue((dependency, search), out var cachedPath))
         {
-            if (cachedPath is not null && File.Exists(cachedPath))
+            if (cachedPath is not null &&
+                File.Exists(cachedPath))
             {
                 return cachedPath;
             }
@@ -78,7 +80,8 @@ public static class Environment
                     foreach (var dir in PathVariable)
                     {
                         path = Path.Combine(dir, dependency);
-                        if (!File.Exists(path) || dir.Contains(@"AppData\Local\Microsoft\WindowsApps"))
+                        if (!File.Exists(path) ||
+                            dir.Contains(@"AppData\Local\Microsoft\WindowsApps"))
                         {
                             continue;
                         }
@@ -98,7 +101,8 @@ public static class Environment
                 foreach (var dir in PathVariable)
                 {
                     path = Path.Combine(dir, dependency);
-                    if (!File.Exists(path) || dir.Contains(@"AppData\Local\Microsoft\WindowsApps"))
+                    if (!File.Exists(path) ||
+                        dir.Contains(@"AppData\Local\Microsoft\WindowsApps"))
                     {
                         continue;
                     }

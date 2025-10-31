@@ -95,7 +95,12 @@ public class TranslationService : ITranslationService
     public string _pn(string context, string text, string pluralText, long n) =>
         _catalog?.GetParticularPluralString(context, text, pluralText, n) ?? (n == 1 ? text : pluralText);
 
-    public string _pn(string context, string text, string pluralText, long n, params object[] args) =>
+    public string _pn(
+        string context,
+        string text,
+        string pluralText,
+        long n,
+        params object[] args) =>
         _catalog?.GetParticularPluralString(context, text, pluralText, n, args) ?? (n == 1 ? text : pluralText);
 
     public Uri GetHelpUrl(string pageName)
@@ -108,12 +113,16 @@ public class TranslationService : ITranslationService
 #endif
         var lang = "C";
         var sysLocale = CultureInfo.CurrentCulture.Name.Replace('-', '_');
-        if (!string.IsNullOrEmpty(sysLocale) && sysLocale != "C" && sysLocale != "en_US" && sysLocale != "*")
+        if (!string.IsNullOrEmpty(sysLocale) &&
+            sysLocale != "C" &&
+            sysLocale != "en_US" &&
+            sysLocale != "*")
         {
             var twoLetter = sysLocale.Split('_')[0];
             foreach (var language in AvailableLanguages)
             {
-                if (language != sysLocale && language != twoLetter)
+                if (language != sysLocale &&
+                    language != twoLetter)
                 {
                     continue;
                 }

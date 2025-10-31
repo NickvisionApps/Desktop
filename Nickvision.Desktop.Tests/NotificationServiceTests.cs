@@ -12,9 +12,9 @@ public class NotificationServiceTests
     [TestMethod]
     public void Case001_Initalize()
     {
-        _notificationService =
-            new NotificationService(
-                new AppInfo("org.nickvision.desktop.tests", "Nickvision Desktop Tests", "Desktop Tests"), "Open");
+        _notificationService = new NotificationService(
+            new AppInfo("org.nickvision.desktop.tests", "Nickvision Desktop Tests", "Desktop Tests"),
+            "Open");
         Assert.IsNotNull(_notificationService);
     }
 
@@ -22,13 +22,16 @@ public class NotificationServiceTests
     public void Case002_SendShell()
     {
         Assert.IsNotNull(_notificationService);
-        Assert.IsTrue(_notificationService.Send(
-            new ShellNotification("Test Notification", "This is a test notification body.",
-                NotificationSeverity.Information)
-            {
-                Action = "open",
-                ActionParam = UserDirectories.Home
-            }));
+        Assert.IsTrue(
+            _notificationService.Send(
+                new ShellNotification(
+                    "Test Notification", 
+                    "This is a test notification body.",
+                    NotificationSeverity.Information)
+                {
+                    Action = "open",
+                    ActionParam = UserDirectories.Home
+                }));
     }
 
     [TestMethod]

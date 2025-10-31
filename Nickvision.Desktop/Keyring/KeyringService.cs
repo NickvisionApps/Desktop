@@ -27,12 +27,13 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         var secret = secretService.Get(info.Id) ?? secretService.Create(info.Id);
         if (secret is not null)
         {
-            _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{_path}'")
-            {
-                Mode = SqliteOpenMode.ReadWriteCreate,
-                Password = secret.Value,
-                Pooling = false
-            }.ToString());
+            _connection = new SqliteConnection(
+                new SqliteConnectionStringBuilder($"Data Source='{_path}'")
+                {
+                    Mode = SqliteOpenMode.ReadWriteCreate,
+                    Password = secret.Value,
+                    Pooling = false
+                }.ToString());
             try
             {
                 _connection.Open();
@@ -57,8 +58,12 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         using var reader = selectAllCommand.ExecuteReader();
         while (reader.Read())
         {
-            _credentials.Add(new Credential(reader.GetString(0), reader.GetString(2), reader.GetString(3),
-                new Uri(reader.GetString(1))));
+            _credentials.Add(
+                new Credential(
+                    reader.GetString(0),
+                    reader.GetString(2),
+                    reader.GetString(3),
+                    new Uri(reader.GetString(1))));
         }
     }
 

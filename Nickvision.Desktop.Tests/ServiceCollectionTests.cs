@@ -27,7 +27,10 @@ internal class TestService : ITestService
 
     public string GetData() => "Test Data";
 
-    ~TestService() => Dispose(false);
+    ~TestService()
+    {
+        Dispose(false);
+    }
 
     private void Dispose(bool disposing)
     {

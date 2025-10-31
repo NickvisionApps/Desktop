@@ -15,8 +15,13 @@ public sealed class PasswordGeneratorTests
         Assert.IsTrue(password.Length == 16);
         foreach (var c in password)
         {
-            Assert.IsTrue(char.IsDigit(c) || char.IsLower(c) || char.IsUpper(c) || char.IsPunctuation(c) ||
-                          char.IsSymbol(c) || char.IsWhiteSpace(c));
+            Assert.IsTrue(
+                char.IsDigit(c) ||
+                char.IsLower(c) ||
+                char.IsUpper(c) ||
+                char.IsPunctuation(c) ||
+                char.IsSymbol(c) ||
+                char.IsWhiteSpace(c));
         }
     }
 
@@ -59,8 +64,8 @@ public sealed class PasswordGeneratorTests
         Assert.IsTrue(password.Length == 64);
         foreach (var c in password)
         {
-            Assert.IsTrue(char.IsDigit(c) || char.IsLower(c) || char.IsUpper(c) || char.IsPunctuation(c) ||
-                          char.IsSymbol(c));
+            Assert.IsTrue(
+                char.IsDigit(c) || char.IsLower(c) || char.IsUpper(c) || char.IsPunctuation(c) || char.IsSymbol(c));
             Assert.IsFalse(char.IsWhiteSpace(c));
         }
     }
