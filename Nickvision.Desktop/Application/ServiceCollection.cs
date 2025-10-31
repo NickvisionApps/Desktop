@@ -25,11 +25,9 @@ public class ServiceCollection : IDisposable
         Dispose(false);
     }
 
-    public bool Add<T, U>(U implementation) where T : IService where U : class, T =>
-        _services.TryAdd(typeof(T), implementation);
+    public bool Add<T, U>(U implementation) where T : IService where U : class, T => _services.TryAdd(typeof(T), implementation);
 
-    public T? Get<T>() where T : IService =>
-        _services.TryGetValue(typeof(T), out var service) ? (T)service : default(T?);
+    public T? Get<T>() where T : IService => _services.TryGetValue(typeof(T), out var service) ? (T)service : default(T?);
 
     public bool Has<T>() where T : IService => _services.ContainsKey(typeof(T));
 

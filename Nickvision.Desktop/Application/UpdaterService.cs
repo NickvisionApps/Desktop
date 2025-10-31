@@ -39,8 +39,7 @@ public class UpdaterService : IUpdaterService
         }
     }
 
-    public async Task<bool> DownloadReleaseAssetAsync(
-        Version version,
+    public async Task<bool> DownloadReleaseAssetAsync(Version version,
         string path,
         string assertName,
         bool exactMatch = true,
@@ -66,19 +65,13 @@ public class UpdaterService : IUpdaterService
                 }
                 try
                 {
-                    using var response = await _httpClient.GetAsync(
-                        asset.BrowserDownloadUrl,
-                        HttpCompletionOption.ResponseHeadersRead);
+                    using var response = await _httpClient.GetAsync(asset.BrowserDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
                     response.EnsureSuccessStatusCode();
                     var totalBytesToRead = response.Content.Headers.ContentLength ?? -1L;
                     var totalBytesRead = 0L;
-                    var buffer = new byte[8192];
+                    var buffer = new byte[81920];
                     await using var downloadStream = await response.Content.ReadAsStreamAsync();
-                    await using var fileStream = new FileStream(
-                        path,
-                        FileMode.Create,
-                        FileAccess.Write,
-                        FileShare.None);
+                    await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
                     while (true)
                     {
                         var bytesRead = await downloadStream.ReadAsync(buffer);
@@ -141,18 +134,17 @@ public class UpdaterService : IUpdaterService
 
     public async Task<bool> WindowsUpdate(Version version, IProgress<DownloadProgress>? progress = null)
     {
-        var setupPath = Path.Combine(UserDirectories.Cache, $"{_owner}_{_name}_Setup_{version}.exe");
+        var setupPath = Path.Combine(UserDirectories.Cache, $"{_owner}_{_name}_Setup.exe");
         if (!await DownloadReleaseAssetAsync(version, setupPath, "setup.exe", false, progress))
         {
             return false;
         }
-        Process.Start(
-            new ProcessStartInfo
-            {
-                FileName = setupPath,
-                UseShellExecute = true,
-                Verb = "open"
-            });
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = setupPath,
+            UseShellExecute = true,
+            Verb = "open"
+        });
         return true;
     }
 }

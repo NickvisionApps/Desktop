@@ -47,9 +47,7 @@ public static class Environment
         }
     }
 
-    public static string? FindDependency(
-        string dependency,
-        DependencySearchOption search = DependencySearchOption.Global)
+    public static string? FindDependency(string dependency, DependencySearchOption search = DependencySearchOption.Global)
     {
 #if OS_WINDOWS
         if (string.IsNullOrEmpty(Path.GetExtension(dependency) ?? string.Empty))

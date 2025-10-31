@@ -18,9 +18,7 @@ public sealed class KeyringServiceTests
     public void Case001_Init()
     {
 #pragma warning disable CA1416
-        _keyringService = new KeyringService(
-            new AppInfo("org.nickvision.desktop.test", "Nickvision.Desktop.Test", "Test"),
-            new SecretService());
+        _keyringService = new KeyringService(new AppInfo("org.nickvision.desktop.test", "Nickvision.Desktop.Test", "Test"), new SecretService());
 #pragma warning restore CA1416
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(_keyringService.IsSavingToDisk);
@@ -37,22 +35,16 @@ public sealed class KeyringServiceTests
     public async Task Case003_Add()
     {
         Assert.IsNotNull(_keyringService);
-        Assert.IsTrue(
-            await _keyringService.AddCredentialAsync(
-                new Credential("YouTube", "abc", "123", new Uri("https://www.youtube.com"))));
+        Assert.IsTrue(await _keyringService.AddCredentialAsync(new Credential("YouTube", "abc", "123", new Uri("https://www.youtube.com"))));
         Assert.IsNotNull(_keyringService.Credentials.FirstOrDefault(c => c.Name == "YouTube"));
-        Assert.IsFalse(
-            await _keyringService.AddCredentialAsync(
-                new Credential("YouTube", "abc", "123", new Uri("https://www.youtube.com"))));
+        Assert.IsFalse(await _keyringService.AddCredentialAsync(new Credential("YouTube", "abc", "123", new Uri("https://www.youtube.com"))));
     }
 
     [TestMethod]
     public async Task Case004_Update()
     {
         Assert.IsNotNull(_keyringService);
-        Assert.IsTrue(
-            await _keyringService.AddCredentialAsync(
-                new Credential("Google", "x@gmail.com", "asdfgh123!", new Uri("https://www.google.com"))));
+        Assert.IsTrue(await _keyringService.AddCredentialAsync(new Credential("Google", "x@gmail.com", "asdfgh123!", new Uri("https://www.google.com"))));
         var cred = _keyringService.Credentials.FirstOrDefault(c => c.Name == "Google");
         Assert.IsNotNull(cred);
         cred.Password = "newpassword456!";
@@ -66,9 +58,7 @@ public sealed class KeyringServiceTests
     public async Task Case005_Remove()
     {
         Assert.IsNotNull(_keyringService);
-        Assert.IsTrue(
-            await _keyringService.AddCredentialAsync(
-                new Credential("Example", "user1", "pass1", new Uri("https://www.example.com"))));
+        Assert.IsTrue(await _keyringService.AddCredentialAsync(new Credential("Example", "user1", "pass1", new Uri("https://www.example.com"))));
         var cred = _keyringService.Credentials.FirstOrDefault(c => c.Name == "Example");
         Assert.IsNotNull(cred);
         Assert.IsTrue(await _keyringService.RemoveCredentialAsync(cred));
@@ -82,13 +72,7 @@ public sealed class KeyringServiceTests
         Assert.IsTrue(await _keyringService.DestroyAsync());
         Assert.IsFalse(_keyringService.Credentials.Any());
         Assert.IsFalse(_keyringService.IsSavingToDisk);
-        Assert.IsFalse(
-            File.Exists(
-                Path.Combine(
-                    UserDirectories.Config,
-                    "Nickvision",
-                    "Keyring",
-                    "Nickvision.Desktop.Keyring.Test.ring2")));
+        Assert.IsFalse(File.Exists(Path.Combine(UserDirectories.Config, "Nickvision", "Keyring", "Nickvision.Desktop.Keyring.Test.ring2")));
         _keyringService = null;
     }
 }

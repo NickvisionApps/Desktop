@@ -56,9 +56,7 @@ public class JsonFileService : IJsonFileService
         try
         {
             var text = JsonSerializer.Serialize(obj, JsonOptions);
-            File.WriteAllText(
-                Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name : name)}.json"),
-                text);
+            File.WriteAllText(Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name : name)}.json"), text);
             return true;
         }
         catch
@@ -72,9 +70,7 @@ public class JsonFileService : IJsonFileService
         try
         {
             var text = JsonSerializer.Serialize(obj, JsonOptions);
-            await File.WriteAllTextAsync(
-                Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name : name)}.json"),
-                text);
+            await File.WriteAllTextAsync(Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name : name)}.json"), text);
             return true;
         }
         catch

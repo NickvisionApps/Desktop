@@ -150,12 +150,7 @@ public static class UserDirectories
         {
 #if OS_WINDOWS
 #pragma warning disable CA1416
-            if (Shell32.SHGetKnownFolderPath(
-                    Shell32.KNOWNFOLDERID.FOLDERID_Downloads.Guid(),
-                    0,
-                    nint.Zero,
-                    out var res) !=
-                HRESULT.S_OK)
+            if (Shell32.SHGetKnownFolderPath(Shell32.KNOWNFOLDERID.FOLDERID_Downloads.Guid(), 0, nint.Zero, out var res) != HRESULT.S_OK)
             {
                 res = Path.Combine(Home, "Downloads");
             }

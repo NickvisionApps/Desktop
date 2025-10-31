@@ -22,8 +22,7 @@ public interface ITranslationService : IService
 
     string _pn(string context, string text, string pluralText, long n);
 
-    string _pn(
-        string context,
+    string _pn(string context,
         string text,
         string pluralText,
         long n,
@@ -43,11 +42,9 @@ public interface ITranslationService : IService
 
     string GetParticular(string context, string text, params object[] args) => _p(context, text, args);
 
-    string GetParticularPlural(string context, string text, string pluralText, long n) =>
-        _pn(context, text, pluralText, n);
+    string GetParticularPlural(string context, string text, string pluralText, long n) => _pn(context, text, pluralText, n);
 
-    string GetParticularPlural(
-        string context,
+    string GetParticularPlural(string context,
         string text,
         string pluralText,
         long n,

@@ -39,8 +39,7 @@ public class NotificationService : IDisposable, INotificationService
     public static partial nint notify_notification_new([MarshalAs(UnmanagedType.LPStr)] string summary, [MarshalAs(UnmanagedType.LPStr)] string body, [MarshalAs(UnmanagedType.LPStr)] string icon);
 
     [LibraryImport("libnotify.so.4")]
-    private static unsafe partial void notify_notification_add_action(
-        nint notification,
+    private static unsafe partial void notify_notification_add_action(nint notification,
         [MarshalAs(UnmanagedType.LPStr)] string action,
         [MarshalAs(UnmanagedType.LPStr)] string label,
         NotifyActionCallback callback,
@@ -139,8 +138,7 @@ public class NotificationService : IDisposable, INotificationService
         {
             notify_notification_add_action(notify, "open", _openTranslatedText, _openActionCallback, Marshal.StringToHGlobalAnsi(notification.ActionParam), _destroyCallback);
         }
-        notify_notification_set_urgency(
-            notify,
+        notify_notification_set_urgency(notify,
             notification.Severity switch
             {
                 NotificationSeverity.Information => 1,

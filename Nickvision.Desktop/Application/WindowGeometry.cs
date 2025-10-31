@@ -20,8 +20,7 @@ public class WindowGeometry
         Y = 10;
     }
 
-    public WindowGeometry(
-        int width,
+    public WindowGeometry(int width,
         int height,
         bool isMaximized,
         int x,

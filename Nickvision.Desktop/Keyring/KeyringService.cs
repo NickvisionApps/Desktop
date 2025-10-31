@@ -27,13 +27,12 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         var secret = secretService.Get(info.Id) ?? secretService.Create(info.Id);
         if (secret is not null)
         {
-            _connection = new SqliteConnection(
-                new SqliteConnectionStringBuilder($"Data Source='{_path}'")
-                {
-                    Mode = SqliteOpenMode.ReadWriteCreate,
-                    Password = secret.Value,
-                    Pooling = false
-                }.ToString());
+            _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{_path}'")
+            {
+                Mode = SqliteOpenMode.ReadWriteCreate,
+                Password = secret.Value,
+                Pooling = false
+            }.ToString());
             try
             {
                 _connection.Open();
@@ -50,20 +49,14 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
             return;
         }
         using var createTableCommand = _connection.CreateCommand();
-        createTableCommand.CommandText =
-            "CREATE TABLE IF NOT EXISTS credentials (name TEXT, uri TEXT, username TEXT, password TEXT)";
+        createTableCommand.CommandText = "CREATE TABLE IF NOT EXISTS credentials (name TEXT, uri TEXT, username TEXT, password TEXT)";
         createTableCommand.ExecuteNonQuery();
         using var selectAllCommand = _connection.CreateCommand();
         selectAllCommand.CommandText = "SELECT * FROM credentials";
         using var reader = selectAllCommand.ExecuteReader();
         while (reader.Read())
         {
-            _credentials.Add(
-                new Credential(
-                    reader.GetString(0),
-                    reader.GetString(2),
-                    reader.GetString(3),
-                    new Uri(reader.GetString(1))));
+            _credentials.Add(new Credential(reader.GetString(0), reader.GetString(2), reader.GetString(3), new Uri(reader.GetString(1))));
         }
     }
 
@@ -95,8 +88,7 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
             return false;
         }
         await using var insertCommand = _connection.CreateCommand();
-        insertCommand.CommandText =
-            "INSERT INTO credentials (name, uri, username, password) VALUES ($name, $uri, $username, $password)";
+        insertCommand.CommandText = "INSERT INTO credentials (name, uri, username, password) VALUES ($name, $uri, $username, $password)";
         insertCommand.Parameters.AddWithValue("$name", credential.Name);
         insertCommand.Parameters.AddWithValue("$uri", credential.Url.ToString());
         insertCommand.Parameters.AddWithValue("$username", credential.Username);
@@ -143,8 +135,7 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
             return false;
         }
         await using var updateCommand = _connection.CreateCommand();
-        updateCommand.CommandText =
-            "UPDATE credentials SET uri = $uri, username = $username, password = $password WHERE name = $name";
+        updateCommand.CommandText = "UPDATE credentials SET uri = $uri, username = $username, password = $password WHERE name = $name";
         updateCommand.Parameters.AddWithValue("$name", credential.Name);
         updateCommand.Parameters.AddWithValue("$uri", credential.Url.ToString());
         updateCommand.Parameters.AddWithValue("$username", credential.Username);

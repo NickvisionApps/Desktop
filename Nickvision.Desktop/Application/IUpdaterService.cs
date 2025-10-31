@@ -6,8 +6,7 @@ namespace Nickvision.Desktop.Application;
 
 public interface IUpdaterService
 {
-    Task<bool> DownloadReleaseAssetAsync(
-        Version version,
+    Task<bool> DownloadReleaseAssetAsync(Version version,
         string path,
         string assertName,
         bool exactMatch = true,

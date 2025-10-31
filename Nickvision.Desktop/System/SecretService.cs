@@ -31,8 +31,7 @@ public class SecretService : ISecretService
 #if OS_WINDOWS
 #pragma warning disable CA1416
         var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
-        var res = AdvApi32.CredWrite(
-            new AdvApi32.CREDENTIAL
+        var res = AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
             {
                 AttributeCount = 0,
                 Attributes = nint.Zero,
@@ -101,8 +100,7 @@ public class SecretService : ISecretService
 #if OS_WINDOWS
 #pragma warning disable CA1416
         var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
-        var res = await Task.Run(() => AdvApi32.CredWrite(
-            new AdvApi32.CREDENTIAL
+        var res = await Task.Run(() => AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
             {
                 AttributeCount = 0,
                 Attributes = nint.Zero,
@@ -292,9 +290,7 @@ public class SecretService : ISecretService
         {
             return null;
         }
-        return credential.CredentialBlob is not null
-            ? new Secret(name, Encoding.Unicode.GetString(credential.CredentialBlob))
-            : null;
+        return credential.CredentialBlob is not null ? new Secret(name, Encoding.Unicode.GetString(credential.CredentialBlob)) : null;
 #pragma warning restore CA1416
 #elif OS_MAC
         using var process = new Process()
@@ -359,9 +355,7 @@ public class SecretService : ISecretService
             }
             return null;
         });
-        return credential?.CredentialBlob is not null
-            ? new Secret(name, Encoding.Unicode.GetString(credential.Value.CredentialBlob))
-            : null;
+        return credential?.CredentialBlob is not null ? new Secret(name, Encoding.Unicode.GetString(credential.Value.CredentialBlob)) : null;
 #pragma warning restore CA1416
 #elif OS_MAC
         using var process = new Process()
@@ -423,8 +417,7 @@ public class SecretService : ISecretService
             return false;
         }
         var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
-        var res = AdvApi32.CredWrite(
-            new AdvApi32.CREDENTIAL
+        var res = AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
             {
                 AttributeCount = 0,
                 Attributes = nint.Zero,
@@ -493,8 +486,7 @@ public class SecretService : ISecretService
             return false;
         }
         var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
-        var res = await Task.Run(() => AdvApi32.CredWrite(
-            new AdvApi32.CREDENTIAL
+        var res = await Task.Run(() => AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
             {
                 AttributeCount = 0,
                 Attributes = nint.Zero,
