@@ -5,6 +5,7 @@ using Octokit;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FileMode = System.IO.FileMode;
@@ -12,7 +13,7 @@ using FileMode = System.IO.FileMode;
 namespace Nickvision.Desktop.Application;
 
 /// <summary>
-/// A service for updating an application via GitHub releases.
+///     A service for updating an application via GitHub releases.
 /// </summary>
 public class GitHubUpdaterService : IUpdaterService
 {
@@ -22,7 +23,7 @@ public class GitHubUpdaterService : IUpdaterService
     private readonly string _owner;
 
     /// <summary>
-    /// Constructs an UpdaterService.
+    ///     Constructs an UpdaterService.
     /// </summary>
     /// <param name="appInfo">The AppInfo object for the app</param>
     /// <param name="httpClient">The HttpClient for the app</param>
@@ -49,7 +50,7 @@ public class GitHubUpdaterService : IUpdaterService
     }
 
     /// <summary>
-    /// Downloads an asset from a released version.
+    ///     Downloads an asset from a released version.
     /// </summary>
     /// <param name="version">The released version</param>
     /// <param name="path">The path of where to download the asset to</param>
@@ -85,20 +86,20 @@ public class GitHubUpdaterService : IUpdaterService
                 {
                     using var response = await _httpClient.GetAsync(asset.BrowserDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
                     response.EnsureSuccessStatusCode();
-                    var totalBytesToRead = response.Content.Headers.ContentLength ?? -1L;
+                    var totalBytesToRead = response.Content.Headers.ContentLength ?? 0L;
                     var totalBytesRead = 0L;
                     var buffer = new byte[81920];
                     await using var downloadStream = await response.Content.ReadAsStreamAsync();
                     await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
                     while (true)
                     {
-                        var bytesRead = await downloadStream.ReadAsync(buffer);
+                        var bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length);
                         if (bytesRead == 0)
                         {
                             progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, true));
-                            return true;
+                            return new FileInfo(path).Length == asset.Size;
                         }
-                        await fileStream.WriteAsync(buffer);
+                        await fileStream.WriteAsync(buffer, 0, bytesRead);
                         totalBytesRead += bytesRead;
                         progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, false));
                     }
@@ -113,20 +114,15 @@ public class GitHubUpdaterService : IUpdaterService
     }
 
     /// <summary>
-    /// Gets the latest preview version available.
+    ///     Gets the latest preview version available.
     /// </summary>
     /// <returns>The latest preview version or null if unavailable</returns>
-    public async Task<Version?> GetLatestPreviewVersionAsync()
+    public async Task<PreviewVersion?> GetLatestPreviewVersionAsync()
     {
         var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
-        foreach (var release in releases)
+        foreach (var release in releases.Where(r => r.Prerelease && !r.Draft))
         {
-            if (!release.Prerelease ||
-                release.Draft)
-            {
-                continue;
-            }
-            if (!Version.TryParse(release.TagName.TrimStart('v'), out var version))
+            if (!PreviewVersion.TryParse(release.TagName.TrimStart('v'), out var version))
             {
                 continue;
             }
@@ -136,19 +132,14 @@ public class GitHubUpdaterService : IUpdaterService
     }
 
     /// <summary>
-    /// Gets the latest stable version available.
+    ///     Gets the latest stable version available.
     /// </summary>
     /// <returns>The latest stable version or null if unavailable</returns>
     public async Task<Version?> GetLatestStableVersionAsync()
     {
         var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
-        foreach (var release in releases)
+        foreach (var release in releases.Where(r => !r.Prerelease && !r.Draft))
         {
-            if (release.Prerelease ||
-                release.Draft)
-            {
-                continue;
-            }
             if (!Version.TryParse(release.TagName.TrimStart('v'), out var version))
             {
                 continue;
@@ -159,7 +150,7 @@ public class GitHubUpdaterService : IUpdaterService
     }
 
     /// <summary>
-    /// Downloads and runs the updated Windows installer of the given released version.
+    ///     Downloads and runs the updated Windows installer of the given released version.
     /// </summary>
     /// <param name="version">The released version</param>
     /// <param name="progress">An optional progress reporter</param>

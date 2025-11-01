@@ -57,12 +57,23 @@ public class GitHubUpdaterServiceTests
         Assert.IsNotNull(_updaterService);
         var version = await _updaterService.GetLatestPreviewVersionAsync();
         Assert.IsNotNull(version);
-        Assert.IsTrue(version > new Version("2025.10.0"));
+        Assert.IsTrue(version > new Version("2025.7.0"));
+    }
+
+    [TestMethod]
+    public async Task Case004_CompareVersions()
+    {
+        Assert.IsNotNull(_updaterService);
+        var preview = await _updaterService.GetLatestPreviewVersionAsync();
+        var stable = await _updaterService.GetLatestStableVersionAsync();
+        Assert.IsNotNull(preview);
+        Assert.IsNotNull(stable);
+        Assert.IsTrue(preview < stable);
     }
 
 #if OS_WINDOWS
     [TestMethod]
-    public async Task Check004_WindowsUpdate()
+    public async Task Check005_WindowsUpdate()
     {
         Assert.IsNotNull(_updaterService);
         var version = await _updaterService.GetLatestStableVersionAsync();

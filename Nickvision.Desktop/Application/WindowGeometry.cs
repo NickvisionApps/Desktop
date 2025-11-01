@@ -1,12 +1,12 @@
 ﻿namespace Nickvision.Desktop.Application;
 
 /// <summary>
-/// A class containing window geometry information.
+///     A class containing window geometry information.
 /// </summary>
 public class WindowGeometry
 {
     /// <summary>
-    /// Constructs a WindowGeometry.
+    ///     Constructs a WindowGeometry.
     /// </summary>
     public WindowGeometry()
     {
@@ -18,7 +18,7 @@ public class WindowGeometry
     }
 
     /// <summary>
-    /// Constructs a WindowGeometry.
+    ///     Constructs a WindowGeometry.
     /// </summary>
     /// <param name="width">The width of the window</param>
     /// <param name="height">The height of the window</param>
@@ -33,7 +33,7 @@ public class WindowGeometry
     }
 
     /// <summary>
-    /// Constructs a WindowGeometry.
+    ///     Constructs a WindowGeometry.
     /// </summary>
     /// <param name="width">The width of the window</param>
     /// <param name="height">The height of the window</param>
@@ -54,23 +54,27 @@ public class WindowGeometry
     }
 
     /// <summary>
-    /// The width of the window.
+    ///     The width of the window.
     /// </summary>
     public int Width { get; set; }
+
     /// <summary>
-    /// The height of the window.
+    ///     The height of the window.
     /// </summary>
     public int Height { get; set; }
+
     /// <summary>
-    /// Whether the window is maximized.
+    ///     Whether the window is maximized.
     /// </summary>
     public bool IsMaximized { get; set; }
+
     /// <summary>
-    /// The x position of the window.
+    ///     The x position of the window.
     /// </summary>
     public int X { get; set; }
+
     /// <summary>
-    /// The y position of the window.
+    ///     The y position of the window.
     /// </summary>
     public int Y { get; set; }
 }

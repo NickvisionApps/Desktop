@@ -10,14 +10,14 @@ using System.Runtime.InteropServices;
 namespace Nickvision.Desktop.System;
 
 /// <summary>
-/// Helpers for working with the system environment.
+///     Helpers for working with the system environment.
 /// </summary>
 public static class Environment
 {
     private static readonly Dictionary<(string Dependency, DependencySearchOption Search), string?> Dependencies;
 
     /// <summary>
-    /// Constructs a static Environment.
+    ///     Constructs a static Environment.
     /// </summary>
     static Environment()
     {
@@ -25,7 +25,7 @@ public static class Environment
     }
 
     /// <summary>
-    /// The deployment mode of the application.
+    ///     The deployment mode of the application.
     /// </summary>
     public static DeploymentMode DeploymentMode
     {
@@ -44,7 +44,7 @@ public static class Environment
     }
 
     /// <summary>
-    /// The list of directories in the PATH variable.
+    ///     The list of directories in the PATH variable.
     /// </summary>
     public static IEnumerable<string> PathVariable
     {
@@ -60,7 +60,7 @@ public static class Environment
     }
 
     /// <summary>
-    /// Finds a dependency on the system.
+    ///     Finds a dependency on the system.
     /// </summary>
     /// <param name="dependency">The dependency to find</param>
     /// <param name="search">The search options</param>
@@ -141,7 +141,7 @@ public static class Environment
     }
 
     /// <summary>
-    /// Gets the debug information for the application.
+    ///     Gets the debug information for the application.
     /// </summary>
     /// <param name="info">The AppInfo object for the app</param>
     /// <param name="extra">Any extra information to include in the debug information string</param>

@@ -7,7 +7,7 @@ using Vanara.PInvoke;
 namespace Nickvision.Desktop.System;
 
 /// <summary>
-/// A server for managing power options.
+///     A server for managing power options.
 /// </summary>
 public class PowerService : IPowerService
 {
@@ -17,7 +17,7 @@ public class PowerService : IPowerService
 #endif
 
     /// <summary>
-    /// Constructs a PowerService.
+    ///     Constructs a PowerService.
     /// </summary>
     public PowerService()
     {
@@ -25,15 +25,15 @@ public class PowerService : IPowerService
     }
 
     /// <summary>
-    /// Finalizes a PowerService.
+    ///     Finalizes a PowerService.
     /// </summary>
     ~PowerService()
     {
         Dispose(false);
     }
-    
+
     /// <summary>
-    /// Disposes a PowerService.
+    ///     Disposes a PowerService.
     /// </summary>
     public void Dispose()
     {
@@ -42,7 +42,7 @@ public class PowerService : IPowerService
     }
 
     /// <summary>
-    /// Allows the system to suspend.
+    ///     Allows the system to suspend.
     /// </summary>
     /// <returns>True if the action was applied successfully, else false</returns>
     public bool AllowSuspend()
@@ -60,7 +60,7 @@ public class PowerService : IPowerService
     }
 
     /// <summary>
-    /// Logs the user off the system.
+    ///     Logs the user off the system.
     /// </summary>
     /// <returns>True if the action was applied successfully, else false</returns>
     public bool Logoff()
@@ -106,7 +106,7 @@ public class PowerService : IPowerService
     }
 
     /// <summary>
-    /// Prevents the system from suspending.
+    ///     Prevents the system from suspending.
     /// </summary>
     /// <returns>True if the action was applied successfully, else false</returns>
     public bool PreventSuspend()
@@ -161,7 +161,7 @@ public class PowerService : IPowerService
     }
 
     /// <summary>
-    /// Restarts the system.
+    ///     Restarts the system.
     /// </summary>
     /// <returns>True if the action was applied successfully, else false</returns>
     public bool Restart()
@@ -207,7 +207,7 @@ public class PowerService : IPowerService
     }
 
     /// <summary>
-    /// Shuts down the system.
+    ///     Shuts down the system.
     /// </summary>
     /// <returns>True if the action was applied successfully, else false</returns>
     public bool Shutdown()
@@ -249,7 +249,7 @@ public class PowerService : IPowerService
     }
 
     /// <summary>
-    /// Suspends the system.
+    ///     Suspends the system.
     /// </summary>
     /// <returns>True if the action was applied successfully, else false</returns>
     public bool Suspend()
@@ -288,7 +288,7 @@ public class PowerService : IPowerService
     }
 
     /// <summary>
-    /// Disposes a PowerService.
+    ///     Disposes a PowerService.
     /// </summary>
     /// <param name="disposing">Whether to dispose managed resources</param>
     private void Dispose(bool disposing)

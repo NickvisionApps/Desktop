@@ -7,17 +7,17 @@ using Vanara.PInvoke;
 namespace Nickvision.Desktop.Filesystem;
 
 /// <summary>
-/// A helper class for getting user directories cross-platform.
+///     A helper class for getting user directories cross-platform.
 /// </summary>
 public static class UserDirectories
 {
     /// <summary>
-    /// The user's home directory.
+    ///     The user's home directory.
     /// </summary>
     public static string Home => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
     /// <summary>
-    /// The user's config directory.
+    ///     The user's config directory.
     /// </summary>
     public static string Config
     {
@@ -47,7 +47,7 @@ public static class UserDirectories
     }
 
     /// <summary>
-    /// The user's cache directory.
+    ///     The user's cache directory.
     /// </summary>
     public static string Cache
     {
@@ -77,7 +77,7 @@ public static class UserDirectories
     }
 
     /// <summary>
-    /// The user's local data directory.
+    ///     The user's local data directory.
     /// </summary>
     public static string LocalData
     {
@@ -107,7 +107,7 @@ public static class UserDirectories
     }
 
     /// <summary>
-    /// The user's desktop directory.
+    ///     The user's desktop directory.
     /// </summary>
     public static string Desktop
     {
@@ -137,7 +137,7 @@ public static class UserDirectories
     }
 
     /// <summary>
-    /// The user's documents directory.
+    ///     The user's documents directory.
     /// </summary>
     public static string Documents
     {
@@ -166,7 +166,7 @@ public static class UserDirectories
     }
 
     /// <summary>
-    /// The user's downloads directory.
+    ///     The user's downloads directory.
     /// </summary>
     public static string Downloads
     {
@@ -200,7 +200,7 @@ public static class UserDirectories
     }
 
     /// <summary>
-    /// The user's music directory.
+    ///     The user's music directory.
     /// </summary>
     public static string Music
     {
@@ -230,7 +230,7 @@ public static class UserDirectories
     }
 
     /// <summary>
-    /// The user's pictures directory.
+    ///     The user's pictures directory.
     /// </summary>
     public static string Pictures
     {
@@ -260,7 +260,7 @@ public static class UserDirectories
     }
 
     /// <summary>
-    /// The user's templates directory.
+    ///     The user's templates directory.
     /// </summary>
     public static string Templates
     {
@@ -290,7 +290,7 @@ public static class UserDirectories
     }
 
     /// <summary>
-    /// The user's videos directory.
+    ///     The user's videos directory.
     /// </summary>
     public static string Videos
     {

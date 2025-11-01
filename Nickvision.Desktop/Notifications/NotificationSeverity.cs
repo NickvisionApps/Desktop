@@ -1,7 +1,7 @@
 ﻿namespace Nickvision.Desktop.Notifications;
 
 /// <summary>
-/// Levels of severity for notifications.
+///     Levels of severity for notifications.
 /// </summary>
 public enum NotificationSeverity
 {

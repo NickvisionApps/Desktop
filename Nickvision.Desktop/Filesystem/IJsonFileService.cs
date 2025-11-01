@@ -3,12 +3,12 @@
 namespace Nickvision.Desktop.Filesystem;
 
 /// <summary>
-/// An interface of a service for working with json files.
+///     An interface of a service for working with json files.
 /// </summary>
 public interface IJsonFileService : IService
 {
     /// <summary>
-    /// Loads a json file and deserializes it into an object.
+    ///     Loads a json file and deserializes it into an object.
     /// </summary>
     /// <param name="name">The name of the json file (without the .json extension)</param>
     /// <typeparam name="T">The type of the object to deserialize to</typeparam>
@@ -16,7 +16,7 @@ public interface IJsonFileService : IService
     T Load<T>(string? name = null);
 
     /// <summary>
-    /// Loads a json file and deserializes it into an object asynchronously.
+    ///     Loads a json file and deserializes it into an object asynchronously.
     /// </summary>
     /// <param name="name">The name of the json file (without the .json extension)</param>
     /// <typeparam name="T">The type of the object to deserialize to</typeparam>
@@ -24,7 +24,7 @@ public interface IJsonFileService : IService
     Task<T> LoadAsync<T>(string? name = null);
 
     /// <summary>
-    /// Saves an object by serializing it into a json file.
+    ///     Saves an object by serializing it into a json file.
     /// </summary>
     /// <param name="obj">The object to serialize</param>
     /// <param name="name">The name of the json file (without the .json extension)</param>
@@ -33,7 +33,7 @@ public interface IJsonFileService : IService
     bool Save<T>(T obj, string? name = null);
 
     /// <summary>
-    /// Saves an object by serializing it into a json file asynchronously.
+    ///     Saves an object by serializing it into a json file asynchronously.
     /// </summary>
     /// <param name="obj">The object to serialize</param>
     /// <param name="name">The name of the json file (without the .json extension)</param>

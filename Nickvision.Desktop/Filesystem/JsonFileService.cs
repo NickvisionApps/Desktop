@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Nickvision.Desktop.Filesystem;
 
 /// <summary>
-/// A service for working with json files on disk.
+///     A service for working with json files on disk.
 /// </summary>
 public class JsonFileService : IJsonFileService
 {
@@ -14,7 +14,7 @@ public class JsonFileService : IJsonFileService
     private readonly string _directory;
 
     /// <summary>
-    /// Constructs a static JsonFileService.
+    ///     Constructs a static JsonFileService.
     /// </summary>
     static JsonFileService()
     {
@@ -25,7 +25,7 @@ public class JsonFileService : IJsonFileService
     }
 
     /// <summary>
-    /// Constructs a JsonFileService.
+    ///     Constructs a JsonFileService.
     /// </summary>
     /// <param name="directory">The directory of where to load and save json files from</param>
     /// <remarks>The directory will be created if it doesn't exist</remarks>
@@ -39,7 +39,7 @@ public class JsonFileService : IJsonFileService
     }
 
     /// <summary>
-    /// Loads a json file and deserializes it into an object.
+    ///     Loads a json file and deserializes it into an object.
     /// </summary>
     /// <param name="name">The name of the json file (without the .json extension)</param>
     /// <typeparam name="T">The type of the object to deserialize to</typeparam>
@@ -57,7 +57,7 @@ public class JsonFileService : IJsonFileService
     }
 
     /// <summary>
-    /// Loads a json file and deserializes it into an object asynchronously.
+    ///     Loads a json file and deserializes it into an object asynchronously.
     /// </summary>
     /// <param name="name">The name of the json file (without the .json extension)</param>
     /// <typeparam name="T">The type of the object to deserialize to</typeparam>
@@ -75,7 +75,7 @@ public class JsonFileService : IJsonFileService
     }
 
     /// <summary>
-    /// Saves an object by serializing it into a json file.
+    ///     Saves an object by serializing it into a json file.
     /// </summary>
     /// <param name="obj">The object to serialize</param>
     /// <param name="name">The name of the json file (without the .json extension)</param>
@@ -96,7 +96,7 @@ public class JsonFileService : IJsonFileService
     }
 
     /// <summary>
-    /// Saves an object by serializing it into a json file asynchronously.
+    ///     Saves an object by serializing it into a json file asynchronously.
     /// </summary>
     /// <param name="obj">The object to serialize</param>
     /// <param name="name">The name of the json file (without the .json extension)</param>

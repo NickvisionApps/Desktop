@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Nickvision.Desktop.Keyring;
 
 /// <summary>
-/// A service for managing credentials in a database keyring.
+///     A service for managing credentials in a database keyring.
 /// </summary>
 public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringService
 {
@@ -20,7 +20,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     private SqliteConnection? _connection;
 
     /// <summary>
-    /// Constructs a KeyringService.
+    ///     Constructs a KeyringService.
     /// </summary>
     /// <param name="info">The AppInfo object for the app</param>
     /// <param name="secretService">The service for managing secrets</param>
@@ -69,17 +69,9 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
             _credentials.Add(new Credential(reader.GetString(0), reader.GetString(2), reader.GetString(3), new Uri(reader.GetString(1))));
         }
     }
-    
-    /// <summary>
-    /// Finalizes a KeyringService.
-    /// </summary>
-    ~DatabaseKeyringService()
-    {
-        Dispose(false);
-    }
 
     /// <summary>
-    /// Disposes a KeyringService asynchronously.
+    ///     Disposes a KeyringService asynchronously.
     /// </summary>
     public async ValueTask DisposeAsync()
     {
@@ -89,7 +81,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    /// Disposes a KeyringService.
+    ///     Disposes a KeyringService.
     /// </summary>
     public void Dispose()
     {
@@ -98,16 +90,17 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    /// Whether the keyring is currently saving to disk.
+    ///     Whether the keyring is currently saving to disk.
     /// </summary>
     public bool IsSavingToDisk => _connection is not null;
+
     /// <summary>
-    /// The list of credentials in the keyring.
+    ///     The list of credentials in the keyring.
     /// </summary>
     public IEnumerable<Credential> Credentials => _credentials;
 
     /// <summary>
-    /// Adds a credential to the keyring.
+    ///     Adds a credential to the keyring.
     /// </summary>
     /// <param name="credential">The credential to add</param>
     /// <returns>True if the keyring was successfully added, else false</returns>
@@ -132,7 +125,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    /// Destroys the keyring and all its credentials.
+    ///     Destroys the keyring and all its credentials.
     /// </summary>
     /// <returns>True if the keyring was successfully added, else false</returns>
     public async Task<bool> DestroyAsync()
@@ -144,7 +137,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    /// Removes a credential from the keyring.
+    ///     Removes a credential from the keyring.
     /// </summary>
     /// <param name="credential">The credential to remove</param>
     /// <returns>True if the keyring was successfully removed, else false</returns>
@@ -167,7 +160,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    /// Updates a credential in the keyring.
+    ///     Updates a credential in the keyring.
     /// </summary>
     /// <param name="credential">The credential to update</param>
     /// <returns>True if the keyring was successfully updated, else false</returns>
@@ -193,7 +186,15 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    /// Disposes a KeyringService asynchronously.
+    ///     Finalizes a KeyringService.
+    /// </summary>
+    ~DatabaseKeyringService()
+    {
+        Dispose(false);
+    }
+
+    /// <summary>
+    ///     Disposes a KeyringService asynchronously.
     /// </summary>
     protected virtual async ValueTask DisposeAsyncCore()
     {
@@ -205,7 +206,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    /// Disposes a KeyringService.
+    ///     Disposes a KeyringService.
     /// </summary>
     /// <param name="disposing">Whether to dispose managed resources</param>
     private void Dispose(bool disposing)
