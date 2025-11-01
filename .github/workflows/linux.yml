@@ -39,7 +39,7 @@ jobs:
           xdg-user-dirs-gtk-update
           sudo locale-gen en_US.UTF-8
           sudo update-locale LANG=en_US.UTF-8
-          notification-daemon --display=:0 -r &
+          /usr/lib/notification-daemon-1.0/notification-daemon --display=:0 -r &
       - name: "Unlock Keyring"
         uses: t1m0thyj/unlock-keyring@v1
       - name: "Restore"
