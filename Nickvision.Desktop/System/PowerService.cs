@@ -6,6 +6,9 @@ using Vanara.PInvoke;
 
 namespace Nickvision.Desktop.System;
 
+/// <summary>
+/// A server for managing power options.
+/// </summary>
 public class PowerService : IPowerService
 {
     private bool _disposed;
@@ -13,16 +16,35 @@ public class PowerService : IPowerService
     private Process? _preventSuspendProcess;
 #endif
 
+    /// <summary>
+    /// Constructs a PowerService.
+    /// </summary>
     public PowerService()
     {
         _disposed = false;
     }
 
+    /// <summary>
+    /// Finalizes a PowerService.
+    /// </summary>
     ~PowerService()
     {
         Dispose(false);
     }
+    
+    /// <summary>
+    /// Disposes a PowerService.
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
+    /// <summary>
+    /// Allows the system to suspend.
+    /// </summary>
+    /// <returns>True if the action was applied successfully, else false</returns>
     public bool AllowSuspend()
     {
 #if OS_WINDOWS
@@ -37,26 +59,20 @@ public class PowerService : IPowerService
 #endif
     }
 
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
+    /// <summary>
+    /// Logs the user off the system.
+    /// </summary>
+    /// <returns>True if the action was applied successfully, else false</returns>
     public bool Logoff()
     {
 #if OS_WINDOWS
-        using var process = new Process
+        Process.Start(new ProcessStartInfo
         {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "shutdown",
-                Arguments = "/l /t 0",
-                CreateNoWindow = true,
-                UseShellExecute = false
-            }
-        };
-        process.Start();
+            FileName = "shutdown",
+            Arguments = "/l /t 0",
+            CreateNoWindow = true,
+            UseShellExecute = false
+        });
         return true;
 #elif OS_MAC
         if (string.IsNullOrEmpty(Environment.FindDependency("osascript")))
@@ -89,6 +105,10 @@ public class PowerService : IPowerService
 #endif
     }
 
+    /// <summary>
+    /// Prevents the system from suspending.
+    /// </summary>
+    /// <returns>True if the action was applied successfully, else false</returns>
     public bool PreventSuspend()
     {
 #if OS_WINDOWS
@@ -140,20 +160,20 @@ public class PowerService : IPowerService
 #endif
     }
 
+    /// <summary>
+    /// Restarts the system.
+    /// </summary>
+    /// <returns>True if the action was applied successfully, else false</returns>
     public bool Restart()
     {
 #if OS_WINDOWS
-        using var process = new Process
+        Process.Start(new ProcessStartInfo
         {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "shutdown",
-                Arguments = "/r /t 0",
-                CreateNoWindow = true,
-                UseShellExecute = false
-            }
-        };
-        process.Start();
+            FileName = "shutdown",
+            Arguments = "/r /t 0",
+            CreateNoWindow = true,
+            UseShellExecute = false
+        });
         return true;
 #elif OS_MAC
         if (string.IsNullOrEmpty(Environment.FindDependency("osascript")))
@@ -186,20 +206,20 @@ public class PowerService : IPowerService
 #endif
     }
 
+    /// <summary>
+    /// Shuts down the system.
+    /// </summary>
+    /// <returns>True if the action was applied successfully, else false</returns>
     public bool Shutdown()
     {
 #if OS_WINDOWS
-        using var process = new Process
+        Process.Start(new ProcessStartInfo
         {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "shutdown",
-                Arguments = "/s /t 0",
-                CreateNoWindow = true,
-                UseShellExecute = false
-            }
-        };
-        process.Start();
+            FileName = "shutdown",
+            Arguments = "/s /t 0",
+            CreateNoWindow = true,
+            UseShellExecute = false
+        });
         return true;
 #elif OS_MAC
         if (string.IsNullOrEmpty(Environment.FindDependency("systemctl")))
@@ -228,6 +248,10 @@ public class PowerService : IPowerService
 #endif
     }
 
+    /// <summary>
+    /// Suspends the system.
+    /// </summary>
+    /// <returns>True if the action was applied successfully, else false</returns>
     public bool Suspend()
     {
 #if OS_WINDOWS
@@ -263,6 +287,10 @@ public class PowerService : IPowerService
 #endif
     }
 
+    /// <summary>
+    /// Disposes a PowerService.
+    /// </summary>
+    /// <param name="disposing">Whether to dispose managed resources</param>
     private void Dispose(bool disposing)
     {
         if (_disposed)

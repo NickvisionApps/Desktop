@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 namespace Nickvision.Desktop.Tests;
 
 [TestClass]
-public class UpdaterServiceTests
+public class GitHubUpdaterServiceTests
 {
     private static HttpClient? _client;
-    private static UpdaterService? _updaterService;
+    private static GitHubUpdaterService? _updaterService;
 
     [ClassInitialize]
     public static void ClassInitialize(TestContext context)
@@ -34,7 +34,7 @@ public class UpdaterServiceTests
     public void Case001_Initialize()
     {
         Assert.IsNotNull(_client);
-        _updaterService = new UpdaterService(new AppInfo("org.nickvision.tubeconverter", "Nickvision Parabolic", "Parabolic")
+        _updaterService = new GitHubUpdaterService(new AppInfo("org.nickvision.tubeconverter", "Nickvision Parabolic", "Parabolic")
             {
                 SourceRepository = new Uri("https://github.com/NickvisionApps/Parabolic")
             },

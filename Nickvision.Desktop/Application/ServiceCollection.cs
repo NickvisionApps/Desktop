@@ -3,36 +3,74 @@ using System.Collections.Generic;
 
 namespace Nickvision.Desktop.Application;
 
+/// <summary>
+/// A collection of services for an application.
+/// </summary>
 public class ServiceCollection : IDisposable
 {
     private readonly Dictionary<Type, IService> _services;
     private bool _disposed;
 
+    /// <summary>
+    /// Constructs a ServiceCollection.
+    /// </summary>
     public ServiceCollection()
     {
         _disposed = false;
         _services = new Dictionary<Type, IService>();
     }
 
+    /// <summary>
+    /// Disposes a ServiceCollection and its services.
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Finalizes a ServiceCollection.
+    /// </summary>
     ~ServiceCollection()
     {
         Dispose(false);
     }
 
-    public bool Add<T, U>(U implementation) where T : IService where U : class, T => _services.TryAdd(typeof(T), implementation);
+    /// <summary>
+    /// Adds a service to the collection.
+    /// </summary>
+    /// <param name="implementation">The object of the service class</param>
+    /// <typeparam name="T">The service interface</typeparam>
+    /// <typeparam name="TU">The service class</typeparam>
+    /// <returns></returns>
+    public bool Add<T, TU>(TU implementation) where T : IService where TU : class, T => _services.TryAdd(typeof(T), implementation);
 
+    /// <summary>
+    /// Gets a service from the collection.
+    /// </summary>
+    /// <typeparam name="T">The service interface</typeparam>
+    /// <returns>The object matching the service interface if found, else null</returns>
     public T? Get<T>() where T : IService => _services.TryGetValue(typeof(T), out var service) ? (T)service : default(T?);
 
+    /// <summary>
+    /// Gets whether a service from the collection with the interface type exists.
+    /// </summary>
+    /// <typeparam name="T">The service interface</typeparam>
+    /// <returns>True if an object matching the service interface is found, else false</returns>
     public bool Has<T>() where T : IService => _services.ContainsKey(typeof(T));
 
+    /// <summary>
+    /// Removes a service from the collection.
+    /// </summary>
+    /// <typeparam name="T">The service interface</typeparam>
+    /// <returns>True if an object matching the service interface was removed, else false</returns>
     public bool Remove<T>() where T : IService => _services.Remove(typeof(T));
 
+    /// <summary>
+    /// Disposes a ServiceCollection and its services.
+    /// </summary>
+    /// <param name="disposing">Whether to dispose managed resources</param>
     private void Dispose(bool disposing)
     {
         if (_disposed || !disposing)

@@ -10,13 +10,23 @@ using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Keyring;
 
-public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
+/// <summary>
+/// A service for managing credentials in a database keyring.
+/// </summary>
+public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringService
 {
     private readonly List<Credential> _credentials;
     private readonly string _path;
     private SqliteConnection? _connection;
 
-    public KeyringService(AppInfo info, ISecretService secretService)
+    /// <summary>
+    /// Constructs a KeyringService.
+    /// </summary>
+    /// <param name="info">The AppInfo object for the app</param>
+    /// <param name="secretService">The service for managing secrets</param>
+    /// <remarks>This will create a new encrypted database store if it doesn't already exist.</remarks>
+    /// <remarks> If the database is unable to be created or unlocked, changes will not be saved to disk.</remarks>
+    public DatabaseKeyringService(AppInfo info, ISecretService secretService)
     {
         var keyringDir = Path.Combine(UserDirectories.Config, "Nickvision", "Keyring");
         Directory.CreateDirectory(keyringDir);
@@ -59,7 +69,18 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
             _credentials.Add(new Credential(reader.GetString(0), reader.GetString(2), reader.GetString(3), new Uri(reader.GetString(1))));
         }
     }
+    
+    /// <summary>
+    /// Finalizes a KeyringService.
+    /// </summary>
+    ~DatabaseKeyringService()
+    {
+        Dispose(false);
+    }
 
+    /// <summary>
+    /// Disposes a KeyringService asynchronously.
+    /// </summary>
     public async ValueTask DisposeAsync()
     {
         await DisposeAsyncCore().ConfigureAwait(false);
@@ -67,15 +88,29 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Disposes a KeyringService.
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Whether the keyring is currently saving to disk.
+    /// </summary>
     public bool IsSavingToDisk => _connection is not null;
+    /// <summary>
+    /// The list of credentials in the keyring.
+    /// </summary>
     public IEnumerable<Credential> Credentials => _credentials;
 
+    /// <summary>
+    /// Adds a credential to the keyring.
+    /// </summary>
+    /// <param name="credential">The credential to add</param>
+    /// <returns>True if the keyring was successfully added, else false</returns>
     public async Task<bool> AddCredentialAsync(Credential credential)
     {
         if (_credentials.Any(c => c.Name == credential.Name))
@@ -96,6 +131,10 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         return await insertCommand.ExecuteNonQueryAsync() > 0;
     }
 
+    /// <summary>
+    /// Destroys the keyring and all its credentials.
+    /// </summary>
+    /// <returns>True if the keyring was successfully added, else false</returns>
     public async Task<bool> DestroyAsync()
     {
         await DisposeAsync();
@@ -104,6 +143,11 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         return !File.Exists(_path);
     }
 
+    /// <summary>
+    /// Removes a credential from the keyring.
+    /// </summary>
+    /// <param name="credential">The credential to remove</param>
+    /// <returns>True if the keyring was successfully removed, else false</returns>
     public async Task<bool> RemoveCredentialAsync(Credential credential)
     {
         var credentialIndex = _credentials.FindIndex(c => c.Name == credential.Name);
@@ -122,6 +166,11 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         return await deleteCommand.ExecuteNonQueryAsync() > 0;
     }
 
+    /// <summary>
+    /// Updates a credential in the keyring.
+    /// </summary>
+    /// <param name="credential">The credential to update</param>
+    /// <returns>True if the keyring was successfully updated, else false</returns>
     public async Task<bool> UpdateCredentialAsync(Credential credential)
     {
         var credentialIndex = _credentials.FindIndex(c => c.Name == credential.Name);
@@ -143,11 +192,9 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         return await updateCommand.ExecuteNonQueryAsync() > 0;
     }
 
-    ~KeyringService()
-    {
-        Dispose(false);
-    }
-
+    /// <summary>
+    /// Disposes a KeyringService asynchronously.
+    /// </summary>
     protected virtual async ValueTask DisposeAsyncCore()
     {
         if (_connection is not null)
@@ -157,6 +204,10 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         _connection = null;
     }
 
+    /// <summary>
+    /// Disposes a KeyringService.
+    /// </summary>
+    /// <param name="disposing">Whether to dispose managed resources</param>
     private void Dispose(bool disposing)
     {
         if (!disposing)

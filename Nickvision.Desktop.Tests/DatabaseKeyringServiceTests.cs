@@ -10,15 +10,15 @@ using System.Threading.Tasks;
 namespace Nickvision.Desktop.Tests;
 
 [TestClass]
-public sealed class KeyringServiceTests
+public sealed class DatabaseKeyringServiceTests
 {
-    private static KeyringService? _keyringService;
+    private static DatabaseKeyringService? _keyringService;
 
     [TestMethod]
     public void Case001_Init()
     {
 #pragma warning disable CA1416
-        _keyringService = new KeyringService(new AppInfo("org.nickvision.desktop.test", "Nickvision.Desktop.Test", "Test"), new SecretService());
+        _keyringService = new DatabaseKeyringService(new AppInfo("org.nickvision.desktop.test", "Nickvision.Desktop.Test", "Test"), new SystemSecretService());
 #pragma warning restore CA1416
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(_keyringService.IsSavingToDisk);

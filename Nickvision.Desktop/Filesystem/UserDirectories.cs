@@ -6,10 +6,19 @@ using Vanara.PInvoke;
 
 namespace Nickvision.Desktop.Filesystem;
 
+/// <summary>
+/// A helper class for getting user directories cross-platform.
+/// </summary>
 public static class UserDirectories
 {
+    /// <summary>
+    /// The user's home directory.
+    /// </summary>
     public static string Home => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
+    /// <summary>
+    /// The user's config directory.
+    /// </summary>
     public static string Config
     {
         get
@@ -37,6 +46,9 @@ public static class UserDirectories
         }
     }
 
+    /// <summary>
+    /// The user's cache directory.
+    /// </summary>
     public static string Cache
     {
         get
@@ -64,6 +76,9 @@ public static class UserDirectories
         }
     }
 
+    /// <summary>
+    /// The user's local data directory.
+    /// </summary>
     public static string LocalData
     {
         get
@@ -91,6 +106,9 @@ public static class UserDirectories
         }
     }
 
+    /// <summary>
+    /// The user's desktop directory.
+    /// </summary>
     public static string Desktop
     {
         get
@@ -118,6 +136,9 @@ public static class UserDirectories
         }
     }
 
+    /// <summary>
+    /// The user's documents directory.
+    /// </summary>
     public static string Documents
     {
         get
@@ -144,6 +165,9 @@ public static class UserDirectories
         }
     }
 
+    /// <summary>
+    /// The user's downloads directory.
+    /// </summary>
     public static string Downloads
     {
         get
@@ -175,6 +199,9 @@ public static class UserDirectories
         }
     }
 
+    /// <summary>
+    /// The user's music directory.
+    /// </summary>
     public static string Music
     {
         get
@@ -202,6 +229,9 @@ public static class UserDirectories
         }
     }
 
+    /// <summary>
+    /// The user's pictures directory.
+    /// </summary>
     public static string Pictures
     {
         get
@@ -229,6 +259,9 @@ public static class UserDirectories
         }
     }
 
+    /// <summary>
+    /// The user's templates directory.
+    /// </summary>
     public static string Templates
     {
         get
@@ -256,6 +289,9 @@ public static class UserDirectories
         }
     }
 
+    /// <summary>
+    /// The user's videos directory.
+    /// </summary>
     public static string Videos
     {
         get
@@ -284,6 +320,11 @@ public static class UserDirectories
     }
 
 #if OS_LINUX
+    /// <summary>
+    /// Gets an XDG user directory from the user-dirs.dirs file or environment variable.
+    /// </summary>
+    /// <param name="name">The name of the XDG user directory to get</param>
+    /// <returns>The path of the XDG user directory if found, else null</returns>
     private static string? GetXdgUserDir(string name)
     {
         if (string.IsNullOrEmpty(name))

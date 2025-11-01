@@ -5,11 +5,17 @@ using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Filesystem;
 
+/// <summary>
+/// A service for working with json files on disk.
+/// </summary>
 public class JsonFileService : IJsonFileService
 {
     private static readonly JsonSerializerOptions JsonOptions;
     private readonly string _directory;
 
+    /// <summary>
+    /// Constructs a static JsonFileService.
+    /// </summary>
     static JsonFileService()
     {
         JsonOptions = new JsonSerializerOptions
@@ -18,6 +24,11 @@ public class JsonFileService : IJsonFileService
         };
     }
 
+    /// <summary>
+    /// Constructs a JsonFileService.
+    /// </summary>
+    /// <param name="directory">The directory of where to load and save json files from</param>
+    /// <remarks>The directory will be created if it doesn't exist</remarks>
     public JsonFileService(string directory)
     {
         if (!Directory.Exists(directory))
@@ -27,6 +38,12 @@ public class JsonFileService : IJsonFileService
         _directory = directory;
     }
 
+    /// <summary>
+    /// Loads a json file and deserializes it into an object.
+    /// </summary>
+    /// <param name="name">The name of the json file (without the .json extension)</param>
+    /// <typeparam name="T">The type of the object to deserialize to</typeparam>
+    /// <returns>A deserialized object from the json file if successful, else a default constructed object</returns>
     public T Load<T>(string? name = null)
     {
         var path = Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name : name)}.json");
@@ -39,6 +56,12 @@ public class JsonFileService : IJsonFileService
         return obj ?? Activator.CreateInstance<T>();
     }
 
+    /// <summary>
+    /// Loads a json file and deserializes it into an object asynchronously.
+    /// </summary>
+    /// <param name="name">The name of the json file (without the .json extension)</param>
+    /// <typeparam name="T">The type of the object to deserialize to</typeparam>
+    /// <returns>A deserialized object from the json file if successful, else a default constructed object</returns>
     public async Task<T> LoadAsync<T>(string? name = null)
     {
         var path = Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name : name)}.json");
@@ -51,6 +74,13 @@ public class JsonFileService : IJsonFileService
         return obj ?? Activator.CreateInstance<T>();
     }
 
+    /// <summary>
+    /// Saves an object by serializing it into a json file.
+    /// </summary>
+    /// <param name="obj">The object to serialize</param>
+    /// <param name="name">The name of the json file (without the .json extension)</param>
+    /// <typeparam name="T">The type of the object to serialize</typeparam>
+    /// <returns>True if the file was saved successfully, else false</returns>
     public bool Save<T>(T obj, string? name = null)
     {
         try
@@ -65,6 +95,13 @@ public class JsonFileService : IJsonFileService
         }
     }
 
+    /// <summary>
+    /// Saves an object by serializing it into a json file asynchronously.
+    /// </summary>
+    /// <param name="obj">The object to serialize</param>
+    /// <param name="name">The name of the json file (without the .json extension)</param>
+    /// <typeparam name="T">The type of the object to serialize</typeparam>
+    /// <returns>True if the file was saved successfully, else false</returns>
     public async Task<bool> SaveAsync<T>(T obj, string? name = null)
     {
         try

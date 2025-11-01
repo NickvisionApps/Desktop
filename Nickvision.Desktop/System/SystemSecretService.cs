@@ -13,11 +13,19 @@ using System.Diagnostics;
 
 namespace Nickvision.Desktop.System;
 
+/// <summary>
+/// A service for managing secrets using the system's secret storage.
+/// </summary>
 [SupportedOSPlatform("windows")]
 [SupportedOSPlatform("linux")]
 [SupportedOSPlatform("macos")]
-public class SecretService : ISecretService
+public class SystemSecretService : ISecretService
 {
+    /// <summary>
+    /// Adds a secret.
+    /// </summary>
+    /// <param name="secret">The secret to add</param>
+    /// <returns>True if the secret was added successfully, else false</returns>
     public bool Add(Secret secret)
     {
         if (secret.Empty)
@@ -87,6 +95,11 @@ public class SecretService : ISecretService
 #endif
     }
 
+    /// <summary>
+    /// Adds a secret asynchronously.
+    /// </summary>
+    /// <param name="secret">The secret to add</param>
+    /// <returns>True if the secret was added successfully, else false</returns>
     public async Task<bool> AddAsync(Secret secret)
     {
         if (secret.Empty)
@@ -156,6 +169,11 @@ public class SecretService : ISecretService
 #endif
     }
 
+    /// <summary>
+    /// Creates a secret with a random but secure value.
+    /// </summary>
+    /// <param name="name">The name of the secret to create</param>
+    /// <returns>The created secret if successful, else null</returns>
     public Secret? Create(string name)
     {
         if (string.IsNullOrEmpty(name))
@@ -170,6 +188,11 @@ public class SecretService : ISecretService
         return Add(secret) ? secret : null;
     }
 
+    /// <summary>
+    /// Creates a secret asynchronously with a random but secure value.
+    /// </summary>
+    /// <param name="name">The name of the secret to create</param>
+    /// <returns>The created secret if successful, else null</returns>
     public async Task<Secret?> CreateAsync(string name)
     {
         if (string.IsNullOrEmpty(name))
@@ -184,6 +207,11 @@ public class SecretService : ISecretService
         return await AddAsync(secret) ? secret : null;
     }
 
+    /// <summary>
+    /// Deletes a secret.
+    /// </summary>
+    /// <param name="name">The name of the secret to delete</param>
+    /// <returns>True if the secret was deleted successfully, else false</returns>
     public bool Delete(string name)
     {
         if (string.IsNullOrEmpty(name))
@@ -231,6 +259,11 @@ public class SecretService : ISecretService
 #endif
     }
 
+    /// <summary>
+    /// Deletes a secret asynchronously.
+    /// </summary>
+    /// <param name="name">The name of the secret to delete</param>
+    /// <returns>True if the secret was deleted successfully, else false</returns>
     public async Task<bool> DeleteAsync(string name)
     {
         if (string.IsNullOrEmpty(name))
@@ -278,6 +311,11 @@ public class SecretService : ISecretService
 #endif
     }
 
+    /// <summary>
+    /// Gets a secret.
+    /// </summary>
+    /// <param name="name">The name of the secret to find</param>
+    /// <returns>The secret if found, else null</returns>
     public Secret? Get(string name)
     {
         if (string.IsNullOrEmpty(name))
@@ -339,6 +377,11 @@ public class SecretService : ISecretService
 #endif
     }
 
+    /// <summary>
+    /// Gets a secret asynchronously.
+    /// </summary>
+    /// <param name="name">The name of the secret to find</param>
+    /// <returns>The secret if found, else null</returns>
     public async Task<Secret?> GetAsync(string name)
     {
         if (string.IsNullOrEmpty(name))
@@ -404,6 +447,11 @@ public class SecretService : ISecretService
 #endif
     }
 
+    /// <summary>
+    /// Updates a secret.
+    /// </summary>
+    /// <param name="secret">The secret to update</param>
+    /// <returns>True if the secret was updated successfully, else false</returns>
     public bool Update(Secret secret)
     {
         if (secret.Empty)
@@ -473,6 +521,11 @@ public class SecretService : ISecretService
 #endif
     }
 
+    /// <summary>
+    /// Updates a secret asynchronously.
+    /// </summary>
+    /// <param name="secret">The secret to update</param>
+    /// <returns>True if the secret was updated successfully, else false</returns>
     public async Task<bool> UpdateAsync(Secret secret)
     {
         if (secret.Empty)

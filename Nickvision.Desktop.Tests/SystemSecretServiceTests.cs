@@ -8,14 +8,14 @@ namespace Nickvision.Desktop.Tests;
 [SupportedOSPlatform("windows")]
 [SupportedOSPlatform("linux")]
 [SupportedOSPlatform("macos")]
-public sealed class SecretServiceTests
+public sealed class SystemSecretServiceTests
 {
-    private static SecretService? _secretService;
+    private static SystemSecretService? _secretService;
 
     [TestMethod]
     public void Case001_Initalize()
     {
-        _secretService = new SecretService();
+        _secretService = new SystemSecretService();
         Assert.IsNotNull(_secretService);
     }
 

@@ -2,6 +2,9 @@
 
 namespace Nickvision.Desktop.Keyring;
 
+/// <summary>
+/// Flags for password content types.
+/// </summary>
 [Flags]
 public enum PasswordContent
 {

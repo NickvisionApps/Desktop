@@ -2,10 +2,8 @@
 using System;
 #if OS_WINDOWS
 using Microsoft.Toolkit.Uwp.Notifications;
-
 #elif OS_MAC
 using System.Diagnostics;
-
 #elif OS_LINUX
 using System.Diagnostics;
 using System.IO;
@@ -14,6 +12,9 @@ using System.Runtime.InteropServices;
 
 namespace Nickvision.Desktop.Notifications;
 
+/// <summary>
+/// A service for managing notifications.
+/// </summary>
 #if OS_LINUX
 public partial class NotificationService : IDisposable, INotificationService
 #else
@@ -62,8 +63,16 @@ public class NotificationService : IDisposable, INotificationService
     private readonly NotifyActionCallback _openActionCallback;
 #endif
 
+    /// <summary>
+    /// The event for when app notifications are sent.
+    /// </summary>
     public event EventHandler<AppNotificationSentEventArgs>? AppNotificationSent;
 
+    /// <summary>
+    /// Constructs a NotificationService.
+    /// </summary>
+    /// <param name="appInfo">The AppInfo object for the app</param>
+    /// <param name="openTranslatedText">The text "Open" translated</param>
     public NotificationService(AppInfo appInfo, string openTranslatedText)
     {
         _disposed = false;
@@ -89,22 +98,37 @@ public class NotificationService : IDisposable, INotificationService
 #endif
     }
 
+    /// <summary>
+    /// Finalizes a NotificationService.
+    /// </summary>
     ~NotificationService()
     {
         Dispose(false);
     }
 
+    /// <summary>
+    /// Disposes a NotificationService.
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Sends an app notification.
+    /// </summary>
+    /// <param name="notification">The AppNotification to send</param>
     public void Send(AppNotification notification)
     {
         AppNotificationSent?.Invoke(this, new AppNotificationSentEventArgs(notification));
     }
 
+    /// <summary>
+    /// Sends a shell notification.
+    /// </summary>
+    /// <param name="notification">The ShellNotification to send</param>
+    /// <returns>True if the shell notification was sent successfully, else false</returns>
     public bool Send(ShellNotification notification)
     {
 #if OS_WINDOWS
@@ -156,6 +180,10 @@ public class NotificationService : IDisposable, INotificationService
 #endif
     }
 
+    /// <summary>
+    /// Disposes a NotificationService.
+    /// </summary>
+    /// <param name="disposing">Whether to dispose managed resources</param>
     private void Dispose(bool disposing)
     {
         if (_disposed || !disposing)

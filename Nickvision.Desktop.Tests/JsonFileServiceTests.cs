@@ -36,8 +36,8 @@ public sealed class JsonFileServiceTests
         var config = _jsonFileService.Load<Config>();
         Assert.IsNotNull(config);
         Assert.IsFalse(config.DarkModeEnabled);
-        Assert.AreEqual(800, config.WindowGeometry.Width);
-        Assert.AreEqual(600, config.WindowGeometry.Height);
+        Assert.AreEqual(900, config.WindowGeometry.Width);
+        Assert.AreEqual(700, config.WindowGeometry.Height);
         Assert.IsFalse(File.Exists("config.json"));
     }
 
@@ -48,8 +48,8 @@ public sealed class JsonFileServiceTests
         var configAsync = await _jsonFileService.LoadAsync<Config>("config-async");
         Assert.IsNotNull(configAsync);
         Assert.IsFalse(configAsync.DarkModeEnabled);
-        Assert.AreEqual(800, configAsync.WindowGeometry.Width);
-        Assert.AreEqual(600, configAsync.WindowGeometry.Height);
+        Assert.AreEqual(900, configAsync.WindowGeometry.Width);
+        Assert.AreEqual(700, configAsync.WindowGeometry.Height);
         Assert.IsFalse(File.Exists("config-async.json"));
     }
 

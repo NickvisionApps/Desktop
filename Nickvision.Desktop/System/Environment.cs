@@ -9,15 +9,24 @@ using System.Runtime.InteropServices;
 
 namespace Nickvision.Desktop.System;
 
+/// <summary>
+/// Helpers for working with the system environment.
+/// </summary>
 public static class Environment
 {
     private static readonly Dictionary<(string Dependency, DependencySearchOption Search), string?> Dependencies;
 
+    /// <summary>
+    /// Constructs a static Environment.
+    /// </summary>
     static Environment()
     {
         Dependencies = [];
     }
 
+    /// <summary>
+    /// The deployment mode of the application.
+    /// </summary>
     public static DeploymentMode DeploymentMode
     {
         get
@@ -34,6 +43,9 @@ public static class Environment
         }
     }
 
+    /// <summary>
+    /// The list of directories in the PATH variable.
+    /// </summary>
     public static IEnumerable<string> PathVariable
     {
         get
@@ -47,6 +59,13 @@ public static class Environment
         }
     }
 
+    /// <summary>
+    /// Finds a dependency on the system.
+    /// </summary>
+    /// <param name="dependency">The dependency to find</param>
+    /// <param name="search">The search options</param>
+    /// <returns>The path of the dependency if found, else null</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if the search option is invalid</exception>
     public static string? FindDependency(string dependency, DependencySearchOption search = DependencySearchOption.Global)
     {
 #if OS_WINDOWS
@@ -121,6 +140,12 @@ public static class Environment
         return Dependencies[(dependency, search)];
     }
 
+    /// <summary>
+    /// Gets the debug information for the application.
+    /// </summary>
+    /// <param name="info">The AppInfo object for the app</param>
+    /// <param name="extra">Any extra information to include in the debug information string</param>
+    /// <returns>The debug information string</returns>
     public static string GetDebugInformation(AppInfo info, string extra = "") =>
         $"""
          App: {info.Name}

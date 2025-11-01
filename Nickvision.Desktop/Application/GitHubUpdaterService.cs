@@ -11,14 +11,23 @@ using FileMode = System.IO.FileMode;
 
 namespace Nickvision.Desktop.Application;
 
-public class UpdaterService : IUpdaterService
+/// <summary>
+/// A service for updating an application via GitHub releases.
+/// </summary>
+public class GitHubUpdaterService : IUpdaterService
 {
     private readonly GitHubClient _githubClient;
     private readonly HttpClient _httpClient;
     private readonly string _name;
     private readonly string _owner;
 
-    public UpdaterService(AppInfo appInfo, HttpClient httpClient)
+    /// <summary>
+    /// Constructs an UpdaterService.
+    /// </summary>
+    /// <param name="appInfo">The AppInfo object for the app</param>
+    /// <param name="httpClient">The HttpClient for the app</param>
+    /// <exception cref="ArgumentException">Thrown if the AppInfo.SourceRepository is missing or ill-formated</exception>
+    public GitHubUpdaterService(AppInfo appInfo, HttpClient httpClient)
     {
         if (appInfo.SourceRepository is null ||
             appInfo.SourceRepository.IsEmpty())
@@ -39,6 +48,15 @@ public class UpdaterService : IUpdaterService
         }
     }
 
+    /// <summary>
+    /// Downloads an asset from a released version.
+    /// </summary>
+    /// <param name="version">The released version</param>
+    /// <param name="path">The path of where to download the asset to</param>
+    /// <param name="assertName">The name of the asset to download</param>
+    /// <param name="exactMatch">Whether the asset name should match exactly to the asset to download</param>
+    /// <param name="progress">An optional progress reporter</param>
+    /// <returns></returns>
     public async Task<bool> DownloadReleaseAssetAsync(Version version,
         string path,
         string assertName,
@@ -94,6 +112,10 @@ public class UpdaterService : IUpdaterService
         return false;
     }
 
+    /// <summary>
+    /// Gets the latest preview version available.
+    /// </summary>
+    /// <returns>The latest preview version or null if unavailable</returns>
     public async Task<Version?> GetLatestPreviewVersionAsync()
     {
         var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
@@ -113,6 +135,10 @@ public class UpdaterService : IUpdaterService
         return null;
     }
 
+    /// <summary>
+    /// Gets the latest stable version available.
+    /// </summary>
+    /// <returns>The latest stable version or null if unavailable</returns>
     public async Task<Version?> GetLatestStableVersionAsync()
     {
         var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
@@ -132,6 +158,12 @@ public class UpdaterService : IUpdaterService
         return null;
     }
 
+    /// <summary>
+    /// Downloads and runs the updated Windows installer of the given released version.
+    /// </summary>
+    /// <param name="version">The released version</param>
+    /// <param name="progress">An optional progress reporter</param>
+    /// <returns>True if the update was downloaded and ran successfully, else false</returns>
     public async Task<bool> WindowsUpdate(Version version, IProgress<DownloadProgress>? progress = null)
     {
         var setupPath = Path.Combine(UserDirectories.Cache, $"{_owner}_{_name}_Setup.exe");
