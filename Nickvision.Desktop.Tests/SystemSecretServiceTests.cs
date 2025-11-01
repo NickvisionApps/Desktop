@@ -13,7 +13,7 @@ public sealed class SystemSecretServiceTests
     private static SystemSecretService? _secretService;
 
     [TestMethod]
-    public void Case001_Initalize()
+    public void Case001_Initialize()
     {
         _secretService = new SystemSecretService();
         Assert.IsNotNull(_secretService);

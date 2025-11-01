@@ -11,6 +11,7 @@ permissions:
   contents: read
 env:
   TEST_PROJECT_NAME: Nickvision.Desktop.Tests
+  KEYRING_PASSWORD: "abc"
 jobs:
   build:
     name: "Build on macOS"
@@ -31,6 +32,12 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '9.0.x'
+      - name: "Setup Keyring"
+        run: |
+          sudo security create-keychain -p ${{ env.KEYRING_PASSWORD }} build.keychain
+          sudo security default-keychain -s build.keychain
+          sudo security unlock-keychain -p ${{ env.KEYRING_PASSWORD }} build.keychain
+          sudo security set-key-partition-list -S apple-tool:,apple: -s -k ${{ env.KEYRING_PASSWORD }} build.keychain
       - name: "Restore"
         run: dotnet restore
       - name: "Build"

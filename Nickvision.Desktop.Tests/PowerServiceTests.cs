@@ -8,7 +8,7 @@ public class PowerServiceTests
     private static PowerService? _powerService;
 
     [TestMethod]
-    public void Case001_Initalize()
+    public void Case001_Initialize()
     {
         _powerService = new PowerService();
         Assert.IsNotNull(_powerService);
