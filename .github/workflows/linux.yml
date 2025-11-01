@@ -34,7 +34,7 @@ jobs:
       - name: "Setup Environment"
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" 
-          sudo apt-get install firefox xdg-user-dirs xdg-user-dirs-gtk gettext tzdata locales libnotify-dev notification-daemon -y
+          sudo apt-get install firefox xdg-user-dirs xdg-user-dirs-gtk gettext tzdata locales libnotify-dev libsecret-tools notification-daemon -y
           xdg-user-dirs-update
           xdg-user-dirs-gtk-update
           sudo locale-gen en_US.UTF-8

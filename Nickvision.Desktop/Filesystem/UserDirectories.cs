@@ -86,7 +86,7 @@ public static class UserDirectories
 #if OS_WINDOWS
             var res = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 #elif OS_MAC
-            return Cache;
+            var res = Cache;
 #elif OS_LINUX
             var res = string.Empty;
             if (Environment.GetEnvironmentVariable("XDG_DATA_HOME") is string dir)

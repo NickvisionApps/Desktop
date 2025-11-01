@@ -50,7 +50,7 @@ public class NotificationService : IDisposable, INotificationService
         GDestroyNotify free_func);
 
     [LibraryImport("libnotify.so.4")]
-    private static partial void notify_notification_set_urgency(nint notifcation, uint urgency);
+    private static partial void notify_notification_set_urgency(nint notification, uint urgency);
 
     [LibraryImport("libnotify.so.4")]
     [return: MarshalAs(UnmanagedType.I1)]
