@@ -1,0 +1,51 @@
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    types: [ "review_requested", "ready_for_review" ]
+  workflow_dispatch:
+name: Linux
+permissions:
+  id-token: write
+  contents: read
+env:
+  TEST_PROJECT_NAME: Nickvision.Desktop.Tests
+jobs:
+  build:
+    name: "Build on Linux"
+    strategy:
+      matrix:
+        variant:
+          - arch: x64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.variant.runner }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - name: "Setup .NET"
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+      - name: "Setup Environment"
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" 
+          sudo apt-get install firefox xdg-user-dirs xdg-user-dirs-gtk gettext tzdata locales libnotify-dev notification-daemon -y
+          xdg-user-dirs-update
+          xdg-user-dirs-gtk-update
+          sudo locale-gen en_US.UTF-8
+          sudo update-locale LANG=en_US.UTF-8
+          notification-daemon --display=:0 -r &
+      - name: "Unlock Keyring"
+        uses: t1m0thyj/unlock-keyring@v1
+      - name: "Restore"
+        run: dotnet restore
+      - name: "Build"
+        run: dotnet build -c Release
+      - name: "Test"
+        run: dotnet test -c Release ${{ env.TEST_PROJECT_NAME }}
+        

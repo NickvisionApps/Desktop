@@ -64,51 +64,58 @@ public class GitHubUpdaterService : IUpdaterService
         bool exactMatch = true,
         IProgress<DownloadProgress>? progress = null)
     {
-        var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
-        foreach (var release in releases)
+        try
         {
-            if (!Version.TryParse(release.TagName.TrimStart('v'), out var releaseVersion))
+            var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
+            foreach (var release in releases)
             {
-                continue;
-            }
-            if (version != releaseVersion)
-            {
-                continue;
-            }
-            foreach (var asset in release.Assets)
-            {
-                if ((!exactMatch || asset.Name.ToLower() != assertName.ToLower()) &&
-                    (exactMatch || !asset.Name.ToLower().Contains(assertName.ToLower())))
+                if (!Version.TryParse(release.TagName.TrimStart('v'), out var releaseVersion))
                 {
                     continue;
                 }
-                try
+                if (version != releaseVersion)
                 {
-                    using var response = await _httpClient.GetAsync(asset.BrowserDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
-                    response.EnsureSuccessStatusCode();
-                    var totalBytesToRead = response.Content.Headers.ContentLength ?? 0L;
-                    var totalBytesRead = 0L;
-                    var buffer = new byte[81920];
-                    await using var downloadStream = await response.Content.ReadAsStreamAsync();
-                    await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
-                    while (true)
+                    continue;
+                }
+                foreach (var asset in release.Assets)
+                {
+                    if ((!exactMatch || asset.Name.ToLower() != assertName.ToLower()) &&
+                        (exactMatch || !asset.Name.ToLower().Contains(assertName.ToLower())))
                     {
-                        var bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length);
-                        if (bytesRead == 0)
+                        continue;
+                    }
+                    try
+                    {
+                        using var response = await _httpClient.GetAsync(asset.BrowserDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
+                        response.EnsureSuccessStatusCode();
+                        var totalBytesToRead = response.Content.Headers.ContentLength ?? 0L;
+                        var totalBytesRead = 0L;
+                        var buffer = new byte[81920];
+                        await using var downloadStream = await response.Content.ReadAsStreamAsync();
+                        await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+                        while (true)
                         {
-                            progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, true));
-                            return new FileInfo(path).Length == asset.Size;
+                            var bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length);
+                            if (bytesRead == 0)
+                            {
+                                progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, true));
+                                return new FileInfo(path).Length == asset.Size;
+                            }
+                            await fileStream.WriteAsync(buffer, 0, bytesRead);
+                            totalBytesRead += bytesRead;
+                            progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, false));
                         }
-                        await fileStream.WriteAsync(buffer, 0, bytesRead);
-                        totalBytesRead += bytesRead;
-                        progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, false));
+                    }
+                    catch
+                    {
+                        return false;
                     }
                 }
-                catch
-                {
-                    return false;
-                }
             }
+        }
+        catch (Exception)
+        {
+            return false;
         }
         return false;
     }
@@ -119,16 +126,23 @@ public class GitHubUpdaterService : IUpdaterService
     /// <returns>The latest preview version or null if unavailable</returns>
     public async Task<PreviewVersion?> GetLatestPreviewVersionAsync()
     {
-        var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
-        foreach (var release in releases.Where(r => r.Prerelease && !r.Draft))
+        try
         {
-            if (!PreviewVersion.TryParse(release.TagName.TrimStart('v'), out var version))
+            var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
+            foreach (var release in releases.Where(r => r.Prerelease && !r.Draft))
             {
-                continue;
+                if (!PreviewVersion.TryParse(release.TagName.TrimStart('v'), out var version))
+                {
+                    continue;
+                }
+                return version;
             }
-            return version;
+            return null;
         }
-        return null;
+        catch(Exception)
+        {
+            return null;
+        }
     }
 
     /// <summary>
@@ -137,16 +151,23 @@ public class GitHubUpdaterService : IUpdaterService
     /// <returns>The latest stable version or null if unavailable</returns>
     public async Task<Version?> GetLatestStableVersionAsync()
     {
-        var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
-        foreach (var release in releases.Where(r => !r.Prerelease && !r.Draft))
+        try
         {
-            if (!Version.TryParse(release.TagName.TrimStart('v'), out var version))
+            var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
+            foreach (var release in releases.Where(r => !r.Prerelease && !r.Draft))
             {
-                continue;
+                if (!Version.TryParse(release.TagName.TrimStart('v'), out var version))
+                {
+                    continue;
+                }
+                return version;
             }
-            return version;
+            return null;
         }
-        return null;
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     /// <summary>

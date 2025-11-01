@@ -1,0 +1,39 @@
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    types: [ "review_requested", "ready_for_review" ]
+  workflow_dispatch:
+name: Windows
+permissions:
+  id-token: write
+  contents: read
+env:
+  TEST_PROJECT_NAME: Nickvision.Desktop.Tests
+jobs:
+  build:
+    name: "Build on Windows"
+    strategy:
+      matrix:
+        variant:
+          - arch: x64
+            runner: windows-latest
+          - arch: arm64
+            runner: windows-11-arm
+    runs-on: ${{ matrix.variant.runner }}
+    steps:
+      - name: "Checkout"  
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - name: "Setup .NET"
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+      - name: "Restore"
+        run: dotnet restore
+      - name: "Build"
+        run: dotnet build -c Release
+      - name: "Test"
+        run: dotnet test -c Release ${{ env.TEST_PROJECT_NAME }}

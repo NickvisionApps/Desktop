@@ -1,0 +1,19 @@
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    types: [ "review_requested", "ready_for_review" ]
+name: Spell Check
+permissions:
+  contents: read
+jobs:
+  codespell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: codespell-project/actions-codespell@v2
+        with:
+          check_filenames: true
+          skip: .git,*.svg,*.html,*.js,*.po,*.pot,*.page,*.map,*.rtf,CONTRIBUTING.md
+          ignore_words_list: gir
