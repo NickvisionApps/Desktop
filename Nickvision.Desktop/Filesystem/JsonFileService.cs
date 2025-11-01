@@ -46,7 +46,7 @@ public class JsonFileService : IJsonFileService
     /// <returns>A deserialized object from the json file if successful, else a default constructed object</returns>
     public T Load<T>(string? name = null)
     {
-        var path = Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name : name)}.json");
+        var path = Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name.ToLower() : name)}.json");
         if (!File.Exists(path))
         {
             return Activator.CreateInstance<T>();
@@ -64,7 +64,7 @@ public class JsonFileService : IJsonFileService
     /// <returns>A deserialized object from the json file if successful, else a default constructed object</returns>
     public async Task<T> LoadAsync<T>(string? name = null)
     {
-        var path = Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name : name)}.json");
+        var path = Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name.ToLower() : name)}.json");
         if (!File.Exists(path))
         {
             return Activator.CreateInstance<T>();
@@ -86,7 +86,7 @@ public class JsonFileService : IJsonFileService
         try
         {
             var text = JsonSerializer.Serialize(obj, JsonOptions);
-            File.WriteAllText(Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name : name)}.json"), text);
+            File.WriteAllText(Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name.ToLower() : name)}.json"), text);
             return true;
         }
         catch
@@ -107,7 +107,7 @@ public class JsonFileService : IJsonFileService
         try
         {
             var text = JsonSerializer.Serialize(obj, JsonOptions);
-            await File.WriteAllTextAsync(Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name : name)}.json"), text);
+            await File.WriteAllTextAsync(Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name.ToLower() : name)}.json"), text);
             return true;
         }
         catch
