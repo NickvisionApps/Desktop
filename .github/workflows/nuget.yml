@@ -2,10 +2,11 @@ on:
   push:
     tags:
     - "[0-9]+.[0-9]+.[0-9]+"
+name: Nuget
 jobs:
   release:
     name: "Release on Nuget"
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: "Checkout"
         uses: actions/checkout@v5
