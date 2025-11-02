@@ -142,7 +142,9 @@ public class NotificationService : IDisposable, INotificationService
         {
             builder.AddButton(_openTranslatedText, ToastActivationType.Protocol, $"file://{notification.ActionParam}");
         }
+#if NET_WINDOWS
         builder.Show();
+#endif
         return true;
 #elif OS_MAC
         using var process = new Process()

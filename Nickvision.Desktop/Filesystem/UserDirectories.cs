@@ -40,6 +40,8 @@ public static class UserDirectories
             {
                 res = Path.Combine(Home, ".config");
             }
+#else
+            var res = Path.Combine(Home, ".config");
 #endif
             Directory.CreateDirectory(res);
             return res;
@@ -70,6 +72,8 @@ public static class UserDirectories
             {
                 res = Path.Combine(Home, ".cache");
             }
+#else
+            var res = Path.Combine(Home, ".cache");
 #endif
             Directory.CreateDirectory(res);
             return res;
@@ -100,6 +104,8 @@ public static class UserDirectories
             {
                 res = Path.Combine(Home, ".local", "share");
             }
+#else
+            var res = Path.Combine(Home, ".local", "share");
 #endif
             Directory.CreateDirectory(res);
             return res;
@@ -130,6 +136,8 @@ public static class UserDirectories
             {
                 res = Path.Combine(Home, "Desktop");
             }
+#else
+            var res = Path.Combine(Home, "Desktop");
 #endif
             Directory.CreateDirectory(res);
             return res;
@@ -160,6 +168,8 @@ public static class UserDirectories
             {
                 res = Path.Combine(Home, "Documents");
             }
+#else
+            var res = Path.Combine(Home, "Documents");
 #endif
             return res;
         }
@@ -194,6 +204,8 @@ public static class UserDirectories
             {
                 res = Path.Combine(Home, "Downloads");
             }
+#else
+            var res = Path.Combine(Home, "Downloads");
 #endif
             return res;
         }
@@ -223,6 +235,8 @@ public static class UserDirectories
             {
                 res = Path.Combine(Home, "Music");
             }
+#else
+            var res = Path.Combine(Home, "Music");
 #endif
             Directory.CreateDirectory(res);
             return res;
@@ -253,6 +267,8 @@ public static class UserDirectories
             {
                 res = Path.Combine(Home, "Pictures");
             }
+#else
+            var res = Path.Combine(Home, "Pictures");
 #endif
             Directory.CreateDirectory(res);
             return res;
@@ -283,6 +299,8 @@ public static class UserDirectories
             {
                 res = Path.Combine(Home, "Templates");
             }
+#else
+            var res = Path.Combine(Home, "Templates");
 #endif
             Directory.CreateDirectory(res);
             return res;
@@ -313,6 +331,8 @@ public static class UserDirectories
             {
                 res = Path.Combine(Home, "Videos");
             }
+#else
+            var res = Path.Combine(Home, "Videos");
 #endif
             Directory.CreateDirectory(res);
             return res;

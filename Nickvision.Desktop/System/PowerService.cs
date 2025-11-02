@@ -48,7 +48,9 @@ public class PowerService : IPowerService
     public bool AllowSuspend()
     {
 #if OS_WINDOWS
+#pragma warning disable CA1416
         return Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS) != 0;
+#pragma warning restore CA1416
 #elif OS_MAC || OS_LINUX
         _preventSuspendProcess?.Kill();
         _preventSuspendProcess?.Dispose();
@@ -112,7 +114,9 @@ public class PowerService : IPowerService
     public bool PreventSuspend()
     {
 #if OS_WINDOWS
+#pragma warning disable CA1416
         return Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS | Kernel32.EXECUTION_STATE.ES_SYSTEM_REQUIRED) != 0;
+#pragma warning restore CA1416
 #elif OS_MAC
         if (_preventSuspendProcess != null)
         {
@@ -255,7 +259,9 @@ public class PowerService : IPowerService
     public bool Suspend()
     {
 #if OS_WINDOWS
+#pragma warning disable CA1416
         return PowrProf.SetSuspendState(false, true, true);
+#pragma warning restore CA1416
 #elif OS_MAC
         if (string.IsNullOrEmpty(Environment.FindDependency("osascript")))
         {
