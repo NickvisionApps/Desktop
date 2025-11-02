@@ -16,6 +16,7 @@
         <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
         <Copyright>(c) Nickvision 2021-2025</Copyright>
         <PackageProjectUrl>https://nickvision.org</PackageProjectUrl>
+        <RepositoryType>git</RepositoryType>
         <RepositoryUrl>https://github.com/NickvisionApps/Desktop</RepositoryUrl>
         <Title>Nickvision.Desktop</Title>
         <PackageIcon>icon.png</PackageIcon>

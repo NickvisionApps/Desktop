@@ -42,9 +42,9 @@ jobs:
       - name: "Restore"
         run: dotnet restore
       - name: "Build"
-        run: dotnet build -c Release
+        run: dotnet build -c Release --no-restore
       - name: "Test"
-        run: dotnet test -c Release ${{ env.TEST_PROJECT_NAME }}
+        run: dotnet test -c Release ${{ env.TEST_PROJECT_NAME }} --no-build
       - name: Cleanup Keychain
         if: always()
         run: security delete-keychain build.keychain
