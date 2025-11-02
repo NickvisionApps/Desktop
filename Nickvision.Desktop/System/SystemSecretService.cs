@@ -60,7 +60,7 @@ public class SystemSecretService : ISecretService
             StartInfo = new ProcessStartInfo()
             {
                 FileName = "security",
-                Arguments = $"add-generic-password -a default -s '{secret.Name}' -w '{secret.Value}'",
+                Arguments = $"add-generic-password -a default -s {secret.Name} -w \"{secret.Value}\"",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -134,7 +134,7 @@ public class SystemSecretService : ISecretService
             StartInfo = new ProcessStartInfo()
             {
                 FileName = "security",
-                Arguments = $"add-generic-password -a default -s '{secret.Name}' -w '{secret.Value}'",
+                Arguments = $"add-generic-password -a default -s {secret.Name} -w \"{secret.Value}\"",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -228,7 +228,7 @@ public class SystemSecretService : ISecretService
             StartInfo = new ProcessStartInfo()
             {
                 FileName = "security",
-                Arguments = $"delete-generic-password -a default -s '{name}'",
+                Arguments = $"delete-generic-password -a default -s {name}",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -280,7 +280,7 @@ public class SystemSecretService : ISecretService
             StartInfo = new ProcessStartInfo()
             {
                 FileName = "security",
-                Arguments = $"delete-generic-password -a default -s '{name}'",
+                Arguments = $"delete-generic-password -a default -s {name}",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -336,7 +336,7 @@ public class SystemSecretService : ISecretService
             StartInfo = new ProcessStartInfo()
             {
                 FileName = "security",
-                Arguments = $"find-generic-password -a default -w -s '{name}'",
+                Arguments = $"find-generic-password -a default -s {name} -w",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -350,7 +350,7 @@ public class SystemSecretService : ISecretService
             return null;
         }
         var stdout = process.StandardOutput.ReadToEnd();
-        return new Secret(name, stdout.Split('\n')[^1]);
+        return new Secret(name, stdout.Split('\n')[0]);
 #elif OS_LINUX
         using var process = new Process()
         {
@@ -370,8 +370,7 @@ public class SystemSecretService : ISecretService
         {
             return null;
         }
-        var stdout = process.StandardOutput.ReadToEnd();
-        return new Secret(name, stdout.Split('\n')[^1]);
+        return new Secret(name, process.StandardOutput.ReadToEnd());
 #else
         return null;
 #endif
@@ -406,7 +405,7 @@ public class SystemSecretService : ISecretService
             StartInfo = new ProcessStartInfo()
             {
                 FileName = "security",
-                Arguments = $"find-generic-password -a default -w -s '{name}'",
+                Arguments = $"find-generic-password -a default -s {name} -w",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -419,8 +418,8 @@ public class SystemSecretService : ISecretService
         {
             return null;
         }
-        var stdout = await process.StandardOutput.ReadToEndAsync();
-        return new Secret(name, stdout.Split('\n')[^1]);
+        var stdout = process.StandardOutput.ReadToEnd();
+        return new Secret(name, stdout.Split('\n')[0]);
 #elif OS_LINUX
         using var process = new Process()
         {
@@ -440,8 +439,7 @@ public class SystemSecretService : ISecretService
         {
             return null;
         }
-        var stdout = await process.StandardOutput.ReadToEndAsync();
-        return new Secret(name, stdout.Split('\n')[^1]);
+        return new Secret(name, await process.StandardOutput.ReadToEndAsync());
 #else
         return null;
 #endif
@@ -486,7 +484,7 @@ public class SystemSecretService : ISecretService
             StartInfo = new ProcessStartInfo()
             {
                 FileName = "security",
-                Arguments = $"add-generic-password -a default -s '{secret.Name}' -w '{secret.Value}' -U",
+                Arguments = $"add-generic-password -a default -s {secret.Name} -w \"{secret.Value}\" -U",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -560,7 +558,7 @@ public class SystemSecretService : ISecretService
             StartInfo = new ProcessStartInfo()
             {
                 FileName = "security",
-                Arguments = $"add-generic-password -a default -s '{secret.Name}' -w '{secret.Value}' -U",
+                Arguments = $"add-generic-password -a default -s {secret.Name} -w \"{secret.Value}\" -U",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,

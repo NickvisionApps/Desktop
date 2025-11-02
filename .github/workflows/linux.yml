@@ -11,6 +11,8 @@ permissions:
   contents: read
 env:
   TEST_PROJECT_NAME: Nickvision.Desktop.Tests
+  DISPLAY: :99.0
+  CI: true
 jobs:
   build:
     name: "Build on Linux"
@@ -31,21 +33,20 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '9.0.x'
+      - name: "Unlock Keyring"
+        uses: t1m0thyj/unlock-keyring@v1
       - name: "Setup Environment"
         run: |
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" 
-          sudo apt-get install firefox xdg-user-dirs xdg-user-dirs-gtk gettext tzdata locales libnotify-dev libsecret-tools notification-daemon -y
+          sudo apt-get install xdg-user-dirs xdg-user-dirs-gtk gettext tzdata locales libnotify-dev libsecret-tools notification-daemon xvfb -y
           xdg-user-dirs-update
           xdg-user-dirs-gtk-update
           sudo locale-gen en_US.UTF-8
           sudo update-locale LANG=en_US.UTF-8
-          /usr/lib/notification-daemon-1.0/notification-daemon --display=:0 -r &
-      - name: "Unlock Keyring"
-        uses: t1m0thyj/unlock-keyring@v1
+          xvfb-run /usr/lib/notification-daemon/notification-daemon -r &
       - name: "Restore"
         run: dotnet restore
       - name: "Build"
         run: dotnet build -c Release
       - name: "Test"
         run: dotnet test -c Release ${{ env.TEST_PROJECT_NAME }}
-        
+    

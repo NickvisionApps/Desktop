@@ -8,15 +8,17 @@
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <PackageId>Nickvision.Desktop</PackageId>
-        <Version>2025.10.0</Version>
+        <Version>2025.11.0</Version>
         <Company>Nickvision</Company>
         <Authors>Nickvision</Authors>
-        <Description>A cross-platform base for Nickvision desktop applications</Description>
+        <Description>A cross-platform base for Nickvision desktop applications.</Description>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
         <Copyright>(c) Nickvision 2021-2025</Copyright>
         <PackageProjectUrl>https://nickvision.org</PackageProjectUrl>
         <RepositoryUrl>https://github.com/NickvisionApps/Desktop</RepositoryUrl>
+        <Title>Nickvision.Desktop</Title>
+        <PackageIcon>icon.png</PackageIcon>
     </PropertyGroup>
 
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
@@ -40,6 +42,14 @@
         <PackageReference Include="Vanara.PInvoke.PowrProf" Version="4.2.1" Condition="$([MSBuild]::IsOSPlatform('Windows'))"/>
         <PackageReference Include="Vanara.PInvoke.Security" Version="4.2.1" Condition="$([MSBuild]::IsOSPlatform('Windows'))"/>
         <PackageReference Include="Vanara.PInvoke.Shell32" Version="4.2.1" Condition="$([MSBuild]::IsOSPlatform('Windows'))"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\resources\icon.png">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+        <Link>icon.png</Link>
+      </None>
     </ItemGroup>
 
 </Project>
