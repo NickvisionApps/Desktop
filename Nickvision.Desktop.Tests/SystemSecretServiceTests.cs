@@ -1,6 +1,7 @@
 ﻿using Nickvision.Desktop.System;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
+using Environment = System.Environment;
 
 namespace Nickvision.Desktop.Tests;
 
@@ -15,7 +16,7 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public void Case001_Initialize()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -26,7 +27,7 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case002_Add()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -39,7 +40,7 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case003_Create()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -52,7 +53,7 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public void Case004_Create()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -65,7 +66,7 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case005_Get()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -80,7 +81,7 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case006_Get()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -97,7 +98,7 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case007_Update()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -117,7 +118,7 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case008_Update()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -137,7 +138,7 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case009_Delete()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }

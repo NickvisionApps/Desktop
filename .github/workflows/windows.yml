@@ -11,6 +11,7 @@ permissions:
   contents: read
 env:
   TEST_PROJECT_NAME: Nickvision.Desktop.Tests
+  CI: true
 jobs:
   build:
     name: "Build on Windows"

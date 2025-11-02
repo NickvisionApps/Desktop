@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Environment = System.Environment;
 
 namespace Nickvision.Desktop.Tests;
 
@@ -17,7 +18,7 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public void Case001_Init()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -31,7 +32,7 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public void Case002_Check()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -42,7 +43,7 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public async Task Case003_Add()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -55,7 +56,7 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public async Task Case004_Update()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -73,7 +74,7 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public async Task Case005_Remove()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -88,7 +89,7 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public async Task Case006_Cleanup()
     {
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }

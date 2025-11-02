@@ -139,7 +139,7 @@ public class GitHubUpdaterService : IUpdaterService
             }
             return null;
         }
-        catch(Exception)
+        catch (Exception)
         {
             return null;
         }

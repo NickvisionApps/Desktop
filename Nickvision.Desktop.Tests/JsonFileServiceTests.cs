@@ -36,7 +36,7 @@ public sealed class JsonFileServiceTests
             File.Delete(configAsyncPath);
         }
     }
-    
+
     [TestMethod]
     public void Case001_Initialize()
     {

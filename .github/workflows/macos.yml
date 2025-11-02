@@ -12,6 +12,7 @@ permissions:
 env:
   TEST_PROJECT_NAME: Nickvision.Desktop.Tests
   KEYRING_PASSWORD: "abc"
+  CI: true
 jobs:
   build:
     name: "Build on macOS"
