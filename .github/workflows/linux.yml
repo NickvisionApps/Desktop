@@ -11,7 +11,6 @@ permissions:
   contents: read
 env:
   TEST_PROJECT_NAME: Nickvision.Desktop.Tests
-  DISPLAY: :99.0
   CI: true
 jobs:
   build:
@@ -42,7 +41,7 @@ jobs:
           xdg-user-dirs-gtk-update
           sudo locale-gen en_US.UTF-8
           sudo update-locale LANG=en_US.UTF-8
-          xvfb-run /usr/lib/notification-daemon/notification-daemon -r &
+          xvfb-run /usr/lib/notification-daemon/notification-daemon --display=:99.0 -r &
       - name: "Restore"
         run: dotnet restore
       - name: "Build"

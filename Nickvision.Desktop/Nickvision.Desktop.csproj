@@ -7,7 +7,7 @@
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <PackageId>Nickvision.Desktop</PackageId>
-        <Version>2025.11.0</Version>
+        <Version>2025.11.1</Version>
         <Company>Nickvision</Company>
         <Authors>Nickvision</Authors>
         <Description>A cross-platform base for Nickvision desktop applications.</Description>

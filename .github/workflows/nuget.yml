@@ -17,7 +17,7 @@ jobs:
       - name: "Restore"
         run: dotnet restore
       - name: "Build"
-        run: dotnet build -c Release --no-restore
+        run: dotnet build Nickvision.Desktop -c Release --no-restore
       - name: "Pack"
         run: dotnet pack Nickvision.Desktop -c Release --no-build --output .
       - name: "Publish"
