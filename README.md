@@ -1,3 +1,5 @@
+[![Nuget](https://img.shields.io/nuget/v/Nickvision.Desktop)](https://www.nuget.org/packages/Nickvision.Desktop/)
+
 # Nickvision.Desktop
 
 <img width='96' height='96' alt='Logo' src='resources/icon-rounded.svg'/>

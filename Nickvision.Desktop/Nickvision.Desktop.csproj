@@ -13,7 +13,7 @@
         <Authors>Nickvision</Authors>
         <Description>A cross-platform base for Nickvision desktop applications.</Description>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <Copyright>(c) Nickvision 2021-2025</Copyright>
         <PackageProjectUrl>https://nickvision.org</PackageProjectUrl>
         <RepositoryType>git</RepositoryType>
