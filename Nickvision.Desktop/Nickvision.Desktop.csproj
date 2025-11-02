@@ -6,6 +6,7 @@
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <PackageId>Nickvision.Desktop</PackageId>
         <Version>2025.11.2</Version>
         <Company>Nickvision</Company>

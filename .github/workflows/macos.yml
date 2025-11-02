@@ -40,11 +40,11 @@ jobs:
           security unlock-keychain -p ${{ env.KEYRING_PASSWORD }} build.keychain
           security set-keychain-settings -t 3600 -l build.keychain
       - name: "Restore"
-        run: dotnet restore
+        run: dotnet restore ${{ env.TEST_PROJECT_NAME }}
       - name: "Build"
-        run: dotnet build -c Release --no-restore
+        run: dotnet build ${{ env.TEST_PROJECT_NAME }} -c Release --no-restore
       - name: "Test"
-        run: dotnet test -c Release ${{ env.TEST_PROJECT_NAME }} --no-build
+        run: dotnet test ${{ env.TEST_PROJECT_NAME }} -c Release --no-build
       - name: Cleanup Keychain
         if: always()
         run: security delete-keychain build.keychain

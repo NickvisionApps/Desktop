@@ -43,9 +43,9 @@ jobs:
           sudo update-locale LANG=en_US.UTF-8
           xvfb-run /usr/lib/notification-daemon/notification-daemon --display=:99.0 -r &
       - name: "Restore"
-        run: dotnet restore
+        run: dotnet restore ${{ env.TEST_PROJECT_NAME }}
       - name: "Build"
-        run: dotnet build -c Release --no-restore
+        run: dotnet build ${{ env.TEST_PROJECT_NAME }} -c Release --no-restore
       - name: "Test"
-        run: dotnet test -c Release ${{ env.TEST_PROJECT_NAME }} --no-build
+        run: dotnet test ${{ env.TEST_PROJECT_NAME }} -c Release --no-build
     
