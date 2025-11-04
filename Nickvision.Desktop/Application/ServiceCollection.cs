@@ -40,11 +40,10 @@ public class ServiceCollection : IDisposable
     /// <summary>
     ///     Adds a service to the collection.
     /// </summary>
-    /// <param name="implementation">The object of the service class</param>
+    /// <param name="implementation">The object of the service interface</param>
     /// <typeparam name="T">The service interface</typeparam>
-    /// <typeparam name="TU">The service class</typeparam>
     /// <returns></returns>
-    public bool Add<T, TU>(TU implementation) where T : IService where TU : class, T => _services.TryAdd(typeof(T), implementation);
+    public bool Add<T>(T implementation) where T : IService => _services.TryAdd(typeof(T), implementation);
 
     /// <summary>
     ///     Gets a service from the collection.

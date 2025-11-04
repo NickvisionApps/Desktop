@@ -54,7 +54,7 @@ public class AppInfo
     /// <summary>
     ///     The current running version of the app.
     /// </summary>
-    public Version? Version { get; set; }
+    public AppVersion? Version { get; set; }
 
     /// <summary>
     ///     The changelog of the app in Markdown format.

@@ -58,7 +58,7 @@ public class GitHubUpdaterService : IUpdaterService
     /// <param name="exactMatch">Whether the asset name should match exactly to the asset to download</param>
     /// <param name="progress">An optional progress reporter</param>
     /// <returns></returns>
-    public async Task<bool> DownloadReleaseAssetAsync(Version version,
+    public async Task<bool> DownloadReleaseAssetAsync(AppVersion version,
         string path,
         string assertName,
         bool exactMatch = true,
@@ -69,7 +69,7 @@ public class GitHubUpdaterService : IUpdaterService
             var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
             foreach (var release in releases)
             {
-                if (!Version.TryParse(release.TagName.TrimStart('v'), out var releaseVersion))
+                if (!AppVersion.TryParse(release.TagName.TrimStart('v'), out var releaseVersion))
                 {
                     continue;
                 }
@@ -124,14 +124,14 @@ public class GitHubUpdaterService : IUpdaterService
     ///     Gets the latest preview version available.
     /// </summary>
     /// <returns>The latest preview version or null if unavailable</returns>
-    public async Task<PreviewVersion?> GetLatestPreviewVersionAsync()
+    public async Task<AppVersion?> GetLatestPreviewVersionAsync()
     {
         try
         {
             var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
             foreach (var release in releases.Where(r => r.Prerelease && !r.Draft))
             {
-                if (!PreviewVersion.TryParse(release.TagName.TrimStart('v'), out var version))
+                if (!AppVersion.TryParse(release.TagName, out var version))
                 {
                     continue;
                 }
@@ -149,14 +149,14 @@ public class GitHubUpdaterService : IUpdaterService
     ///     Gets the latest stable version available.
     /// </summary>
     /// <returns>The latest stable version or null if unavailable</returns>
-    public async Task<Version?> GetLatestStableVersionAsync()
+    public async Task<AppVersion?> GetLatestStableVersionAsync()
     {
         try
         {
             var releases = await _githubClient.Repository.Release.GetAll(_owner, _name);
             foreach (var release in releases.Where(r => !r.Prerelease && !r.Draft))
             {
-                if (!Version.TryParse(release.TagName.TrimStart('v'), out var version))
+                if (!AppVersion.TryParse(release.TagName, out var version))
                 {
                     continue;
                 }
@@ -176,7 +176,7 @@ public class GitHubUpdaterService : IUpdaterService
     /// <param name="version">The released version</param>
     /// <param name="progress">An optional progress reporter</param>
     /// <returns>True if the update was downloaded and ran successfully, else false</returns>
-    public async Task<bool> WindowsUpdate(Version version, IProgress<DownloadProgress>? progress = null)
+    public async Task<bool> WindowsUpdate(AppVersion version, IProgress<DownloadProgress>? progress = null)
     {
         var setupPath = Path.Combine(UserDirectories.Cache, $"{_owner}_{_name}_Setup.exe");
         if (!await DownloadReleaseAssetAsync(version, setupPath, "setup.exe", false, progress))

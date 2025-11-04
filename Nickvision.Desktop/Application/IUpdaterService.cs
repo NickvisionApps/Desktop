@@ -7,7 +7,7 @@ namespace Nickvision.Desktop.Application;
 /// <summary>
 ///     An interface of a service for updating an application.
 /// </summary>
-public interface IUpdaterService
+public interface IUpdaterService : IService
 {
     /// <summary>
     ///     Downloads an asset from a released version.
@@ -18,7 +18,7 @@ public interface IUpdaterService
     /// <param name="exactMatch">Whether the asset name should match exactly to the asset to download</param>
     /// <param name="progress">An optional progress reporter</param>
     /// <returns></returns>
-    Task<bool> DownloadReleaseAssetAsync(Version version,
+    Task<bool> DownloadReleaseAssetAsync(AppVersion version,
         string path,
         string assertName,
         bool exactMatch = true,
@@ -28,13 +28,13 @@ public interface IUpdaterService
     ///     Gets the latest preview version available.
     /// </summary>
     /// <returns>The latest preview version or null if unavailable</returns>
-    Task<PreviewVersion?> GetLatestPreviewVersionAsync();
+    Task<AppVersion?> GetLatestPreviewVersionAsync();
 
     /// <summary>
     ///     Gets the latest stable version available.
     /// </summary>
     /// <returns>The latest stable version or null if unavailable</returns>
-    Task<Version?> GetLatestStableVersionAsync();
+    Task<AppVersion?> GetLatestStableVersionAsync();
 
 #if OS_WINDOWS
     /// <summary>
@@ -43,6 +43,6 @@ public interface IUpdaterService
     /// <param name="version">The released version</param>
     /// <param name="progress">An optional progress reporter</param>
     /// <returns>True if the update was downloaded and ran successfully, else false</returns>
-    Task<bool> WindowsUpdate(Version version, IProgress<DownloadProgress>? progress = null);
+    Task<bool> WindowsUpdate(AppVersion version, IProgress<DownloadProgress>? progress = null);
 #endif
 }
