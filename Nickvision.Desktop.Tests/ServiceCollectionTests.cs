@@ -66,8 +66,8 @@ public class ServiceCollectionTests
     {
         Assert.IsNotNull(_collection);
         var service = new TestService();
-        Assert.IsTrue(_collection.Add<ITestService>(service));
-        Assert.IsFalse(_collection.Add<ITestService>(service));
+        Assert.IsNotNull(_collection.Add<ITestService>(service));
+        Assert.IsNull(_collection.Add<ITestService>(service));
         Assert.IsTrue(_collection.Has<ITestService>());
         Assert.IsFalse(service.Disposed);
     }
@@ -95,7 +95,7 @@ public class ServiceCollectionTests
     {
         Assert.IsNotNull(_collection);
         var service = new TestService();
-        Assert.IsTrue(_collection.Add<ITestService>(service));
+        Assert.IsNotNull(_collection.Add<ITestService>(service));
         Assert.IsFalse(service.Disposed);
         _collection.Dispose();
         _collection = null;

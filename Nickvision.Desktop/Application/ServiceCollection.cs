@@ -42,8 +42,8 @@ public class ServiceCollection : IDisposable
     /// </summary>
     /// <param name="implementation">The object of the service interface</param>
     /// <typeparam name="T">The service interface</typeparam>
-    /// <returns></returns>
-    public bool Add<T>(T implementation) where T : IService => _services.TryAdd(typeof(T), implementation);
+    /// <returns>The object to the service if successfully added, else null</returns>
+    public T? Add<T>(T implementation) where T : IService => _services.TryAdd(typeof(T), implementation) ? implementation : default(T?);
 
     /// <summary>
     ///     Gets a service from the collection.

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Filesystem;
 
@@ -7,6 +8,11 @@ namespace Nickvision.Desktop.Filesystem;
 /// </summary>
 public interface IJsonFileService : IService
 {
+    /// <summary>
+    ///     The event for when json files are saved.
+    /// </summary>
+    event EventHandler<JsonFileSavedEventArgs>? Saved;
+
     /// <summary>
     ///     Loads a json file and deserializes it into an object.
     /// </summary>

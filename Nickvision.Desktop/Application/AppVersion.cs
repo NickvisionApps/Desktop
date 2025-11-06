@@ -24,7 +24,7 @@ public class AppVersion
 
     public Version BaseVersion { get; init; }
     public string PreviewLabel { get; init; }
-    
+
     public bool IsPreview => !string.IsNullOrEmpty(PreviewLabel);
 
     public static bool TryParse(string version, out AppVersion? appVersion)

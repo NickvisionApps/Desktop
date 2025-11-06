@@ -8,7 +8,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <PackageId>Nickvision.Desktop</PackageId>
-        <Version>2025.11.3</Version>
+        <Version>2025.11.4</Version>
         <Company>Nickvision</Company>
         <Authors>Nickvision</Authors>
         <Description>A cross-platform base for Nickvision desktop applications.</Description>
