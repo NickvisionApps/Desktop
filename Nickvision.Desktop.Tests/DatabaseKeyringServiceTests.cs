@@ -18,7 +18,7 @@ public sealed class DatabaseKeyringServiceTests
     public void Case001_Init()
     {
 #if OS_LINUX
-        if (Environment.GetEnvironmentVariable("CI") == "true")
+        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -34,7 +34,7 @@ public sealed class DatabaseKeyringServiceTests
     public void Case002_Check()
     {
 #if OS_LINUX
-        if (Environment.GetEnvironmentVariable("CI") == "true")
+        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -47,7 +47,7 @@ public sealed class DatabaseKeyringServiceTests
     public async Task Case003_Add()
     {
 #if OS_LINUX
-        if (Environment.GetEnvironmentVariable("CI") == "true")
+        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -62,7 +62,7 @@ public sealed class DatabaseKeyringServiceTests
     public async Task Case004_Update()
     {
 #if OS_LINUX
-        if (Environment.GetEnvironmentVariable("CI") == "true")
+        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -82,7 +82,7 @@ public sealed class DatabaseKeyringServiceTests
     public async Task Case005_Remove()
     {
 #if OS_LINUX
-        if (Environment.GetEnvironmentVariable("CI") == "true")
+        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
@@ -99,7 +99,7 @@ public sealed class DatabaseKeyringServiceTests
     public async Task Case006_Cleanup()
     {
 #if OS_LINUX
-        if (Environment.GetEnvironmentVariable("CI") == "true")
+        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
