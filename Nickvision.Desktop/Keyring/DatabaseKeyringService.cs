@@ -71,6 +71,14 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
+    ///     Finalizes a KeyringService.
+    /// </summary>
+    ~DatabaseKeyringService()
+    {
+        Dispose(false);
+    }
+
+    /// <summary>
     ///     Disposes a KeyringService asynchronously.
     /// </summary>
     public async ValueTask DisposeAsync()
@@ -183,14 +191,6 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
         updateCommand.Parameters.AddWithValue("$username", credential.Username);
         updateCommand.Parameters.AddWithValue("$password", credential.Password);
         return await updateCommand.ExecuteNonQueryAsync() > 0;
-    }
-
-    /// <summary>
-    ///     Finalizes a KeyringService.
-    /// </summary>
-    ~DatabaseKeyringService()
-    {
-        Dispose(false);
     }
 
     /// <summary>

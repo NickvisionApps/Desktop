@@ -29,10 +29,7 @@ public class GitHubUpdaterServiceTests
     }
 
     [ClassCleanup]
-    public static void ClassCleanup()
-    {
-        _client?.Dispose();
-    }
+    public static void ClassCleanup() => _client?.Dispose();
 
     [TestMethod]
     public void Case001_Initialize()

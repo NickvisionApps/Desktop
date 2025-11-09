@@ -15,26 +15,19 @@ public class PasswordGenerator
     private static readonly List<char> SpecialChars;
 
     /// <summary>
+    ///     The content type flags to include when generating a password.
+    /// </summary>
+    public PasswordContent ContentFlags { get; set; }
+
+    /// <summary>
     ///     Constructs a static PasswordGenerator.
     /// </summary>
     static PasswordGenerator()
     {
         NumericChars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        UpperChars =
-        [
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
-            'V', 'W', 'X', 'Y', 'Z'
-        ];
-        LowerChars =
-        [
-            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
-            'v', 'w', 'x', 'y', 'z'
-        ];
-        SpecialChars =
-        [
-            '!', '#', '$', '%', '&', '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[',
-            '\\', ']', '^', '_', '`', '{', '|', '}', '~'
-        ];
+        UpperChars = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+        LowerChars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+        SpecialChars = ['!', '#', '$', '%', '&', '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'];
     }
 
     /// <summary>
@@ -45,11 +38,6 @@ public class PasswordGenerator
     {
         ContentFlags = contentFlags;
     }
-
-    /// <summary>
-    ///     The content type flags to include when generating a password.
-    /// </summary>
-    public PasswordContent ContentFlags { get; set; }
 
     /// <summary>
     ///     Generates a random password.

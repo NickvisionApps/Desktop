@@ -7,14 +7,14 @@ namespace Nickvision.Desktop.Tests;
 
 public class Config
 {
+    public bool DarkModeEnabled { get; set; }
+    public WindowGeometry WindowGeometry { get; set; }
+
     public Config()
     {
         DarkModeEnabled = false;
         WindowGeometry = new WindowGeometry();
     }
-
-    public bool DarkModeEnabled { get; set; }
-    public WindowGeometry WindowGeometry { get; set; }
 }
 
 [TestClass]

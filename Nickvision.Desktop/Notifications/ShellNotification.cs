@@ -6,6 +6,11 @@
 public class ShellNotification : AppNotification
 {
     /// <summary>
+    ///     The title of the notification.
+    /// </summary>
+    public string Title { get; init; }
+
+    /// <summary>
     ///     Constructs a ShellNotification.
     /// </summary>
     /// <param name="title">The title of the notification</param>
@@ -15,9 +20,4 @@ public class ShellNotification : AppNotification
     {
         Title = title;
     }
-
-    /// <summary>
-    ///     The title of the notification.
-    /// </summary>
-    public string Title { get; init; }
 }

@@ -4,6 +4,9 @@ namespace Nickvision.Desktop.Application;
 
 public class AppVersion
 {
+    public Version BaseVersion { get; init; }
+    public string PreviewLabel { get; init; }
+
     public AppVersion(string version)
     {
         var dashIndex = version.IndexOf('-');
@@ -21,9 +24,6 @@ public class AppVersion
         BaseVersion = version;
         PreviewLabel = string.Empty;
     }
-
-    public Version BaseVersion { get; init; }
-    public string PreviewLabel { get; init; }
 
     public bool IsPreview => !string.IsNullOrEmpty(PreviewLabel);
 
@@ -83,15 +83,13 @@ public class AppVersion
 
     public static bool operator !=(AppVersion? pv, Version? v) => !(pv == v);
 
-    public override bool Equals(object? obj)
-    {
-        return obj switch
+    public override bool Equals(object? obj) =>
+        obj switch
         {
             AppVersion pv => this == pv,
             Version v => this == v,
             var _ => false
         };
-    }
 
     public override int GetHashCode() => ToString().GetHashCode();
 

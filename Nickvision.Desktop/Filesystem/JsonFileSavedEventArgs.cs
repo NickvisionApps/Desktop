@@ -7,13 +7,6 @@ namespace Nickvision.Desktop.Filesystem;
 /// </summary>
 public class JsonFileSavedEventArgs : EventArgs
 {
-    public JsonFileSavedEventArgs(object data, Type dataType, string name)
-    {
-        Data = data;
-        DataType = dataType;
-        Name = name;
-    }
-
     /// <summary>
     ///     The object that was saved to a json file.
     /// </summary>
@@ -28,4 +21,11 @@ public class JsonFileSavedEventArgs : EventArgs
     ///     The name of the json file (without the .json extension).
     /// </summary>
     public string Name { get; init; }
+
+    public JsonFileSavedEventArgs(object data, Type dataType, string name)
+    {
+        Data = data;
+        DataType = dataType;
+        Name = name;
+    }
 }

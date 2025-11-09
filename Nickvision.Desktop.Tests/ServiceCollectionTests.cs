@@ -17,6 +17,11 @@ internal class TestService : ITestService
         Disposed = false;
     }
 
+    ~TestService()
+    {
+        Dispose(false);
+    }
+
     public bool Disposed { get; private set; }
 
     public void Dispose()
@@ -26,11 +31,6 @@ internal class TestService : ITestService
     }
 
     public string GetData() => "Test Data";
-
-    ~TestService()
-    {
-        Dispose(false);
-    }
 
     private void Dispose(bool disposing)
     {

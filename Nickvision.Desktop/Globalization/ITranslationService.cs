@@ -9,6 +9,10 @@ namespace Nickvision.Desktop.Globalization;
 public interface ITranslationService : IService
 {
     /// <summary>
+    ///     The list of available language codes for translations.
+    /// </summary>
+    IEnumerable<string> AvailableLanguages { get; }
+    /// <summary>
     ///     The language code for translations.
     /// </summary>
     /// <remarks>
@@ -16,11 +20,6 @@ public interface ITranslationService : IService
     ///     to remain untranslated
     /// </remarks>
     string Language { get; set; }
-
-    /// <summary>
-    ///     The list of available language codes for translations.
-    /// </summary>
-    IEnumerable<string> AvailableLanguages { get; }
 
     /// <summary>
     ///     Translates a string.
@@ -92,11 +91,7 @@ public interface ITranslationService : IService
     /// <param name="n">The number of objects</param>
     /// <param name="args">The arguments for the format string</param>
     /// <returns>The translated plural format string if n != 1, else the translated non-plural format string for the context</returns>
-    string _pn(string context,
-        string text,
-        string pluralText,
-        long n,
-        params object[] args);
+    string _pn(string context, string text, string pluralText, long n, params object[] args);
 
     /// <summary>
     ///     Translates a string.
@@ -175,10 +170,5 @@ public interface ITranslationService : IService
     /// <param name="n">The number of objects</param>
     /// <param name="args">The arguments for the format string</param>
     /// <returns>The translated plural format string if n != 1, else the translated non-plural format string for the context</returns>
-    string GetParticularPlural(string context,
-        string text,
-        string pluralText,
-        long n,
-        params object[] args) =>
-        _pn(context, text, pluralText, n, args);
+    string GetParticularPlural(string context, string text, string pluralText, long n, params object[] args) => _pn(context, text, pluralText, n, args);
 }

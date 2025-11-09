@@ -8,16 +8,6 @@ namespace Nickvision.Desktop.Notifications;
 public class AppNotificationSentEventArgs : EventArgs
 {
     /// <summary>
-    ///     Constructs an AppNotificationSentEventArgs.
-    /// </summary>
-    /// <param name="notification">The AppNotification sent</param>
-    public AppNotificationSentEventArgs(AppNotification notification)
-    {
-        Notification = notification;
-        Timestamp = DateTime.Now;
-    }
-
-    /// <summary>
     ///     The AppNotification sent.
     /// </summary>
     public AppNotification Notification { get; init; }
@@ -26,4 +16,14 @@ public class AppNotificationSentEventArgs : EventArgs
     ///     The timestamp of when the notification was sent.
     /// </summary>
     public DateTime Timestamp { get; init; }
+
+    /// <summary>
+    ///     Constructs an AppNotificationSentEventArgs.
+    /// </summary>
+    /// <param name="notification">The AppNotification sent</param>
+    public AppNotificationSentEventArgs(AppNotification notification)
+    {
+        Notification = notification;
+        Timestamp = DateTime.Now;
+    }
 }

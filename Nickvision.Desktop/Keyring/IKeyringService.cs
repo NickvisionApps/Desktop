@@ -9,14 +9,13 @@ namespace Nickvision.Desktop.Keyring;
 public interface IKeyringService : IService
 {
     /// <summary>
-    ///     Whether the keyring is currently saving to disk.
-    /// </summary>
-    bool IsSavingToDisk { get; }
-
-    /// <summary>
     ///     The list of credentials in the keyring.
     /// </summary>
     IEnumerable<Credential> Credentials { get; }
+    /// <summary>
+    ///     Whether the keyring is currently saving to disk.
+    /// </summary>
+    bool IsSavingToDisk { get; }
 
     /// <summary>
     ///     Adds a credential to the keyring.

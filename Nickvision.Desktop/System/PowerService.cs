@@ -303,7 +303,6 @@ public class PowerService : IPowerService
         {
             return;
         }
-
         if (disposing)
         {
 #if OS_MAC || OS_LINUX

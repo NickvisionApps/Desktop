@@ -6,6 +6,31 @@
 public class WindowGeometry
 {
     /// <summary>
+    ///     The height of the window.
+    /// </summary>
+    public int Height { get; set; }
+
+    /// <summary>
+    ///     Whether the window is maximized.
+    /// </summary>
+    public bool IsMaximized { get; set; }
+
+    /// <summary>
+    ///     The width of the window.
+    /// </summary>
+    public int Width { get; set; }
+
+    /// <summary>
+    ///     The x position of the window.
+    /// </summary>
+    public int X { get; set; }
+
+    /// <summary>
+    ///     The y position of the window.
+    /// </summary>
+    public int Y { get; set; }
+
+    /// <summary>
     ///     Constructs a WindowGeometry.
     /// </summary>
     public WindowGeometry()
@@ -40,11 +65,7 @@ public class WindowGeometry
     /// <param name="isMaximized">Whether the window is maximized</param>
     /// <param name="x">The x position of the window</param>
     /// <param name="y">The y position of the window</param>
-    public WindowGeometry(int width,
-        int height,
-        bool isMaximized,
-        int x,
-        int y)
+    public WindowGeometry(int width, int height, bool isMaximized, int x, int y)
     {
         Width = width;
         Height = height;
@@ -52,29 +73,4 @@ public class WindowGeometry
         X = x;
         Y = y;
     }
-
-    /// <summary>
-    ///     The width of the window.
-    /// </summary>
-    public int Width { get; set; }
-
-    /// <summary>
-    ///     The height of the window.
-    /// </summary>
-    public int Height { get; set; }
-
-    /// <summary>
-    ///     Whether the window is maximized.
-    /// </summary>
-    public bool IsMaximized { get; set; }
-
-    /// <summary>
-    ///     The x position of the window.
-    /// </summary>
-    public int X { get; set; }
-
-    /// <summary>
-    ///     The y position of the window.
-    /// </summary>
-    public int Y { get; set; }
 }

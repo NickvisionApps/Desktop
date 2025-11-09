@@ -21,20 +21,20 @@ public class ServiceCollection : IDisposable
     }
 
     /// <summary>
+    ///     Finalizes a ServiceCollection.
+    /// </summary>
+    ~ServiceCollection()
+    {
+        Dispose(false);
+    }
+
+    /// <summary>
     ///     Disposes a ServiceCollection and its services.
     /// </summary>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    ///     Finalizes a ServiceCollection.
-    /// </summary>
-    ~ServiceCollection()
-    {
-        Dispose(false);
     }
 
     /// <summary>

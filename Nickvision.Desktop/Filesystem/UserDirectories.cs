@@ -365,8 +365,7 @@ public static class UserDirectories
         }
         foreach (var line in File.ReadLines(dirsPath))
         {
-            if (string.IsNullOrEmpty(line) ||
-                line.StartsWith("#"))
+            if (string.IsNullOrEmpty(line) || line.StartsWith("#"))
             {
                 continue;
             }

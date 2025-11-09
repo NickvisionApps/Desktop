@@ -6,6 +6,21 @@
 public class DownloadProgress
 {
     /// <summary>
+    ///     The number of bytes received already.
+    /// </summary>
+    public long BytesReceived { get; init; }
+
+    /// <summary>
+    ///     Whether the download is marked as completed.
+    /// </summary>
+    public bool Completed { get; init; }
+
+    /// <summary>
+    ///     The total number of bytes to be received.
+    /// </summary>
+    public long TotalBytesToReceive { get; init; }
+
+    /// <summary>
     ///     Constructs a DownloadProgress.
     /// </summary>
     /// <param name="totalBytesToReceive">The total number of bytes to be received</param>
@@ -17,21 +32,6 @@ public class DownloadProgress
         BytesReceived = bytesReceived;
         Completed = completed;
     }
-
-    /// <summary>
-    ///     The total number of bytes to be received.
-    /// </summary>
-    public long TotalBytesToReceive { get; init; }
-
-    /// <summary>
-    ///     The number of bytes received already.
-    /// </summary>
-    public long BytesReceived { get; init; }
-
-    /// <summary>
-    ///     Whether the download is marked as completed.
-    /// </summary>
-    public bool Completed { get; init; }
 
     /// <summary>
     ///     The percentage of the download completed.

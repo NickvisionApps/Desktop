@@ -1,7 +1,6 @@
 ﻿using Nickvision.Desktop.System;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
-using Environment = System.Environment;
 
 namespace Nickvision.Desktop.Tests;
 
@@ -162,15 +161,15 @@ public sealed class SystemSecretServiceTests
 #endif
         Assert.IsNotNull(_secretService);
         foreach (var cred in new[]
-                 {
-                     "Nickvision.Desktop.Test",
-                     "Nickvision.Desktop.Test2",
-                     "Nickvision.Desktop.Test3",
-                     "Nickvision.Desktop.Test4",
-                     "Nickvision.Desktop.Test5",
-                     "Nickvision.Desktop.Test6",
-                     "Nickvision.Desktop.Test7"
-                 })
+        {
+            "Nickvision.Desktop.Test",
+            "Nickvision.Desktop.Test2",
+            "Nickvision.Desktop.Test3",
+            "Nickvision.Desktop.Test4",
+            "Nickvision.Desktop.Test5",
+            "Nickvision.Desktop.Test6",
+            "Nickvision.Desktop.Test7"
+        })
         {
             Assert.IsTrue(await _secretService.DeleteAsync(cred));
         }

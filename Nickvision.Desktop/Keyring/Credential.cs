@@ -9,6 +9,26 @@ namespace Nickvision.Desktop.Keyring;
 public class Credential
 {
     /// <summary>
+    ///     The friendly name of the credential.
+    /// </summary>
+    public string Name { get; set; }
+
+    /// <summary>
+    ///     The password of the credential.
+    /// </summary>
+    public string Password { get; set; }
+
+    /// <summary>
+    ///     The url of the credential.
+    /// </summary>
+    public Uri Url { get; set; }
+
+    /// <summary>
+    ///     The username of the credential.
+    /// </summary>
+    public string Username { get; set; }
+
+    /// <summary>
     ///     Constructs a credential.
     /// </summary>
     /// <param name="name">The friendly name of the credential</param>
@@ -22,24 +42,4 @@ public class Credential
         Password = password;
         Url = UriExtensions.GetEmpty();
     }
-
-    /// <summary>
-    ///     The friendly name of the credential.
-    /// </summary>
-    public string Name { get; set; }
-
-    /// <summary>
-    ///     The username of the credential.
-    /// </summary>
-    public string Username { get; set; }
-
-    /// <summary>
-    ///     The password of the credential.
-    /// </summary>
-    public string Password { get; set; }
-
-    /// <summary>
-    ///     The url of the credential.
-    /// </summary>
-    public Uri Url { get; set; }
 }

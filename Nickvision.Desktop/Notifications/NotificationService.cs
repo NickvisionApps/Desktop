@@ -42,12 +42,7 @@ public class NotificationService : IDisposable, INotificationService
     public static partial nint notify_notification_new([MarshalAs(UnmanagedType.LPStr)] string summary, [MarshalAs(UnmanagedType.LPStr)] string body, [MarshalAs(UnmanagedType.LPStr)] string icon);
 
     [LibraryImport("libnotify.so.4")]
-    private static unsafe partial void notify_notification_add_action(nint notification,
-        [MarshalAs(UnmanagedType.LPStr)] string action,
-        [MarshalAs(UnmanagedType.LPStr)] string label,
-        NotifyActionCallback callback,
-        nint user_data,
-        GDestroyNotify free_func);
+    private static unsafe partial void notify_notification_add_action(nint notification, [MarshalAs(UnmanagedType.LPStr)] string action, [MarshalAs(UnmanagedType.LPStr)] string label, NotifyActionCallback callback, nint user_data, GDestroyNotify free_func);
 
     [LibraryImport("libnotify.so.4")]
     private static partial void notify_notification_set_urgency(nint notification, uint urgency);
@@ -121,10 +116,7 @@ public class NotificationService : IDisposable, INotificationService
     ///     Sends an app notification.
     /// </summary>
     /// <param name="notification">The AppNotification to send</param>
-    public void Send(AppNotification notification)
-    {
-        AppNotificationSent?.Invoke(this, new AppNotificationSentEventArgs(notification));
-    }
+    public void Send(AppNotification notification) => AppNotificationSent?.Invoke(this, new AppNotificationSentEventArgs(notification));
 
     /// <summary>
     ///     Sends a shell notification.
@@ -137,8 +129,7 @@ public class NotificationService : IDisposable, INotificationService
         var builder = new ToastContentBuilder();
         builder.AddText(notification.Title);
         builder.AddText(notification.Message);
-        if (notification.Action == "open" &&
-            !string.IsNullOrEmpty(notification.ActionParam))
+        if (notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam))
         {
             builder.AddButton(_openTranslatedText, ToastActivationType.Protocol, $"file://{notification.ActionParam}");
         }
@@ -161,8 +152,7 @@ public class NotificationService : IDisposable, INotificationService
         return true;
 #elif OS_LINUX
         var notify = notify_notification_new(notification.Title, notification.Message, _appInfo.Id);
-        if (notification.Action == "open" &&
-            !string.IsNullOrEmpty(notification.ActionParam))
+        if (notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam))
         {
             notify_notification_add_action(notify, "open", _openTranslatedText, _openActionCallback, Marshal.StringToHGlobalAnsi(notification.ActionParam), _destroyCallback);
         }

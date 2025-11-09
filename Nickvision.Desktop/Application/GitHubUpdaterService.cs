@@ -30,8 +30,7 @@ public class GitHubUpdaterService : IUpdaterService
     /// <exception cref="ArgumentException">Thrown if the AppInfo.SourceRepository is missing or ill-formated</exception>
     public GitHubUpdaterService(AppInfo appInfo, HttpClient httpClient)
     {
-        if (appInfo.SourceRepository is null ||
-            appInfo.SourceRepository.IsEmpty())
+        if (appInfo.SourceRepository is null || appInfo.SourceRepository.IsEmpty())
         {
             throw new ArgumentException("AppInfo.SourceRepository cannot be null");
         }
@@ -58,11 +57,7 @@ public class GitHubUpdaterService : IUpdaterService
     /// <param name="exactMatch">Whether the asset name should match exactly to the asset to download</param>
     /// <param name="progress">An optional progress reporter</param>
     /// <returns></returns>
-    public async Task<bool> DownloadReleaseAssetAsync(AppVersion version,
-        string path,
-        string assertName,
-        bool exactMatch = true,
-        IProgress<DownloadProgress>? progress = null)
+    public async Task<bool> DownloadReleaseAssetAsync(AppVersion version, string path, string assertName, bool exactMatch = true, IProgress<DownloadProgress>? progress = null)
     {
         try
         {
@@ -79,8 +74,7 @@ public class GitHubUpdaterService : IUpdaterService
                 }
                 foreach (var asset in release.Assets)
                 {
-                    if ((!exactMatch || asset.Name.ToLower() != assertName.ToLower()) &&
-                        (exactMatch || !asset.Name.ToLower().Contains(assertName.ToLower())))
+                    if ((!exactMatch || asset.Name.ToLower() != assertName.ToLower()) && (exactMatch || !asset.Name.ToLower().Contains(assertName.ToLower())))
                     {
                         continue;
                     }

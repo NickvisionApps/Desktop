@@ -18,11 +18,7 @@ public interface IUpdaterService : IService
     /// <param name="exactMatch">Whether the asset name should match exactly to the asset to download</param>
     /// <param name="progress">An optional progress reporter</param>
     /// <returns></returns>
-    Task<bool> DownloadReleaseAssetAsync(AppVersion version,
-        string path,
-        string assertName,
-        bool exactMatch = true,
-        IProgress<DownloadProgress>? progress = null);
+    Task<bool> DownloadReleaseAssetAsync(AppVersion version, string path, string assertName, bool exactMatch = true, IProgress<DownloadProgress>? progress = null);
 
     /// <summary>
     ///     Gets the latest preview version available.

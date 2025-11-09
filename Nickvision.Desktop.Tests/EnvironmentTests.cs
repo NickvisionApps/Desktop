@@ -8,16 +8,10 @@ namespace Nickvision.Desktop.Tests;
 public sealed class EnvironmentTests
 {
     [TestMethod]
-    public void Case001_Deployment()
-    {
-        Assert.AreEqual(DeploymentMode.Local, Environment.DeploymentMode);
-    }
+    public void Case001_Deployment() => Assert.AreEqual(DeploymentMode.Local, Environment.DeploymentMode);
 
     [TestMethod]
-    public void Case002_PathVariable()
-    {
-        Assert.IsTrue(Environment.PathVariable.Any());
-    }
+    public void Case002_PathVariable() => Assert.IsTrue(Environment.PathVariable.Any());
 
     [TestMethod]
     public void Case003_GlobalDependency()
