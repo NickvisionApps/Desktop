@@ -40,16 +40,16 @@ public class SystemSecretService : ISecretService
 #pragma warning disable CA1416
         var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
         var res = AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
-            {
-                AttributeCount = 0,
-                Attributes = nint.Zero,
-                Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
-                Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
-                TargetName = new StrPtrAuto(secret.Name),
-                UserName = new StrPtrAuto("default"),
-                CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
-                CredentialBlob = stringPtr
-            },
+        {
+            AttributeCount = 0,
+            Attributes = nint.Zero,
+            Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
+            Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
+            TargetName = new StrPtrAuto(secret.Name),
+            UserName = new StrPtrAuto("default"),
+            CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
+            CredentialBlob = stringPtr
+        },
             0);
         Marshal.FreeHGlobal(stringPtr);
         return res;
@@ -114,16 +114,16 @@ public class SystemSecretService : ISecretService
 #pragma warning disable CA1416
         var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
         var res = await Task.Run(() => AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
-            {
-                AttributeCount = 0,
-                Attributes = nint.Zero,
-                Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
-                Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
-                TargetName = new StrPtrAuto(secret.Name),
-                UserName = new StrPtrAuto("default"),
-                CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
-                CredentialBlob = stringPtr
-            },
+        {
+            AttributeCount = 0,
+            Attributes = nint.Zero,
+            Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
+            Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
+            TargetName = new StrPtrAuto(secret.Name),
+            UserName = new StrPtrAuto("default"),
+            CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
+            CredentialBlob = stringPtr
+        },
             0));
         Marshal.FreeHGlobal(stringPtr);
         return res;
@@ -464,16 +464,16 @@ public class SystemSecretService : ISecretService
         }
         var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
         var res = AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
-            {
-                AttributeCount = 0,
-                Attributes = nint.Zero,
-                Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
-                Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
-                TargetName = new StrPtrAuto(secret.Name),
-                UserName = new StrPtrAuto("default"),
-                CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
-                CredentialBlob = stringPtr
-            },
+        {
+            AttributeCount = 0,
+            Attributes = nint.Zero,
+            Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
+            Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
+            TargetName = new StrPtrAuto(secret.Name),
+            UserName = new StrPtrAuto("default"),
+            CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
+            CredentialBlob = stringPtr
+        },
             0);
         Marshal.FreeHGlobal(stringPtr);
         return res;
@@ -538,16 +538,16 @@ public class SystemSecretService : ISecretService
         }
         var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
         var res = await Task.Run(() => AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
-            {
-                AttributeCount = 0,
-                Attributes = nint.Zero,
-                Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
-                Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
-                TargetName = new StrPtrAuto(secret.Name),
-                UserName = new StrPtrAuto("default"),
-                CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
-                CredentialBlob = stringPtr
-            },
+        {
+            AttributeCount = 0,
+            Attributes = nint.Zero,
+            Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
+            Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
+            TargetName = new StrPtrAuto(secret.Name),
+            UserName = new StrPtrAuto("default"),
+            CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
+            CredentialBlob = stringPtr
+        },
             0));
         Marshal.FreeHGlobal(stringPtr);
         return res;

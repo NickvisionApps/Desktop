@@ -143,8 +143,7 @@ public static class Environment
     /// <param name="info">The AppInfo object for the app</param>
     /// <param name="extra">Any extra information to include in the debug information string</param>
     /// <returns>The debug information string</returns>
-    public static string GetDebugInformation(AppInfo info, string extra = "") =>
-        $"""
+    public static string GetDebugInformation(AppInfo info, string extra = "") => $"""
          App: {info.Name}
          Version: {info.Version}
 

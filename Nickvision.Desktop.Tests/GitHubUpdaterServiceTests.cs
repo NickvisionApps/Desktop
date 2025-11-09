@@ -40,9 +40,9 @@ public class GitHubUpdaterServiceTests
         }
         Assert.IsNotNull(_client);
         _updaterService = new GitHubUpdaterService(new AppInfo("org.nickvision.tubeconverter", "Nickvision Parabolic", "Parabolic")
-            {
-                SourceRepository = new Uri("https://github.com/NickvisionApps/Parabolic")
-            },
+        {
+            SourceRepository = new Uri("https://github.com/NickvisionApps/Parabolic")
+        },
             _client);
         Assert.IsNotNull(_updaterService);
     }

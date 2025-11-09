@@ -83,13 +83,12 @@ public class AppVersion
 
     public static bool operator !=(AppVersion? pv, Version? v) => !(pv == v);
 
-    public override bool Equals(object? obj) =>
-        obj switch
-        {
-            AppVersion pv => this == pv,
-            Version v => this == v,
-            var _ => false
-        };
+    public override bool Equals(object? obj) => obj switch
+    {
+        AppVersion pv => this == pv,
+        Version v => this == v,
+        var _ => false
+    };
 
     public override int GetHashCode() => ToString().GetHashCode();
 

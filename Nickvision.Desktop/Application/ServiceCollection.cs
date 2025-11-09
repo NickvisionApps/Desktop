@@ -43,14 +43,14 @@ public class ServiceCollection : IDisposable
     /// <param name="implementation">The object of the service interface</param>
     /// <typeparam name="T">The service interface</typeparam>
     /// <returns>The object to the service if successfully added, else null</returns>
-    public T? Add<T>(T implementation) where T : IService => _services.TryAdd(typeof(T), implementation) ? implementation : default(T?);
+    public T? Add<T>(T implementation) where T : IService => _services.TryAdd(typeof(T), implementation) ? implementation : default;
 
     /// <summary>
     ///     Gets a service from the collection.
     /// </summary>
     /// <typeparam name="T">The service interface</typeparam>
     /// <returns>The object matching the service interface if found, else null</returns>
-    public T? Get<T>() where T : IService => _services.TryGetValue(typeof(T), out var service) ? (T)service : default(T?);
+    public T? Get<T>() where T : IService => _services.TryGetValue(typeof(T), out var service) ? (T)service : default;
 
     /// <summary>
     ///     Gets whether a service from the collection with the interface type exists.
