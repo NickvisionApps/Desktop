@@ -9,7 +9,7 @@
 `Nickvision.Desktop` provides Nickvision apps with a common set of cross-platform APIs and services for managing system and desktop app functionality such as secrets, translations, app updates, and more.
 
 ## Dependencies
-- .NET 9.0
+- .NET 8/9/10
 
 ## Documentation
 Documentation can be generated using [DocFX](https://dotnet.github.io/docfx/).
