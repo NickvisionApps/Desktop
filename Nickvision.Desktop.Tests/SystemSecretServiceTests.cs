@@ -51,7 +51,7 @@ public sealed class SystemSecretServiceTests
 #endif
         Assert.IsNotNull(_secretService);
         var service = await _secretService.CreateAsync("Nickvision.Desktop.Test2");
-        Assert.IsFalse(service is null);
+        Assert.IsNotNull(service);
         Assert.IsFalse(service.Empty);
     }
 
@@ -66,7 +66,7 @@ public sealed class SystemSecretServiceTests
 #endif
         Assert.IsNotNull(_secretService);
         var service = _secretService.Create("Nickvision.Desktop.Test3");
-        Assert.IsFalse(service is null);
+        Assert.IsNotNull(service);
         Assert.IsFalse(service.Empty);
     }
 
@@ -82,7 +82,7 @@ public sealed class SystemSecretServiceTests
         Assert.IsNotNull(_secretService);
         Assert.IsTrue(await _secretService.AddAsync(new Secret("Nickvision.Desktop.Test4", "abc")));
         var secret = _secretService.Get("Nickvision.Desktop.Test4");
-        Assert.IsFalse(secret is null);
+        Assert.IsNotNull(secret);
         Assert.IsFalse(secret.Empty);
         Assert.AreEqual("abc", secret.Value);
     }
@@ -98,10 +98,10 @@ public sealed class SystemSecretServiceTests
 #endif
         Assert.IsNotNull(_secretService);
         var secret = await _secretService.CreateAsync("Nickvision.Desktop.Test5");
-        Assert.IsFalse(secret is null);
+        Assert.IsNotNull(secret);
         Assert.IsFalse(secret.Empty);
         var secretFromGet = await _secretService.GetAsync("Nickvision.Desktop.Test5");
-        Assert.IsFalse(secretFromGet is null);
+        Assert.IsNotNull(secretFromGet);
         Assert.IsFalse(secretFromGet.Empty);
         Assert.AreEqual(secret.Value, secretFromGet.Value);
     }
@@ -118,12 +118,12 @@ public sealed class SystemSecretServiceTests
         Assert.IsNotNull(_secretService);
         Assert.IsTrue(_secretService.Add(new Secret("Nickvision.Desktop.Test6", "abc123")));
         var secret = await _secretService.GetAsync("Nickvision.Desktop.Test6");
-        Assert.IsFalse(secret is null);
+        Assert.IsNotNull(secret);
         Assert.IsFalse(secret.Empty);
         Assert.AreEqual("abc123", secret.Value);
         Assert.IsTrue(await _secretService.UpdateAsync(new Secret("Nickvision.Desktop.Test6", "abc!")));
         secret = _secretService.Get("Nickvision.Desktop.Test6");
-        Assert.IsFalse(secret is null);
+        Assert.IsNotNull(secret);
         Assert.IsFalse(secret.Empty);
         Assert.AreEqual("abc!", secret.Value);
     }
@@ -140,12 +140,12 @@ public sealed class SystemSecretServiceTests
         Assert.IsNotNull(_secretService);
         Assert.IsTrue(await _secretService.AddAsync(new Secret("Nickvision.Desktop.Test7", "abc123")));
         var secret = _secretService.Get("Nickvision.Desktop.Test7");
-        Assert.IsFalse(secret is null);
+        Assert.IsNotNull(secret);
         Assert.IsFalse(secret.Empty);
         Assert.AreEqual("abc123", secret.Value);
         Assert.IsTrue(_secretService.Update(new Secret("Nickvision.Desktop.Test7", "abc!")));
         secret = await _secretService.GetAsync("Nickvision.Desktop.Test7");
-        Assert.IsFalse(secret is null);
+        Assert.IsNotNull(secret);
         Assert.IsFalse(secret.Empty);
         Assert.AreEqual("abc!", secret.Value);
     }

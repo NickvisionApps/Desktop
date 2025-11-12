@@ -12,7 +12,7 @@ public sealed class PasswordGeneratorTests
         var generator = new PasswordGenerator();
         var password = generator.Next();
         Console.WriteLine(password);
-        Assert.IsTrue(password.Length == 16);
+        Assert.AreEqual(16, password.Length);
         foreach (var c in password)
         {
             Assert.IsTrue(char.IsDigit(c) || char.IsLower(c) || char.IsUpper(c) || char.IsPunctuation(c) || char.IsSymbol(c) || char.IsWhiteSpace(c));
@@ -25,7 +25,7 @@ public sealed class PasswordGeneratorTests
         var generator = new PasswordGenerator(PasswordContent.Numeric);
         var password = generator.Next(23);
         Console.WriteLine(password);
-        Assert.IsTrue(password.Length == 23);
+        Assert.AreEqual(23, password.Length);
         foreach (var c in password)
         {
             Assert.IsTrue(char.IsDigit(c));
@@ -40,7 +40,7 @@ public sealed class PasswordGeneratorTests
         var generator = new PasswordGenerator(PasswordContent.Numeric | PasswordContent.Lowercase);
         var password = generator.Next(64);
         Console.WriteLine(password);
-        Assert.IsTrue(password.Length == 64);
+        Assert.AreEqual(64, password.Length);
         foreach (var c in password)
         {
             Assert.IsTrue(char.IsDigit(c) || char.IsLower(c));
@@ -55,7 +55,7 @@ public sealed class PasswordGeneratorTests
         var generator = new PasswordGenerator(PasswordContent.AllNoSpace);
         var password = generator.Next(64);
         Console.WriteLine(password);
-        Assert.IsTrue(password.Length == 64);
+        Assert.AreEqual(64, password.Length);
         foreach (var c in password)
         {
             Assert.IsTrue(char.IsDigit(c) || char.IsLower(c) || char.IsUpper(c) || char.IsPunctuation(c) || char.IsSymbol(c));
