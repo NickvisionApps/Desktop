@@ -11,6 +11,7 @@ permissions:
   contents: read
 env:
   TEST_PROJECT_NAME: Nickvision.Desktop.Tests
+  WINUI_PROJECT_NAME: Nickvision.Desktop.WinUI
   CI: true
 jobs:
   build:
@@ -38,3 +39,28 @@ jobs:
         run: dotnet build ${{ env.TEST_PROJECT_NAME }} -c Release --no-restore
       - name: "Test"
         run: dotnet test ${{ env.TEST_PROJECT_NAME }} -c Release --no-build
+  build-winui:
+    name: "Build WinUI on Windows"
+    strategy:
+      matrix:
+        variant:
+          - arch: x64
+            runner: windows-latest
+          - arch: arm64
+            runner: windows-11-arm
+    runs-on: ${{ matrix.variant.runner }}
+    steps:
+      - name: "Checkout"  
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - name: "Setup .NET"
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: "Restore"
+        run: dotnet restore ${{ env.WINUI_PROJECT_NAME }}
+      - name: "Build"
+        run: dotnet build ${{ env.WINUI_PROJECT_NAME }} -c Release --no-restore
+      - name: "Test"
+        run: dotnet test ${{ env.WINUI_PROJECT_NAME }} -c Release --no-build
