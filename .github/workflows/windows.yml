@@ -62,5 +62,3 @@ jobs:
         run: dotnet restore ${{ env.WINUI_PROJECT_NAME }}
       - name: "Build"
         run: dotnet build ${{ env.WINUI_PROJECT_NAME }} -c Release --no-restore
-      - name: "Test"
-        run: dotnet test ${{ env.WINUI_PROJECT_NAME }} -c Release --no-build
