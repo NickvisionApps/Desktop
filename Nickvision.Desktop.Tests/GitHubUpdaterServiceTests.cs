@@ -88,9 +88,23 @@ public class GitHubUpdaterServiceTests
         Assert.IsTrue(preview < stable);
     }
 
+    [TestMethod]
+    public async Task Case005_Ytdlp()
+    {
+        if (Environment.GetEnvironmentVariable("CI") == "true")
+        {
+            Assert.Inconclusive("Dialogs are not supported in CI environments");
+        }
+        Assert.IsNotNull(_client);
+        var updateService = new GitHubUpdaterService("yt-dlp", "yt-dlp", _client);
+        var stable = await updateService.GetLatestStableVersionAsync();
+        Assert.IsNotNull(stable);
+        Assert.IsTrue(stable >= new AppVersion("2025.11.12"));
+    }
+
 #if OS_WINDOWS
     [TestMethod]
-    public async Task Check005_WindowsUpdate()
+    public async Task Check006_WindowsUpdate()
     {
         if (Environment.GetEnvironmentVariable("CI") == "true")
         {

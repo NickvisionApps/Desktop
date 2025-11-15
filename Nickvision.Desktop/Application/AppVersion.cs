@@ -2,7 +2,7 @@
 
 namespace Nickvision.Desktop.Application;
 
-public class AppVersion
+public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
 {
     public Version BaseVersion { get; init; }
     public string PreviewLabel { get; init; }
@@ -56,6 +56,8 @@ public class AppVersion
 
     public static bool operator <(AppVersion? pv, Version? v) => pv is null ? v is not null : pv.BaseVersion <= v;
 
+    public static bool operator <=(AppVersion? pv1, AppVersion? pv2) => pv1 is null ? pv2 is null : pv1 < pv2 || pv1 == pv2;
+
     public static bool operator >(AppVersion? pv1, AppVersion? pv2)
     {
         if (pv1 is null)
@@ -75,6 +77,8 @@ public class AppVersion
 
     public static bool operator >(AppVersion? pv, Version? v) => pv is null ? v is null : pv.BaseVersion > v;
 
+    public static bool operator >=(AppVersion? pv1, AppVersion? pv2) => pv1 is null ? pv2 is null : pv1 > pv2 || pv1 == pv2;
+
     public static bool operator ==(AppVersion? pv1, AppVersion? pv2) => pv1 is null ? pv2 is null : pv1.BaseVersion == pv2?.BaseVersion && pv1.PreviewLabel == pv2?.PreviewLabel;
 
     public static bool operator ==(AppVersion? pv, Version? v) => pv is null ? v is null : pv.BaseVersion == v && string.IsNullOrEmpty(pv.PreviewLabel);
@@ -82,6 +86,21 @@ public class AppVersion
     public static bool operator !=(AppVersion? pv1, AppVersion? pv2) => !(pv1 == pv2);
 
     public static bool operator !=(AppVersion? pv, Version? v) => !(pv == v);
+
+    public int CompareTo(AppVersion? other)
+    {
+        if (this < other)
+        {
+            return -1;
+        }
+        else if (this > other)
+        {
+            return 1;
+        }
+        return 0;
+    }
+
+    public bool Equals(AppVersion? other) => this == other;
 
     public override bool Equals(object? obj) => obj switch
     {

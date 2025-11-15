@@ -32,7 +32,7 @@ public class GitHubUpdaterService : IUpdaterService
     {
         if (appInfo.SourceRepository is null || appInfo.SourceRepository.IsEmpty())
         {
-            throw new ArgumentException("AppInfo.SourceRepository cannot be null");
+            throw new ArgumentException("AppInfo.SourceRepository cannot be null or empty");
         }
         _httpClient = httpClient;
         _githubClient = new GitHubClient(new ProductHeaderValue("Nickvision.Desktop"));
@@ -46,6 +46,25 @@ public class GitHubUpdaterService : IUpdaterService
         {
             throw new ArgumentException("AppInfo.SourceRepository is ill-formated", e);
         }
+    }
+
+    /// <summary>
+    ///     Constructs an UpdaterService.
+    /// </summary>
+    /// <param name="owner">The repository owner</param>
+    /// <param name="name">The repository name</param>
+    /// <param name="httpClient">The HttpClient for the app</param>
+    /// <exception cref="ArgumentException">Thrown if the Owner and/or Name are empty</exception>
+    public GitHubUpdaterService(string owner, string name, HttpClient httpClient)
+    {
+        if (string.IsNullOrEmpty(owner) || string.IsNullOrEmpty(name))
+        {
+            throw new ArgumentException("Owner and Name cannot be null or empty");
+        }
+        _owner = owner;
+        _name = name;
+        _httpClient = httpClient;
+        _githubClient = new GitHubClient(new ProductHeaderValue("Nickvision.Desktop"));
     }
 
     /// <summary>
