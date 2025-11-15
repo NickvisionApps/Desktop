@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+  <PropertyGroup>
+    <TargetFrameworks>net8.0-windows10.0.19041.0;net9.0-windows10.0.19041.0;net10.0-windows10.0.19041.0</TargetFrameworks>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Nickvision.Desktop.WinUI</RootNamespace>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <WinUISDKReferences>false</WinUISDKReferences>
+    <PackageId>Nickvision.Desktop.WinUI</PackageId>
+    <Version>2025.11.0</Version>
+    <Company>Nickvision</Company>
+    <Authors>Nickvision</Authors>
+    <Description>A set of controls and helpers for WinUI based Nickvision apps.</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>(c) Nickvision 2021-2025</Copyright>
+    <PackageProjectUrl>https://nickvision.org</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/NickvisionApps/Desktop</RepositoryUrl>
+    <Title>Nickvision.Desktop</Title>
+    <PackageIcon>icon.png</PackageIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.6901" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\resources\icon.png">
+      <Pack>True</Pack>
+      <PackagePath />
+      <Link>icon.png</Link>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Controls\StatusPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Controls\ViewStack.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+  </ItemGroup>
+  
+</Project>
