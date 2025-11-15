@@ -2,7 +2,8 @@ on:
   push:
     tags:
     - "[0-9]+.[0-9]+.[0-9]+"
-name: Nuget
+  workflow_dispatch:
+name: Nuget (Desktop)
 jobs:
   release:
     name: "Release on Nuget"
@@ -15,7 +16,7 @@ jobs:
         with:
           dotnet-version: '10.0.x'
       - name: "Restore"
-        run: dotnet restore
+        run: dotnet restore Nickvision.Desktop
       - name: "Build"
         run: dotnet build Nickvision.Desktop -c Release --no-restore
       - name: "Pack"

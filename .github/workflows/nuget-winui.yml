@@ -2,7 +2,8 @@ on:
   push:
     tags:
     - "[0-9]+.[0-9]+.[0-9]+-winui"
-name: Nuget
+  workflow_dispatch:
+name: Nuget (WinUI)
 jobs:
   release:
     name: "Release on Nuget"
@@ -15,7 +16,7 @@ jobs:
         with:
           dotnet-version: '10.0.x'
       - name: "Restore"
-        run: dotnet restore
+        run: dotnet restore Nickvision.Desktop.WinUI
       - name: "Build"
         run: dotnet build Nickvision.Desktop.WinUI -c Release --no-restore
       - name: "Pack"
