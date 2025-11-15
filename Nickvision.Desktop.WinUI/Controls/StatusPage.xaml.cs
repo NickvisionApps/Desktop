@@ -7,12 +7,12 @@ namespace Nickvision.Desktop.WinUI.Controls;
 
 public sealed partial class StatusPage : UserControl, INotifyPropertyChanged
 {
-    public static readonly DependencyProperty GlyphProperty = DependencyProperty.Register("Glyph", typeof(string), typeof(StatusPage), new PropertyMetadata(string.Empty));
-    public static readonly DependencyProperty ImageProperty = DependencyProperty.Register("Image", typeof(ImageSource), typeof(StatusPage), new PropertyMetadata(null));
-    public static readonly DependencyProperty TitleProperty = DependencyProperty.Register("Title", typeof(string), typeof(StatusPage), new PropertyMetadata(string.Empty));
-    public static readonly DependencyProperty DescriptionProperty = DependencyProperty.Register("Description", typeof(string), typeof(StatusPage), new PropertyMetadata(string.Empty));
-    public static readonly DependencyProperty ChildProperty = DependencyProperty.Register("Child", typeof(UIElement), typeof(StatusPage), new PropertyMetadata(null));
-    public static readonly DependencyProperty IsCompactProperty = DependencyProperty.Register("IsCompact", typeof(bool), typeof(StatusPage), new PropertyMetadata(false));
+    public static readonly DependencyProperty GlyphProperty = DependencyProperty.Register(nameof(Glyph), typeof(string), typeof(StatusPage), new PropertyMetadata(string.Empty));
+    public static readonly DependencyProperty ImageProperty = DependencyProperty.Register(nameof(Image), typeof(ImageSource), typeof(StatusPage), new PropertyMetadata(null));
+    public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(nameof(Title), typeof(string), typeof(StatusPage), new PropertyMetadata(string.Empty));
+    public static readonly DependencyProperty DescriptionProperty = DependencyProperty.Register(nameof(Description), typeof(string), typeof(StatusPage), new PropertyMetadata(string.Empty));
+    public static readonly DependencyProperty ChildProperty = DependencyProperty.Register(nameof(Child), typeof(UIElement), typeof(StatusPage), new PropertyMetadata(null));
+    public static readonly DependencyProperty IsCompactProperty = DependencyProperty.Register(nameof(IsCompact), typeof(bool), typeof(StatusPage), new PropertyMetadata(false));
 
     public StatusPage()
     {

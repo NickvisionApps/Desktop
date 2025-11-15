@@ -6,8 +6,8 @@ namespace Nickvision.Desktop.WinUI.Controls;
 
 public sealed partial class ViewStack : UserControl
 {
-    public static readonly DependencyProperty PagesProperty = DependencyProperty.Register("Pages", typeof(ObservableCollection<UIElement>), typeof(ViewStack), new PropertyMetadata(new ObservableCollection<UIElement>()));
-    public static readonly DependencyProperty SelectedIndexProperty = DependencyProperty.Register("SelectedIndex", typeof(int), typeof(ViewStack), new PropertyMetadata(0));
+    public static readonly DependencyProperty PagesProperty = DependencyProperty.Register(nameof(Pages), typeof(ObservableCollection<UIElement>), typeof(ViewStack), new PropertyMetadata(new ObservableCollection<UIElement>()));
+    public static readonly DependencyProperty SelectedIndexProperty = DependencyProperty.Register(nameof(SelectedIndex), typeof(int), typeof(ViewStack), new PropertyMetadata(0));
 
     public ViewStack()
     {
@@ -23,7 +23,7 @@ public sealed partial class ViewStack : UserControl
             SetValue(PagesProperty, value);
             if(value.Count > 0)
             {
-                Content = value[SelectedIndex];
+                Content = Pages[SelectedIndex];
             }
         }
     }
@@ -34,12 +34,11 @@ public sealed partial class ViewStack : UserControl
 
         set
         {
-            if(value < 0 || value >= Pages.Count)
-            {
-                return;
-            }
             SetValue(SelectedIndexProperty, value);
-            Content = Pages[value];
+            if (Pages.Count > 0 && value >= 0 && value < Pages.Count)
+            {
+                Content = Pages[value];
+            }
         }
     }
 }
