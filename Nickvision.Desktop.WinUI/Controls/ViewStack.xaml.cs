@@ -6,12 +6,13 @@ namespace Nickvision.Desktop.WinUI.Controls;
 
 public sealed partial class ViewStack : UserControl
 {
-    public static readonly DependencyProperty PagesProperty = DependencyProperty.Register(nameof(Pages), typeof(ObservableCollection<UIElement>), typeof(ViewStack), new PropertyMetadata(new ObservableCollection<UIElement>()));
+    public static readonly DependencyProperty PagesProperty = DependencyProperty.Register(nameof(Pages), typeof(ObservableCollection<UIElement>), typeof(ViewStack), new PropertyMetadata(null));
     public static readonly DependencyProperty SelectedIndexProperty = DependencyProperty.Register(nameof(SelectedIndex), typeof(int), typeof(ViewStack), new PropertyMetadata(0));
 
     public ViewStack()
     {
         InitializeComponent();
+        Pages = new ObservableCollection<UIElement>();
     }
 
     public ObservableCollection<UIElement> Pages
