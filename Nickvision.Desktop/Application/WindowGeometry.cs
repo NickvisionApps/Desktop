@@ -35,6 +35,7 @@ public class WindowGeometry
     /// </summary>
     public WindowGeometry() : this(900, 700, false, 10, 10)
     {
+
     }
 
     /// <summary>
@@ -45,6 +46,7 @@ public class WindowGeometry
     /// <param name="isMaximized">Whether the window is maximized</param>
     public WindowGeometry(int width, int height, bool isMaximized) : this(width, height, isMaximized, 10, 10)
     {
+
     }
 
     /// <summary>
