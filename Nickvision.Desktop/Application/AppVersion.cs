@@ -62,7 +62,7 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
     {
         if (pv1 is null)
         {
-            return pv2 is null;
+            return false;
         }
         if (pv1.BaseVersion > pv2?.BaseVersion)
         {
@@ -111,5 +111,5 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
 
     public override int GetHashCode() => ToString().GetHashCode();
 
-    public override string ToString() => $"{BaseVersion}-{PreviewLabel}";
+    public override string ToString() => string.IsNullOrEmpty(PreviewLabel) ? BaseVersion.ToString() : $"{BaseVersion}-{PreviewLabel}";
 }

@@ -33,13 +33,8 @@ public class WindowGeometry
     /// <summary>
     ///     Constructs a WindowGeometry.
     /// </summary>
-    public WindowGeometry()
+    public WindowGeometry() : this(900, 700, false, 10, 10)
     {
-        Width = 900;
-        Height = 700;
-        IsMaximized = false;
-        X = 10;
-        Y = 10;
     }
 
     /// <summary>
@@ -48,13 +43,8 @@ public class WindowGeometry
     /// <param name="width">The width of the window</param>
     /// <param name="height">The height of the window</param>
     /// <param name="isMaximized">Whether the window is maximized</param>
-    public WindowGeometry(int width, int height, bool isMaximized)
+    public WindowGeometry(int width, int height, bool isMaximized) : this(width, height, isMaximized, 10, 10)
     {
-        Width = width;
-        Height = height;
-        IsMaximized = isMaximized;
-        X = 10;
-        Y = 10;
     }
 
     /// <summary>
