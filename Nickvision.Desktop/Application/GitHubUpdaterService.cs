@@ -103,6 +103,7 @@ public class GitHubUpdaterService : IUpdaterService
                         response.EnsureSuccessStatusCode();
                         var totalBytesToRead = response.Content.Headers.ContentLength ?? 0L;
                         var totalBytesRead = 0L;
+                        var bytesSinceLastReport = 0L;
                         var buffer = new byte[81920];
                         await using var downloadStream = await response.Content.ReadAsStreamAsync();
                         await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
@@ -116,7 +117,12 @@ public class GitHubUpdaterService : IUpdaterService
                             }
                             await fileStream.WriteAsync(buffer, 0, bytesRead);
                             totalBytesRead += bytesRead;
-                            progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, false));
+                            bytesSinceLastReport += bytesRead;
+                            if(bytesSinceLastReport >= 524288)
+                            {
+                                progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, false));
+                                bytesSinceLastReport = 0;
+                            }
                         }
                     }
                     catch
