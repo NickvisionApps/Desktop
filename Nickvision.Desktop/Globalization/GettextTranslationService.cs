@@ -84,7 +84,7 @@ public class GettextTranslationService : ITranslationService
         get
         {
             var languages = new List<string>();
-            foreach (var directory in Directory.EnumerateDirectories(Directory.GetCurrentDirectory()))
+            foreach (var directory in Directory.EnumerateDirectories(System.Environment.ExecutingDirectory))
             {
                 if (File.Exists(Path.Combine(directory, $"{_appInfo.EnglishShortName}.mo")))
                 {

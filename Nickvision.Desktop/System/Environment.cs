@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace Nickvision.Desktop.System;
@@ -42,6 +43,16 @@ public static class Environment
             return DeploymentMode.Local;
         }
     }
+
+    /// <summary>
+    ///     The application executable's directory.
+    /// </summary>
+    public static string ExecutingDirectory => Path.GetDirectoryName(ExecutingPath) ?? global::System.Environment.CurrentDirectory;
+
+    /// <summary>
+    ///     The application executable's path.
+    /// </summary>
+    public static string ExecutingPath => !string.IsNullOrEmpty(Assembly.GetExecutingAssembly().Location) ? Assembly.GetExecutingAssembly().Location : global::System.Environment.GetCommandLineArgs()[0];
 
     /// <summary>
     ///     The list of directories in the PATH variable.
@@ -86,7 +97,7 @@ public static class Environment
         switch (search)
         {
             case DependencySearchOption.Global:
-                path = Path.Combine(Directory.GetCurrentDirectory(), dependency);
+                path = Path.Combine(ExecutingDirectory, dependency);
                 if (File.Exists(path))
                 {
                     Dependencies[(dependency, search)] = path;
@@ -106,7 +117,7 @@ public static class Environment
                 }
                 break;
             case DependencySearchOption.App:
-                path = Path.Combine(Directory.GetCurrentDirectory(), dependency);
+                path = Path.Combine(ExecutingDirectory, dependency);
                 if (File.Exists(path))
                 {
                     Dependencies[(dependency, search)] = path;
@@ -150,7 +161,7 @@ public static class Environment
          Operating System: {RuntimeInformation.OSDescription}
          Deployment Mode: {DeploymentMode}
          Locale: {CultureInfo.CurrentCulture.Name}
-         Running From: {Directory.GetCurrentDirectory()}
+         Running From: {ExecutingDirectory}
 
          {extra}
          """;

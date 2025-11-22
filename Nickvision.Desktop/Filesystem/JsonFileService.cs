@@ -47,7 +47,7 @@ public class JsonFileService : IJsonFileService
     ///     If the environment variable "{AppInfo.Id}.portable" is set, the current working directory will be used. Else,
     ///     a {AppInfo.Name} folder will be created and used inside the user's configuration directory.
     /// </remarks>
-    public JsonFileService(AppInfo appInfo) : this(Environment.GetEnvironmentVariable($"{appInfo.Id}.portable") is not null ? Directory.GetCurrentDirectory() : Path.Combine(UserDirectories.Config, appInfo.Name))
+    public JsonFileService(AppInfo appInfo) : this(Environment.GetEnvironmentVariable($"{appInfo.Id}.portable") is not null ? System.Environment.ExecutingDirectory : Path.Combine(UserDirectories.Config, appInfo.Name))
     {
     }
 

@@ -64,4 +64,16 @@ public sealed class EnvironmentTests
         Assert.IsTrue(string.IsNullOrEmpty(path));
         Assert.IsFalse(File.Exists(path));
     }
+
+    [TestMethod]
+    public void Case007_ExecutingPaths()
+    {
+        var executingPath = Environment.ExecutingPath;
+        var executingDirectory = Environment.ExecutingDirectory;
+        Assert.IsFalse(string.IsNullOrEmpty(executingPath));
+        Assert.IsTrue(File.Exists(executingPath));
+        Assert.IsFalse(string.IsNullOrEmpty(executingDirectory));
+        Assert.IsTrue(Directory.Exists(executingDirectory));
+        Assert.AreEqual(executingDirectory, Path.GetDirectoryName(executingPath));
+    }
 }

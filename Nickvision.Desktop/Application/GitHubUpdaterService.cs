@@ -118,7 +118,7 @@ public class GitHubUpdaterService : IUpdaterService
                             await fileStream.WriteAsync(buffer, 0, bytesRead);
                             totalBytesRead += bytesRead;
                             bytesSinceLastReport += bytesRead;
-                            if(bytesSinceLastReport >= 524288)
+                            if (bytesSinceLastReport >= 524288)
                             {
                                 progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, false));
                                 bytesSinceLastReport = 0;
