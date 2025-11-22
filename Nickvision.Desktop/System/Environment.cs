@@ -52,7 +52,7 @@ public static class Environment
     /// <summary>
     ///     The application executable's path.
     /// </summary>
-    public static string ExecutingPath => !string.IsNullOrEmpty(Assembly.GetExecutingAssembly().Location) ? Assembly.GetExecutingAssembly().Location : global::System.Environment.GetCommandLineArgs()[0];
+    public static string ExecutingPath => !string.IsNullOrEmpty(Assembly.GetEntryAssembly()!.Location) ? Assembly.GetEntryAssembly()!.Location : global::System.Environment.GetCommandLineArgs()[0];
 
     /// <summary>
     ///     The list of directories in the PATH variable.
