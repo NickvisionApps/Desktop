@@ -5,6 +5,7 @@
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 		<PackageId>Nickvision.Desktop.GNOME</PackageId>
 		<Version>2025.11.0</Version>
 		<Company>Nickvision</Company>
