@@ -49,15 +49,15 @@ jobs:
         run: dotnet build ${{ env.TEST_PROJECT_NAME }} -c Release --no-restore
       - name: "Test"
         run: dotnet test ${{ env.TEST_PROJECT_NAME }} -c Release --no-build
-   build-winui:
+  build-gnome:
     name: "Build GNOME on Linux"
     strategy:
       matrix:
         variant:
           - arch: x64
-            runner: windows-latest
+            runner: ubuntu-latest
           - arch: arm64
-            runner: windows-11-arm
+            runner: ubuntu-22.04-arm
     runs-on: ${{ matrix.variant.runner }}
     steps:
       - name: "Checkout"  
