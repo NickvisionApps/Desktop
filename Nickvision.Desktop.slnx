@@ -1,4 +1,5 @@
 <Solution>
+    <Project Path="Nickvision.Desktop.GNOME/Nickvision.Desktop.GNOME.csproj" Id="f1ce209d-bbe5-4a7f-a758-b9b1321b2a42" />
     <Project Path="Nickvision.Desktop.Tests/Nickvision.Desktop.Tests.csproj" Id="7c4073ac-b4e5-41e9-a180-e535e19ded2f" />
     <Project Path="Nickvision.Desktop.WinUI/Nickvision.Desktop.WinUI.csproj" Id="494549cc-534b-4d8a-8add-882827f989b9" />
     <Project Path="Nickvision.Desktop/Nickvision.Desktop.csproj" />
