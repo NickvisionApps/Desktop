@@ -30,7 +30,7 @@ public class GitHubUpdaterService : IUpdaterService
     /// <exception cref="ArgumentException">Thrown if the AppInfo.SourceRepository is missing or ill-formated</exception>
     public GitHubUpdaterService(AppInfo appInfo, HttpClient httpClient)
     {
-        if (appInfo.SourceRepository is null || appInfo.SourceRepository.IsEmpty())
+        if (appInfo.SourceRepository is null || appInfo.SourceRepository.IsEmpty)
         {
             throw new ArgumentException("AppInfo.SourceRepository cannot be null or empty");
         }

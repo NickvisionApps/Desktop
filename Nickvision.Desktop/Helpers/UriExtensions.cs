@@ -7,26 +7,31 @@ namespace Nickvision.Desktop.Helpers;
 /// </summary>
 public static class UriExtensions
 {
-    private static readonly Uri Empty;
+    private static readonly Uri EmptyUri;
 
     /// <summary>
     ///     Constructs a static UriExtensions.
     /// </summary>
     static UriExtensions()
     {
-        Empty = new Uri("about:blank");
+        EmptyUri = new Uri("about:blank");
     }
 
-    /// <summary>
-    ///     Gets an empty Uri (about:blank).
-    /// </summary>
-    /// <returns>The empty Uri</returns>
-    public static Uri GetEmpty() => Empty;
+    extension(Uri)
+    {
+        /// <summary>
+        ///     An empty Uri (about:blank).
+        /// </summary>
+        /// <returns>The empty Uri</returns>
+        public static Uri Empty => EmptyUri;
+    }
 
-    /// <summary>
-    ///     Gets whether the Uri is empty (about:blank).
-    /// </summary>
-    /// <param name="uri">The Uri to check</param>
-    /// <returns>True if the Uri is empty, else false</returns>
-    public static bool IsEmpty(this Uri uri) => uri == Empty || uri.ToString() == "about:blank";
+    extension(Uri uri)
+    {
+        /// <summary>
+        ///     Whether the Uri is empty (about:blank).
+        /// </summary>
+        /// <returns>True if the Uri is empty, else false</returns>
+        public bool IsEmpty => uri == EmptyUri || uri.ToString() == "about:blank";
+    }
 }

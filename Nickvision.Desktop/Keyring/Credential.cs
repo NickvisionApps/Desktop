@@ -40,6 +40,6 @@ public class Credential
         Name = name;
         Username = username;
         Password = password;
-        Url = url ?? UriExtensions.GetEmpty();
+        Url = url ?? Uri.Empty;
     }
 }
