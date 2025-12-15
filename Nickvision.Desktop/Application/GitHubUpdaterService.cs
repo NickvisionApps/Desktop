@@ -132,7 +132,7 @@ public class GitHubUpdaterService : IUpdaterService
                 }
             }
         }
-        catch (Exception)
+        catch
         {
             return false;
         }
@@ -158,7 +158,7 @@ public class GitHubUpdaterService : IUpdaterService
             }
             return null;
         }
-        catch (Exception)
+        catch
         {
             return null;
         }
@@ -183,7 +183,7 @@ public class GitHubUpdaterService : IUpdaterService
             }
             return null;
         }
-        catch (Exception)
+        catch
         {
             return null;
         }

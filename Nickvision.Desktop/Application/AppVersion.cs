@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Nickvision.Desktop.Application;
 
@@ -25,6 +26,14 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
         PreviewLabel = string.Empty;
     }
 
+    [JsonConstructor]
+    public AppVersion(Version baseVersion, string previewLabel)
+    {
+        BaseVersion = baseVersion;
+        PreviewLabel = previewLabel;
+    }
+
+    [JsonIgnore]
     public bool IsPreview => !string.IsNullOrEmpty(PreviewLabel);
 
     public static bool TryParse(string version, out AppVersion? appVersion)
