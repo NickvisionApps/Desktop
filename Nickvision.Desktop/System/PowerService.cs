@@ -9,7 +9,7 @@ namespace Nickvision.Desktop.System;
 /// <summary>
 ///     A server for managing power options.
 /// </summary>
-public class PowerService : IPowerService
+public class PowerService : IDisposable, IPowerService
 {
     private bool _disposed;
 #if OS_MAC || OS_LINUX

@@ -5,7 +5,7 @@ namespace Nickvision.Desktop.System;
 /// <summary>
 ///     An interface of a service for managing secrets.
 /// </summary>
-public interface ISecretService
+public interface ISecretService : IService
 {
     /// <summary>
     ///     Adds a secret.
