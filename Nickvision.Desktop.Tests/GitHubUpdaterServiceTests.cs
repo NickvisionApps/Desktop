@@ -99,7 +99,7 @@ public class GitHubUpdaterServiceTests
         var updateService = new GitHubUpdaterService("yt-dlp", "yt-dlp", _client);
         var stable = await updateService.GetLatestStableVersionAsync();
         Assert.IsNotNull(stable);
-        Assert.IsTrue(stable >= new AppVersion("2025.11.12"));
+        Assert.IsTrue(stable >= new AppVersion("2025.12.08"));
     }
 
 #if OS_WINDOWS

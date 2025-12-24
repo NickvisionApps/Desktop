@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Nickvision.Desktop.System;
+﻿namespace Nickvision.Desktop.System;
 
 /// <summary>
 ///     An interface for a service for managing power options.
