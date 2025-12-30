@@ -37,7 +37,11 @@ jobs:
         uses: t1m0thyj/unlock-keyring@v1
       - name: "Setup Environment"
         run: |
-          sudo apt-get install xdg-user-dirs xdg-user-dirs-gtk gettext tzdata locales libnotify-dev libsecret-tools notification-daemon xvfb -y
+          export DEBIAN_FRONTEND=noninteractive
+          sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get clean
+          sudo apt-get update
+          sudo apt-get install -y xdg-user-dirs xdg-user-dirs-gtk gettext tzdata locales libnotify-dev libsecret-tools notification-daemon xvfb
           xdg-user-dirs-update
           xdg-user-dirs-gtk-update
           sudo locale-gen en_US.UTF-8
