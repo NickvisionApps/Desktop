@@ -12,7 +12,7 @@
 		<UseWinUI>true</UseWinUI>
 		<WinUISDKReferences>false</WinUISDKReferences>
 		<PackageId>Nickvision.Desktop.WinUI</PackageId>
-		<Version>2025.12.0</Version>
+		<Version>2025.12.1</Version>
 		<Company>Nickvision</Company>
 		<Authors>Nickvision</Authors>
 		<Description>A set of controls and helpers for WinUI based Nickvision apps.</Description>
@@ -29,6 +29,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7175" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
+		<PackageReference Include="Nickvision.Desktop" Version="2025.12.3" />
 	</ItemGroup>
 	
 	<ItemGroup>
