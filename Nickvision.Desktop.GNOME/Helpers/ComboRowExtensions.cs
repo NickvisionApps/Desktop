@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Nickvision.Desktop.Application;
+using System.Collections.Generic;
 
 namespace Nickvision.Desktop.GNOME.Helpers;
 
@@ -6,7 +7,34 @@ public static class ComboRowExtensions
 {
     extension(Adw.ComboRow row)
     {
-        public void SetModel(List<string> strs, string selected, bool allowElipse = true)
+        public void SetModel(IReadOnlyList<ISelectionItem> selectionItems, bool allowElipse = true)
+        {
+            var selectedIndex = 0u;
+            var list = Gtk.StringList.New(null);
+            for(var i = 0; i < selectionItems.Count; i++)
+            {
+                var item = selectionItems[i];
+                list.Append(item.Label);
+                if(item.ShouldSelect)
+                {
+                    selectedIndex = (uint)i;
+                }
+            }
+            if (!allowElipse)
+            {
+                (row.Factory! as Gtk.SignalListItemFactory)!.OnSetup += (sender, args) =>
+                {
+                    var box = (args.Object as Gtk.ListItem)!.Child;
+                    var label = box!.GetFirstChild() as Gtk.Label;
+                    label!.Ellipsize = Pango.EllipsizeMode.None;
+                };
+            }
+            row.Model = list;
+            list.Unref();
+            row.Selected = selectedIndex;
+        }
+
+        public void SetModel(IReadOnlyList<string> strs, string selected, bool allowElipse = true)
         {
             var selectedIndex = 0u;
             var list = Gtk.StringList.New(null);
@@ -33,7 +61,7 @@ public static class ComboRowExtensions
             row.Selected = selectedIndex;
         }
 
-        public void SetModel(List<string> strs, uint selected, bool allowElipse = true)
+        public void SetModel(IReadOnlyList<string> strs, uint selected, bool allowElipse = true)
         {
             var list = Gtk.StringList.New(null);
             foreach (var str in strs)
