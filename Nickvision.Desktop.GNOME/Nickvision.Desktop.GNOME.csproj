@@ -7,13 +7,13 @@
 		<Nullable>enable</Nullable>
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 		<PackageId>Nickvision.Desktop.GNOME</PackageId>
-		<Version>2025.12.1</Version>
+		<Version>2026.1.0</Version>
 		<Company>Nickvision</Company>
 		<Authors>Nickvision</Authors>
 		<Description>A set of controls and helpers for GNOME based Nickvision apps.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Copyright>(c) Nickvision 2021-2025</Copyright>
+		<Copyright>(c) Nickvision 2021-2026</Copyright>
 		<PackageProjectUrl>https://nickvision.org</PackageProjectUrl>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/NickvisionApps/Desktop</RepositoryUrl>
@@ -23,7 +23,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="GirCore.Adw-1" Version="0.7.0" />
-		<PackageReference Include="Nickvision.Desktop" Version="2025.12.3" />
+		<PackageReference Include="Nickvision.Desktop" Version="2026.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>
