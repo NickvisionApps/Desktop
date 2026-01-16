@@ -12,13 +12,13 @@
 		<UseWinUI>true</UseWinUI>
 		<WinUISDKReferences>false</WinUISDKReferences>
 		<PackageId>Nickvision.Desktop.WinUI</PackageId>
-		<Version>2025.12.2</Version>
+		<Version>2026.1.0</Version>
 		<Company>Nickvision</Company>
 		<Authors>Nickvision</Authors>
 		<Description>A set of controls and helpers for WinUI based Nickvision apps.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Copyright>(c) Nickvision 2021-2025</Copyright>
+		<Copyright>(c) Nickvision 2021-2026</Copyright>
 		<PackageProjectUrl>https://nickvision.org</PackageProjectUrl>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/NickvisionApps/Desktop</RepositoryUrl>
@@ -27,9 +27,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7175" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.251106002" />
-		<PackageReference Include="Nickvision.Desktop" Version="2025.12.3" />
+		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7463" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260101001" />
+		<PackageReference Include="Nickvision.Desktop" Version="2026.1.0" />
 	</ItemGroup>
 	
 	<ItemGroup>
