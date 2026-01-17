@@ -16,7 +16,7 @@ public static class WindowExtensions
 
         public WindowGeometry Geometry
         {
-            get => new WindowGeometry(window.AppWindow.Size.Width, window.AppWindow.Size.Height, User32.IsZoomed(_hwnd), window.AppWindow.Position.X, window.AppWindow.Position.Y);
+            get => new WindowGeometry(window.AppWindow.Size.Width, window.AppWindow.Size.Height, User32.IsZoomed(window.Hwnd), window.AppWindow.Position.X, window.AppWindow.Position.Y);
 
             set
             {
