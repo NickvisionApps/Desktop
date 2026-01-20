@@ -19,7 +19,7 @@ public class PowerServiceTests
     public async Task Case002_PreventSuspend()
     {
 #if OS_LINUX
-        if (global::System.global::System.Environment.GetEnvironmentVariable("CI") == "true")
+        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("org.freedesktop.ScreenSaver service not available in CI environments");
         }
