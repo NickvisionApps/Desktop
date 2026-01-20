@@ -46,7 +46,7 @@ public sealed partial class StatusPage : UserControl, INotifyPropertyChanged
     public string Title
     {
         get => (string)GetValue(TitleProperty);
-        
+
         set
         {
             SetValue(TitleProperty, value);

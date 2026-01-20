@@ -11,11 +11,11 @@ public static class ComboRowExtensions
         {
             var selectedIndex = 0u;
             var list = Gtk.StringList.New(null);
-            for(var i = 0; i < selectionItems.Count; i++)
+            for (var i = 0; i < selectionItems.Count; i++)
             {
                 var item = selectionItems[i];
                 list.Append(item.Label);
-                if(item.ShouldSelect)
+                if (item.ShouldSelect)
                 {
                     selectedIndex = (uint)i;
                 }
