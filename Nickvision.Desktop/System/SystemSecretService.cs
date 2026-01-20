@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 #if OS_WINDOWS
 using Vanara.InteropServices;
 using Vanara.PInvoke;
-
 #elif OS_MAC || OS_LINUX
 using System.Diagnostics;
 #endif

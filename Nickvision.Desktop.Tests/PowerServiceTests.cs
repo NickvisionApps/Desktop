@@ -1,4 +1,5 @@
 ﻿using Nickvision.Desktop.System;
+using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Tests;
 
@@ -15,17 +16,17 @@ public class PowerServiceTests
     }
 
     [TestMethod]
-    public void Case002_PreventSuspend()
+    public async Task Case002_PreventSuspend()
     {
         Assert.IsNotNull(_powerService);
-        Assert.IsTrue(_powerService.PreventSuspend());
+        Assert.IsTrue(await _powerService.PreventSuspendAsync());
     }
 
     [TestMethod]
-    public void Case003_AllowSuspend()
+    public async Task Case003_AllowSuspend()
     {
         Assert.IsNotNull(_powerService);
-        Assert.IsTrue(_powerService.AllowSuspend());
+        Assert.IsTrue(await _powerService.AllowSuspendAsync());
     }
 
     [TestMethod]

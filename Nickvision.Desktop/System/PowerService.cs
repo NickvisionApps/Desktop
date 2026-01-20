@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 #if OS_WINDOWS
 using Vanara.PInvoke;
+#elif OS_LINUX
+using Nickvision.Desktop.FreeDesktop;
+using Tmds.DBus;
 #endif
 
 namespace Nickvision.Desktop.System;
@@ -12,7 +16,11 @@ namespace Nickvision.Desktop.System;
 public class PowerService : IDisposable, IPowerService
 {
     private bool _disposed;
-#if OS_MAC || OS_LINUX
+#if OS_LINUX
+    private Connection? _dbus;
+    private IScreenSaver? _freeDesktopScreenSaver;
+    private uint _inhibitCookie;
+#elif OS_MAC
     private Process? _preventSuspendProcess;
 #endif
 
@@ -22,6 +30,9 @@ public class PowerService : IDisposable, IPowerService
     public PowerService()
     {
         _disposed = false;
+#if OS_LINUX
+        _inhibitCookie = 0;
+#endif
     }
 
     /// <summary>
@@ -45,65 +56,31 @@ public class PowerService : IDisposable, IPowerService
     ///     Allows the system to suspend.
     /// </summary>
     /// <returns>True if the action was applied successfully, else false</returns>
-    public bool AllowSuspend()
+    public async Task<bool> AllowSuspendAsync()
     {
 #if OS_WINDOWS
 #pragma warning disable CA1416
-        return Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS) != 0;
+        return await Task.FromResult(Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS) != 0);
 #pragma warning restore CA1416
-#elif OS_MAC || OS_LINUX
-        _preventSuspendProcess?.Kill();
-        _preventSuspendProcess?.Dispose();
-        _preventSuspendProcess = null;
-        return true;
-#else
-        return false;
-#endif
-    }
-
-    /// <summary>
-    ///     Logs the user off the system.
-    /// </summary>
-    /// <returns>True if the action was applied successfully, else false</returns>
-    public bool Logoff()
-    {
-#if OS_WINDOWS
-        Process.Start(new ProcessStartInfo
+#elif OS_LINUX
+        if(_inhibitCookie == 0 || _freeDesktopScreenSaver is null)
         {
-            FileName = "shutdown",
-            Arguments = "/l /t 0",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
+            return false;
+        }
+        await _freeDesktopScreenSaver.UnInhibitAsync(_inhibitCookie);
+        _inhibitCookie = 0;
         return true;
 #elif OS_MAC
-        if (string.IsNullOrEmpty(Environment.FindDependency("osascript")))
+        if(_preventSuspendProcess is null)
         {
-            return false;
+            return await Task.FromResult(false);
         }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "osascript",
-            Arguments = "-e 'tell application \"System Events\" to log out'",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
-        return true;
-#elif OS_LINUX
-        if (string.IsNullOrEmpty(Environment.FindDependency("gnome-session-quit")))
-        {
-            return false;
-        }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "gnome-session-quit",
-            Arguments = "--logout",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
-        return true;
+        _preventSuspendProcess.Kill();
+        _preventSuspendProcess.Dispose();
+        _preventSuspendProcess = null;
+        return await Task.FromResult(true);
 #else
-        return false;
+        return await Task.FromResult(false);
 #endif
     }
 
@@ -111,20 +88,36 @@ public class PowerService : IDisposable, IPowerService
     ///     Prevents the system from suspending.
     /// </summary>
     /// <returns>True if the action was applied successfully, else false</returns>
-    public bool PreventSuspend()
+    public async Task<bool> PreventSuspendAsync()
     {
 #if OS_WINDOWS
 #pragma warning disable CA1416
-        return Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS | Kernel32.EXECUTION_STATE.ES_SYSTEM_REQUIRED) != 0;
+        return await Task.FromResult(Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS | Kernel32.EXECUTION_STATE.ES_SYSTEM_REQUIRED) != 0);
 #pragma warning restore CA1416
-#elif OS_MAC
-        if (_preventSuspendProcess != null)
+#elif OS_LINUX
+        if(_dbus is null)
+        {
+            _dbus = new Connection(Address.Session);
+            await _dbus.ConnectAsync();
+        }
+        if (_freeDesktopScreenSaver is null)
+        {
+            _freeDesktopScreenSaver = _dbus.CreateProxy<IScreenSaver>("org.freedesktop.ScreenSaver", new ObjectPath("/org/freedesktop/ScreenSaver"));
+        }
+        if (_inhibitCookie != 0)
         {
             return true;
         }
+        _inhibitCookie = await _freeDesktopScreenSaver.InhibitAsync("Nickvision Desktop", "Preventing suspend");
+        return true;
+#elif OS_MAC
+        if (_preventSuspendProcess is not null)
+        {
+            return await Task.FromResult(true);
+        }
         if (string.IsNullOrEmpty(Environment.FindDependency("caffeinate")))
         {
-            return false;
+            return await Task.FromResult(false);
         }
         _preventSuspendProcess = new Process()
         {
@@ -137,159 +130,9 @@ public class PowerService : IDisposable, IPowerService
             }
         };
         _preventSuspendProcess.Start();
-        return true;
-#elif OS_LINUX
-        if (_preventSuspendProcess != null)
-        {
-            return true;
-        }
-        if (string.IsNullOrEmpty(Environment.FindDependency("systemd-inhibit")))
-        {
-            return false;
-        }
-        _preventSuspendProcess = new Process()
-        {
-            StartInfo = new ProcessStartInfo()
-            {
-                FileName = "systemd-inhibit",
-                Arguments = "--what=handle-lid-switch:sleep:idle sleep infinity",
-                CreateNoWindow = true,
-                UseShellExecute = false
-            }
-        };
-        _preventSuspendProcess.Start();
-        return true;
+        return await Task.FromResult(true);
 #else
-        return false;
-#endif
-    }
-
-    /// <summary>
-    ///     Restarts the system.
-    /// </summary>
-    /// <returns>True if the action was applied successfully, else false</returns>
-    public bool Restart()
-    {
-#if OS_WINDOWS
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "shutdown",
-            Arguments = "/r /t 0",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
-        return true;
-#elif OS_MAC
-        if (string.IsNullOrEmpty(Environment.FindDependency("osascript")))
-        {
-            return false;
-        }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "osascript",
-            Arguments = "-e 'tell application \"System Events\" to restart'",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
-        return true;
-#elif OS_LINUX
-        if (string.IsNullOrEmpty(Environment.FindDependency("systemctl")))
-        {
-            return false;
-        }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "systemctl",
-            Arguments = "reboot",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
-        return true;
-#else
-        return false;
-#endif
-    }
-
-    /// <summary>
-    ///     Shuts down the system.
-    /// </summary>
-    /// <returns>True if the action was applied successfully, else false</returns>
-    public bool Shutdown()
-    {
-#if OS_WINDOWS
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "shutdown",
-            Arguments = "/s /t 0",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
-        return true;
-#elif OS_MAC
-        if (string.IsNullOrEmpty(Environment.FindDependency("systemctl")))
-        {
-            return false;
-        }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "osascript",
-            Arguments = "-e 'tell application \"System Events\" to shut down'",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
-        return true;
-#elif OS_LINUX
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "systemctl",
-            Arguments = "poweroff",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
-        return true;
-#else
-        return false;
-#endif
-    }
-
-    /// <summary>
-    ///     Suspends the system.
-    /// </summary>
-    /// <returns>True if the action was applied successfully, else false</returns>
-    public bool Suspend()
-    {
-#if OS_WINDOWS
-#pragma warning disable CA1416
-        return PowrProf.SetSuspendState(false, true, true);
-#pragma warning restore CA1416
-#elif OS_MAC
-        if (string.IsNullOrEmpty(Environment.FindDependency("osascript")))
-        {
-            return false;
-        }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "osascript",
-            Arguments = "-e 'tell application \"System Events\" to sleep'",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
-        return true;
-#elif OS_LINUX
-        if (string.IsNullOrEmpty(Environment.FindDependency("systemctl")))
-        {
-            return false;
-        }
-        Process.Start(new ProcessStartInfo()
-        {
-            FileName = "systemctl",
-            Arguments = "suspend",
-            CreateNoWindow = true,
-            UseShellExecute = false
-        });
-        return true;
-#else
-        return false;
+        return await Task.FromResult(false);
 #endif
     }
 
@@ -305,7 +148,11 @@ public class PowerService : IDisposable, IPowerService
         }
         if (disposing)
         {
-#if OS_MAC || OS_LINUX
+#if OS_LINUX
+            AllowSuspendAsync().Wait();
+            _dbus?.Dispose();
+            _dbus = null;
+#elif OS_MAC
             _preventSuspendProcess?.Kill();
             _preventSuspendProcess?.Dispose();
             _preventSuspendProcess = null;

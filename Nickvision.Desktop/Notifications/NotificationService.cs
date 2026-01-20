@@ -1,13 +1,9 @@
 ﻿using Nickvision.Desktop.Application;
 using System;
+using System.Diagnostics;
 #if OS_WINDOWS
 using Microsoft.Toolkit.Uwp.Notifications;
-
-#elif OS_MAC
-using System.Diagnostics;
-
 #elif OS_LINUX
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 #endif
