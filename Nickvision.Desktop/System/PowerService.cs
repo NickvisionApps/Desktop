@@ -102,7 +102,14 @@ public class PowerService : IDisposable, IPowerService
         }
         if (_freeDesktopScreenSaver is null)
         {
-            _freeDesktopScreenSaver = _dbus.CreateProxy<IScreenSaver>("org.freedesktop.ScreenSaver", new ObjectPath("/org/freedesktop/ScreenSaver"));
+            try
+            {
+                _freeDesktopScreenSaver = _dbus.CreateProxy<IScreenSaver>("org.freedesktop.ScreenSaver", new ObjectPath("/org/freedesktop/ScreenSaver"));
+            }
+            catch
+            {
+                return false;
+            }
         }
         if (_inhibitCookie != 0)
         {

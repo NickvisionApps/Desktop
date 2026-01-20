@@ -18,6 +18,12 @@ public class PowerServiceTests
     [TestMethod]
     public async Task Case002_PreventSuspend()
     {
+#if OS_LINUX
+        if (Environment.GetEnvironmentVariable("CI") == "true")
+        {
+            Assert.Inconclusive("org.freedesktop.ScreenSaver service not available in CI environments");
+        }
+#endif
         Assert.IsNotNull(_powerService);
         Assert.IsTrue(await _powerService.PreventSuspendAsync());
     }
@@ -25,6 +31,12 @@ public class PowerServiceTests
     [TestMethod]
     public async Task Case003_AllowSuspend()
     {
+#if OS_LINUX
+        if (Environment.GetEnvironmentVariable("CI") == "true")
+        {
+            Assert.Inconclusive("org.freedesktop.ScreenSaver service not available in CI environments");
+        }
+#endif
         Assert.IsNotNull(_powerService);
         Assert.IsTrue(await _powerService.AllowSuspendAsync());
     }
