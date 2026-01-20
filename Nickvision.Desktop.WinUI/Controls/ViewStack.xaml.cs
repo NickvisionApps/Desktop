@@ -22,7 +22,7 @@ public sealed partial class ViewStack : UserControl
         set
         {
             SetValue(PagesProperty, value);
-            if(value.Count > 0)
+            if (value.Count > 0)
             {
                 Content = Pages[SelectedIndex];
             }

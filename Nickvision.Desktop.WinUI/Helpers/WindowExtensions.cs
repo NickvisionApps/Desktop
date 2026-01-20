@@ -42,7 +42,7 @@ public static class WindowExtensions
                         });
                     }
                     else
-                    { 
+                    {
                         window.AppWindow.Resize(new SizeInt32
                         {
                             Width = Math.Max(900, value.Width),
@@ -57,7 +57,7 @@ public static class WindowExtensions
         {
             var workArea = DisplayArea.GetFromWindowId(window.AppWindow.Id, DisplayAreaFallback.Nearest).WorkArea;
             var windowRect = new RectInt32(windowGeometry.X, windowGeometry.Y, windowGeometry.Width, windowGeometry.Height);
-            return Math.Max(0, Math.Min(windowRect.X + windowRect.Width, workArea.X + workArea.Width) - Math.Max(windowRect.X, workArea.X)) >= 100 && 
+            return Math.Max(0, Math.Min(windowRect.X + windowRect.Width, workArea.X + workArea.Width) - Math.Max(windowRect.X, workArea.X)) >= 100 &&
                 Math.Max(0, Math.Min(windowRect.Y + windowRect.Height, workArea.Y + workArea.Height) - Math.Max(windowRect.Y, workArea.Y)) >= 100;
         }
     }
