@@ -1,27 +1,27 @@
-﻿namespace Nickvision.Desktop.Network;
+namespace Nickvision.Desktop.Network;
 
 /// <summary>
-///     A class containing information about a download's progress.
+/// A class containing information about a download's progress.
 /// </summary>
 public class DownloadProgress
 {
     /// <summary>
-    ///     The number of bytes received already.
+    /// The number of bytes received already.
     /// </summary>
     public long BytesReceived { get; init; }
 
     /// <summary>
-    ///     Whether the download is marked as completed.
+    /// Whether the download is marked as completed.
     /// </summary>
     public bool Completed { get; init; }
 
     /// <summary>
-    ///     The total number of bytes to be received.
+    /// The total number of bytes to be received.
     /// </summary>
     public long TotalBytesToReceive { get; init; }
 
     /// <summary>
-    ///     Constructs a DownloadProgress.
+    /// Constructs a DownloadProgress.
     /// </summary>
     /// <param name="totalBytesToReceive">The total number of bytes to be received</param>
     /// <param name="bytesReceived">The number of bytes received already</param>
@@ -34,7 +34,7 @@ public class DownloadProgress
     }
 
     /// <summary>
-    ///     The percentage of the download completed.
+    /// The percentage of the download completed.
     /// </summary>
     /// <remarks>Ranges from 0.0 to 1.0</remarks>
     public double Percentage => TotalBytesToReceive <= 0 ? 0.0 : (double)BytesReceived / TotalBytesToReceive;

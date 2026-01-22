@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.Filesystem;
+using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.Helpers;
 using Nickvision.Desktop.Network;
 using Octokit;
@@ -15,7 +15,7 @@ using FileMode = System.IO.FileMode;
 namespace Nickvision.Desktop.Application;
 
 /// <summary>
-///     A service for updating an application via GitHub releases.
+/// A service for updating an application via GitHub releases.
 /// </summary>
 public class GitHubUpdaterService : IUpdaterService
 {
@@ -26,7 +26,7 @@ public class GitHubUpdaterService : IUpdaterService
     private readonly string _cacheReleasesPath;
 
     /// <summary>
-    ///     Constructs an UpdaterService.
+    /// Constructs an UpdaterService.
     /// </summary>
     /// <param name="appInfo">The AppInfo object for the app</param>
     /// <param name="httpClient">The HttpClient for the app</param>
@@ -54,7 +54,7 @@ public class GitHubUpdaterService : IUpdaterService
     }
 
     /// <summary>
-    ///     Constructs an UpdaterService.
+    /// Constructs an UpdaterService.
     /// </summary>
     /// <param name="owner">The repository owner</param>
     /// <param name="name">The repository name</param>
@@ -74,7 +74,7 @@ public class GitHubUpdaterService : IUpdaterService
     }
 
     /// <summary>
-    ///     Downloads an asset from a released version.
+    /// Downloads an asset from a released version.
     /// </summary>
     /// <param name="version">The released version</param>
     /// <param name="path">The path of where to download the asset to</param>
@@ -138,7 +138,7 @@ public class GitHubUpdaterService : IUpdaterService
     }
 
     /// <summary>
-    ///     Gets the latest preview version available.
+    /// Gets the latest preview version available.
     /// </summary>
     /// <returns>The latest preview version or null if unavailable</returns>
     public async Task<AppVersion?> GetLatestPreviewVersionAsync()
@@ -156,7 +156,7 @@ public class GitHubUpdaterService : IUpdaterService
     }
 
     /// <summary>
-    ///     Gets the latest stable version available.
+    /// Gets the latest stable version available.
     /// </summary>
     /// <returns>The latest stable version or null if unavailable</returns>
     public async Task<AppVersion?> GetLatestStableVersionAsync()
@@ -174,7 +174,7 @@ public class GitHubUpdaterService : IUpdaterService
     }
 
     /// <summary>
-    ///     Downloads and runs the updated Windows installer of the given released version.
+    /// Downloads and runs the updated Windows installer of the given released version.
     /// </summary>
     /// <param name="version">The released version</param>
     /// <param name="progress">An optional progress reporter</param>

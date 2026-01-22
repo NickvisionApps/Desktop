@@ -1,16 +1,16 @@
-﻿using Nickvision.Desktop.Network;
+using Nickvision.Desktop.Network;
 using System;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Application;
 
 /// <summary>
-///     An interface of a service for updating an application.
+/// An interface of a service for updating an application.
 /// </summary>
 public interface IUpdaterService : IService
 {
     /// <summary>
-    ///     Downloads an asset from a released version.
+    /// Downloads an asset from a released version.
     /// </summary>
     /// <param name="version">The released version</param>
     /// <param name="path">The path of where to download the asset to</param>
@@ -21,19 +21,19 @@ public interface IUpdaterService : IService
     Task<bool> DownloadReleaseAssetAsync(AppVersion version, string path, string assertName, bool exactMatch = true, IProgress<DownloadProgress>? progress = null);
 
     /// <summary>
-    ///     Gets the latest preview version available.
+    /// Gets the latest preview version available.
     /// </summary>
     /// <returns>The latest preview version or null if unavailable</returns>
     Task<AppVersion?> GetLatestPreviewVersionAsync();
 
     /// <summary>
-    ///     Gets the latest stable version available.
+    /// Gets the latest stable version available.
     /// </summary>
     /// <returns>The latest stable version or null if unavailable</returns>
     Task<AppVersion?> GetLatestStableVersionAsync();
 
     /// <summary>
-    ///     Downloads and runs the updated Windows installer of the given released version.
+    /// Downloads and runs the updated Windows installer of the given released version.
     /// </summary>
     /// <param name="version">The released version</param>
     /// <param name="progress">An optional progress reporter</param>

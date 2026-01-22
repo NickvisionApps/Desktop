@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 namespace Nickvision.Desktop.Notifications;
 
 /// <summary>
-///     P/Invoke wrapper for libnotify on Linux.
+/// P/Invoke wrapper for libnotify on Linux.
 /// </summary>
 internal static partial class LinuxNotify
 {

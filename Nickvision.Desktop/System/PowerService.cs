@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.FreeDesktop;
+using Nickvision.Desktop.FreeDesktop;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -8,7 +8,7 @@ using Vanara.PInvoke;
 namespace Nickvision.Desktop.System;
 
 /// <summary>
-///     A server for managing power options.
+/// A server for managing power options.
 /// </summary>
 public class PowerService : IDisposable, IPowerService
 {
@@ -19,7 +19,7 @@ public class PowerService : IDisposable, IPowerService
     private Process? _preventSuspendProcess;
 
     /// <summary>
-    ///     Constructs a PowerService.
+    /// Constructs a PowerService.
     /// </summary>
     public PowerService()
     {
@@ -28,7 +28,7 @@ public class PowerService : IDisposable, IPowerService
     }
 
     /// <summary>
-    ///     Finalizes a PowerService.
+    /// Finalizes a PowerService.
     /// </summary>
     ~PowerService()
     {
@@ -36,7 +36,7 @@ public class PowerService : IDisposable, IPowerService
     }
 
     /// <summary>
-    ///     Disposes a PowerService.
+    /// Disposes a PowerService.
     /// </summary>
     public void Dispose()
     {
@@ -45,7 +45,7 @@ public class PowerService : IDisposable, IPowerService
     }
 
     /// <summary>
-    ///     Allows the system to suspend.
+    /// Allows the system to suspend.
     /// </summary>
     /// <returns>True if the action was applied successfully, else false</returns>
     public async Task<bool> AllowSuspendAsync()
@@ -82,7 +82,7 @@ public class PowerService : IDisposable, IPowerService
     }
 
     /// <summary>
-    ///     Prevents the system from suspending.
+    /// Prevents the system from suspending.
     /// </summary>
     /// <returns>True if the action was applied successfully, else false</returns>
     public async Task<bool> PreventSuspendAsync()
@@ -146,7 +146,7 @@ public class PowerService : IDisposable, IPowerService
     }
 
     /// <summary>
-    ///     Disposes a PowerService.
+    /// Disposes a PowerService.
     /// </summary>
     /// <param name="disposing">Whether to dispose managed resources</param>
     private void Dispose(bool disposing)
