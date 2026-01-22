@@ -32,7 +32,6 @@ public interface IUpdaterService : IService
     /// <returns>The latest stable version or null if unavailable</returns>
     Task<AppVersion?> GetLatestStableVersionAsync();
 
-#if OS_WINDOWS
     /// <summary>
     ///     Downloads and runs the updated Windows installer of the given released version.
     /// </summary>
@@ -40,5 +39,4 @@ public interface IUpdaterService : IService
     /// <param name="progress">An optional progress reporter</param>
     /// <returns>True if the update was downloaded and ran successfully, else false</returns>
     Task<bool> WindowsUpdate(AppVersion version, IProgress<DownloadProgress>? progress = null);
-#endif
 }

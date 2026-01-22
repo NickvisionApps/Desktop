@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FileMode = System.IO.FileMode;
@@ -181,6 +182,10 @@ public class GitHubUpdaterService : IUpdaterService
     /// <returns>True if the update was downloaded and ran successfully, else false</returns>
     public async Task<bool> WindowsUpdate(AppVersion version, IProgress<DownloadProgress>? progress = null)
     {
+        if(!OperatingSystem.IsWindows())
+        {
+            return false;
+        }
         var setupPath = Path.Combine(UserDirectories.Cache, $"{_owner}_{_name}_Setup.exe");
         if (!await DownloadReleaseAssetAsync(version, setupPath, "setup.exe", false, progress))
         {
