@@ -21,7 +21,7 @@ public sealed class DatabaseKeyringServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is not supported in CI environments");
             }
         }
         _keyringService = new DatabaseKeyringService(new AppInfo("org.nickvision.desktop.test", "Nickvision.Desktop.Test", "Test"), new SystemSecretService());
@@ -36,7 +36,7 @@ public sealed class DatabaseKeyringServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is supported in CI environments");
             }
         }
         Assert.IsNotNull(_keyringService);
@@ -50,7 +50,7 @@ public sealed class DatabaseKeyringServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is supported in CI environments");
             }
         }
         Assert.IsNotNull(_keyringService);
@@ -66,7 +66,7 @@ public sealed class DatabaseKeyringServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is supported in CI environments");
             }
         }
         Assert.IsNotNull(_keyringService);
@@ -87,7 +87,7 @@ public sealed class DatabaseKeyringServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is supported in CI environments");
             }
         }
         Assert.IsNotNull(_keyringService);
@@ -105,7 +105,7 @@ public sealed class DatabaseKeyringServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is supported in CI environments");
             }
         }
         Assert.IsNotNull(_keyringService);

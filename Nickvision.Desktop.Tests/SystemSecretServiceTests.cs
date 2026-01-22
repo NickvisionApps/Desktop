@@ -15,7 +15,7 @@ public sealed class SystemSecretServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is not supported in CI environments");
             }
         }
         _secretService = new SystemSecretService();
@@ -29,7 +29,7 @@ public sealed class SystemSecretServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is not supported in CI environments");
             }
         }
         Assert.IsNotNull(_secretService);
@@ -45,7 +45,7 @@ public sealed class SystemSecretServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is not supported in CI environments");
             }
         }
         Assert.IsNotNull(_secretService);
@@ -61,7 +61,7 @@ public sealed class SystemSecretServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is not supported in CI environments");
             }
         }
         Assert.IsNotNull(_secretService);
@@ -77,7 +77,7 @@ public sealed class SystemSecretServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is not supported in CI environments");
             }
         }
         Assert.IsNotNull(_secretService);
@@ -95,7 +95,7 @@ public sealed class SystemSecretServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is not supported in CI environments");
             }
         }
         Assert.IsNotNull(_secretService);
@@ -115,7 +115,7 @@ public sealed class SystemSecretServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is not supported in CI environments");
             }
         }
         Assert.IsNotNull(_secretService);
@@ -138,7 +138,7 @@ public sealed class SystemSecretServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is not supported in CI environments");
             }
         }
         Assert.IsNotNull(_secretService);
@@ -161,7 +161,7 @@ public sealed class SystemSecretServiceTests
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
-                Assert.Inconclusive("Dialogs are not supported in CI environments");
+                Assert.Inconclusive("Secret service is not supported in CI environments");
             }
         }
         Assert.IsNotNull(_secretService);
