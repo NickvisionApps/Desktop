@@ -33,27 +33,28 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
         _credentials = [];
         _path = Path.Combine(keyringDir, $"{info.Id}.ring2");
         _connection = null;
-#if OS_WINDOWS || OS_MAC || OS_LINUX
-        var secret = secretService.Get(info.Id) ?? secretService.Create(info.Id);
-        if (secret is not null)
+        if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsLinux())
         {
-            _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{_path}'")
+            var secret = secretService.Get(info.Id) ?? secretService.Create(info.Id);
+            if (secret is not null)
             {
-                Mode = SqliteOpenMode.ReadWriteCreate,
-                Password = secret.Value,
-                Pooling = false
-            }.ToString());
-            try
-            {
-                _connection.Open();
-            }
-            catch (SqliteException)
-            {
-                _connection.Dispose();
-                _connection = null;
+                _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{_path}'")
+                {
+                    Mode = SqliteOpenMode.ReadWriteCreate,
+                    Password = secret.Value,
+                    Pooling = false
+                }.ToString());
+                try
+                {
+                    _connection.Open();
+                }
+                catch (SqliteException)
+                {
+                    _connection.Dispose();
+                    _connection = null;
+                }
             }
         }
-#endif
         if (_connection is null)
         {
             return;

@@ -22,15 +22,15 @@ public static class UserDirectories
         get
         {
             var res = string.Empty;
-            if(OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows())
             {
                 res = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             }
-            else if(OperatingSystem.IsMacOS())
+            else if (OperatingSystem.IsMacOS())
             {
                 res = Path.Combine(Home, "Library", "ApplicationSupport");
             }
-            else if(OperatingSystem.IsLinux())
+            else if (OperatingSystem.IsLinux())
             {
                 if (Environment.GetEnvironmentVariable("XDG_CONFIG_HOME") is string dir)
                 {
@@ -61,15 +61,15 @@ public static class UserDirectories
         get
         {
             var res = string.Empty;
-            if(OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows())
             {
                 res = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/Temp";
             }
-            else if(OperatingSystem.IsMacOS())
+            else if (OperatingSystem.IsMacOS())
             {
                 res = Path.Combine(Home, "Library", "Caches");
             }
-            else if(OperatingSystem.IsLinux())
+            else if (OperatingSystem.IsLinux())
             {
                 if (Environment.GetEnvironmentVariable("XDG_CACHE_HOME") is string dir)
                 {
@@ -100,15 +100,15 @@ public static class UserDirectories
         get
         {
             var res = string.Empty;
-            if(OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows())
             {
                 res = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             }
-            else if(OperatingSystem.IsMacOS())
+            else if (OperatingSystem.IsMacOS())
             {
                 res = Cache;
             }
-            else if(OperatingSystem.IsLinux())
+            else if (OperatingSystem.IsLinux())
             {
                 if (Environment.GetEnvironmentVariable("XDG_DATA_HOME") is string dir)
                 {
@@ -139,15 +139,15 @@ public static class UserDirectories
         get
         {
             var res = string.Empty;
-            if(OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows())
             {
                 res = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             }
-            else if(OperatingSystem.IsMacOS())
+            else if (OperatingSystem.IsMacOS())
             {
                 res = Path.Combine(Home, "Desktop");
             }
-            else if(OperatingSystem.IsLinux())
+            else if (OperatingSystem.IsLinux())
             {
                 if (GetXdgUserDir("XDG_DESKTOP_DIR") is string dir)
                 {
@@ -178,15 +178,15 @@ public static class UserDirectories
         get
         {
             var res = string.Empty;
-            if(OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows())
             {
                 res = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             }
-            else if(OperatingSystem.IsMacOS())
+            else if (OperatingSystem.IsMacOS())
             {
                 res = Path.Combine(Home, "Documents");
             }
-            else if(OperatingSystem.IsLinux())
+            else if (OperatingSystem.IsLinux())
             {
                 if (GetXdgUserDir("XDG_DOCUMENTS_DIR") is string dir)
                 {
@@ -216,20 +216,18 @@ public static class UserDirectories
         get
         {
             var res = string.Empty;
-            if(OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows())
             {
-#pragma warning disable CA1416
                 if (Shell32.SHGetKnownFolderPath(Shell32.KNOWNFOLDERID.FOLDERID_Downloads.Guid(), 0, nint.Zero, out res) != HRESULT.S_OK)
                 {
                     res = Path.Combine(Home, "Downloads");
                 }
-#pragma warning restore CA1416
             }
-            else if(OperatingSystem.IsMacOS())
+            else if (OperatingSystem.IsMacOS())
             {
                 res = Path.Combine(Home, "Downloads");
             }
-            else if(OperatingSystem.IsLinux())
+            else if (OperatingSystem.IsLinux())
             {
                 if (GetXdgUserDir("XDG_DOWNLOAD_DIR") is string dir)
                 {
@@ -259,15 +257,15 @@ public static class UserDirectories
         get
         {
             var res = string.Empty;
-            if(OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows())
             {
                 res = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
             }
-            else if(OperatingSystem.IsMacOS())
+            else if (OperatingSystem.IsMacOS())
             {
                 res = Path.Combine(Home, "Music");
             }
-            else if(OperatingSystem.IsLinux())
+            else if (OperatingSystem.IsLinux())
             {
                 if (GetXdgUserDir("XDG_MUSIC_DIR") is string dir)
                 {
@@ -298,15 +296,15 @@ public static class UserDirectories
         get
         {
             var res = string.Empty;
-            if(OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows())
             {
                 res = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
             }
-            else if(OperatingSystem.IsMacOS())
+            else if (OperatingSystem.IsMacOS())
             {
                 res = Path.Combine(Home, "Pictures");
             }
-            else if(OperatingSystem.IsLinux())
+            else if (OperatingSystem.IsLinux())
             {
                 if (GetXdgUserDir("XDG_PICTURES_DIR") is string dir)
                 {
@@ -337,15 +335,15 @@ public static class UserDirectories
         get
         {
             var res = string.Empty;
-            if(OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows())
             {
                 res = Environment.GetFolderPath(Environment.SpecialFolder.Templates);
             }
-            else if(OperatingSystem.IsMacOS())
+            else if (OperatingSystem.IsMacOS())
             {
                 res = Path.Combine(Home, "Templates");
             }
-            else if(OperatingSystem.IsLinux())
+            else if (OperatingSystem.IsLinux())
             {
                 if (GetXdgUserDir("XDG_TEMPLATES_DIR") is string dir)
                 {
@@ -376,15 +374,15 @@ public static class UserDirectories
         get
         {
             var res = string.Empty;
-            if(OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindows())
             {
                 res = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
             }
-            else if(OperatingSystem.IsMacOS())
+            else if (OperatingSystem.IsMacOS())
             {
                 res = Path.Combine(Home, "Videos");
             }
-            else if(OperatingSystem.IsLinux())
+            else if (OperatingSystem.IsLinux())
             {
                 if (GetXdgUserDir("XDG_VIDEOS_DIR") is string dir)
                 {

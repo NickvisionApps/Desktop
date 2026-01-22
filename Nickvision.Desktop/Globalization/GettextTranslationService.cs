@@ -1,13 +1,11 @@
 ﻿using GetText;
 using Nickvision.Desktop.Application;
+using Nickvision.Desktop.System;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-#if OS_LINUX
-using Nickvision.Desktop.System;
-#endif
 
 namespace Nickvision.Desktop.Globalization;
 
@@ -174,12 +172,13 @@ public class GettextTranslationService : ITranslationService
     /// <returns>The help page url for the current system locale</returns>
     public Uri GetHelpUrl(string pageName)
     {
-#if OS_LINUX
-        if (Nickvision.Desktop.System.Environment.DeploymentMode == DeploymentMode.Flatpak)
+        if (OperatingSystem.IsLinux())
         {
-            return new Uri($"help:{_appInfo.EnglishShortName.ToLower()}/{pageName}");
+            if (System.Environment.DeploymentMode == DeploymentMode.Flatpak)
+            {
+                return new Uri($"help:{_appInfo.EnglishShortName.ToLower()}/{pageName}");
+            }
         }
-#endif
         var lang = "C";
         var sysLocale = CultureInfo.CurrentCulture.Name.Replace('-', '_');
         if (!string.IsNullOrEmpty(sysLocale) && sysLocale != "C" && sysLocale != "en_US" && sysLocale != "*")

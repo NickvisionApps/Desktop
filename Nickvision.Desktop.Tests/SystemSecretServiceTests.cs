@@ -5,9 +5,6 @@ using System.Threading.Tasks;
 namespace Nickvision.Desktop.Tests;
 
 [TestClass]
-[SupportedOSPlatform("windows")]
-[SupportedOSPlatform("linux")]
-[SupportedOSPlatform("macos")]
 public sealed class SystemSecretServiceTests
 {
     private static SystemSecretService? _secretService;

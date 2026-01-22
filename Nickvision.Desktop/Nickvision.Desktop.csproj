@@ -22,17 +22,8 @@
 		<PackageIcon>icon.png</PackageIcon>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-		<DefineConstants>OS_WINDOWS</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
-		<DefineConstants>OS_LINUX</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-		<DefineConstants>OS_MAC</DefineConstants>
-	</PropertyGroup>
 	<PropertyGroup Condition="'$(TargetFramework)'=='net8.0-windows10.0.19041.0' Or '$(TargetFramework)'=='net9.0-windows10.0.19041.0' Or '$(TargetFramework)'=='net10.0-windows10.0.19041.0'">
-		<DefineConstants>OS_WINDOWS,NET_WINDOWS</DefineConstants>
+		<DefineConstants>NET_WINDOWS</DefineConstants>
 	</PropertyGroup>
 
 	<ItemGroup>

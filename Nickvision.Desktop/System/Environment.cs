@@ -62,11 +62,7 @@ public static class Environment
         get
         {
             var path = global::System.Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-#if OS_WINDOWS
-            return path.Split(';').Select(p => global::System.Environment.ExpandEnvironmentVariables(p));
-#else
-            return path.Split(':').Select(p => global::System.Environment.ExpandEnvironmentVariables(p));
-#endif
+            return (OperatingSystem.IsWindows() ? path.Split(';') : path.Split(':')).Select(global::System.Environment.ExpandEnvironmentVariables);
         }
     }
 
@@ -79,12 +75,13 @@ public static class Environment
     /// <exception cref="ArgumentOutOfRangeException">Thrown if the search option is invalid</exception>
     public static string? FindDependency(string dependency, DependencySearchOption search = DependencySearchOption.Global)
     {
-#if OS_WINDOWS
-        if (string.IsNullOrEmpty(Path.GetExtension(dependency) ?? string.Empty))
+        if (OperatingSystem.IsWindows())
         {
-            dependency += ".exe";
+            if (string.IsNullOrEmpty(Path.GetExtension(dependency) ?? string.Empty))
+            {
+                dependency += ".exe";
+            }
         }
-#endif
         if (Dependencies.TryGetValue((dependency, search), out var cachedPath))
         {
             if (cachedPath is not null && File.Exists(cachedPath))

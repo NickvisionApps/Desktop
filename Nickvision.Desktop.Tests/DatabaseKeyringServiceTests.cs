@@ -23,9 +23,7 @@ public sealed class DatabaseKeyringServiceTests
             Assert.Inconclusive("Dialogs are not supported in CI environments");
         }
 #endif
-#pragma warning disable CA1416
         _keyringService = new DatabaseKeyringService(new AppInfo("org.nickvision.desktop.test", "Nickvision.Desktop.Test", "Test"), new SystemSecretService());
-#pragma warning restore CA1416
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(_keyringService.IsSavingToDisk);
     }
