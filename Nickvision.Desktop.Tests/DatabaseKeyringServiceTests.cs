@@ -17,13 +17,6 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public void Case001_Init()
     {
-        if (global::System.OperatingSystem.IsLinux())
-        {
-            if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-            {
-                Assert.Inconclusive("Secret service is not supported in CI environments");
-            }
-        }
         _keyringService = new DatabaseKeyringService(new AppInfo("org.nickvision.desktop.test", "Nickvision.Desktop.Test", "Test"), new SystemSecretService());
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(_keyringService.IsSavingToDisk);
@@ -32,13 +25,6 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public void Case002_Check()
     {
-        if (global::System.OperatingSystem.IsLinux())
-        {
-            if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-            {
-                Assert.Inconclusive("Secret service is supported in CI environments");
-            }
-        }
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(_keyringService.IsSavingToDisk);
     }
@@ -46,13 +32,6 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public async Task Case003_Add()
     {
-        if (global::System.OperatingSystem.IsLinux())
-        {
-            if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-            {
-                Assert.Inconclusive("Secret service is supported in CI environments");
-            }
-        }
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(await _keyringService.AddCredentialAsync(new Credential("YouTube", "abc", "123", new Uri("https://www.youtube.com"))));
         Assert.IsNotNull(_keyringService.Credentials.FirstOrDefault(c => c.Name == "YouTube"));
@@ -62,13 +41,6 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public async Task Case004_Update()
     {
-        if (global::System.OperatingSystem.IsLinux())
-        {
-            if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-            {
-                Assert.Inconclusive("Secret service is supported in CI environments");
-            }
-        }
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(await _keyringService.AddCredentialAsync(new Credential("Google", "x@gmail.com", "asdfgh123!", new Uri("https://www.google.com"))));
         var cred = _keyringService.Credentials.FirstOrDefault(c => c.Name == "Google");
@@ -83,13 +55,6 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public async Task Case005_Remove()
     {
-        if (global::System.OperatingSystem.IsLinux())
-        {
-            if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-            {
-                Assert.Inconclusive("Secret service is supported in CI environments");
-            }
-        }
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(await _keyringService.AddCredentialAsync(new Credential("Example", "user1", "pass1", new Uri("https://www.example.com"))));
         var cred = _keyringService.Credentials.FirstOrDefault(c => c.Name == "Example");
@@ -101,13 +66,6 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public async Task Case006_Cleanup()
     {
-        if (global::System.OperatingSystem.IsLinux())
-        {
-            if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-            {
-                Assert.Inconclusive("Secret service is supported in CI environments");
-            }
-        }
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(await _keyringService.DestroyAsync());
         Assert.IsFalse(_keyringService.Credentials.Any());
