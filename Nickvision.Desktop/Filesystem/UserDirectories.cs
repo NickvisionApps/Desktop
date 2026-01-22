@@ -1,345 +1,410 @@
-﻿using System;
+using System;
 using System.IO;
-#if OS_WINDOWS
 using Vanara.PInvoke;
-#endif
 
 namespace Nickvision.Desktop.Filesystem;
 
 /// <summary>
-///     A helper class for getting user directories cross-platform.
+/// A helper class for getting user directories cross-platform.
 /// </summary>
 public static class UserDirectories
 {
     /// <summary>
-    ///     The user's home directory.
+    /// The user's home directory.
     /// </summary>
     public static string Home => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
     /// <summary>
-    ///     The user's config directory.
+    /// The user's config directory.
     /// </summary>
     public static string Config
     {
         get
         {
-#if OS_WINDOWS
-            var res = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-#elif OS_MAC
-            var res = Path.Combine(Home, "Library", "ApplicationSupport");
-#elif OS_LINUX
             var res = string.Empty;
-            if (Environment.GetEnvironmentVariable("XDG_CONFIG_HOME") is string dir)
+            if (OperatingSystem.IsWindows())
             {
-                if (!string.IsNullOrEmpty(dir))
+                res = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                res = Path.Combine(Home, "Library", "ApplicationSupport");
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                if (Environment.GetEnvironmentVariable("XDG_CONFIG_HOME") is string dir)
                 {
-                    res = dir;
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        res = dir;
+                    }
+                }
+                else
+                {
+                    res = Path.Combine(Home, ".config");
                 }
             }
             else
             {
                 res = Path.Combine(Home, ".config");
             }
-#else
-            var res = Path.Combine(Home, ".config");
-#endif
             Directory.CreateDirectory(res);
             return res;
         }
     }
 
     /// <summary>
-    ///     The user's cache directory.
+    /// The user's cache directory.
     /// </summary>
     public static string Cache
     {
         get
         {
-#if OS_WINDOWS
-            var res = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/Temp";
-#elif OS_MAC
-            var res = Path.Combine(Home, "Library", "Caches");
-#elif OS_LINUX
             var res = string.Empty;
-            if (Environment.GetEnvironmentVariable("XDG_CACHE_HOME") is string dir)
+            if (OperatingSystem.IsWindows())
             {
-                if (!string.IsNullOrEmpty(dir))
+                res = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/Temp";
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                res = Path.Combine(Home, "Library", "Caches");
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                if (Environment.GetEnvironmentVariable("XDG_CACHE_HOME") is string dir)
                 {
-                    res = dir;
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        res = dir;
+                    }
+                }
+                else
+                {
+                    res = Path.Combine(Home, ".cache");
                 }
             }
             else
             {
                 res = Path.Combine(Home, ".cache");
             }
-#else
-            var res = Path.Combine(Home, ".cache");
-#endif
             Directory.CreateDirectory(res);
             return res;
         }
     }
 
     /// <summary>
-    ///     The user's local data directory.
+    /// The user's local data directory.
     /// </summary>
     public static string LocalData
     {
         get
         {
-#if OS_WINDOWS
-            var res = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-#elif OS_MAC
-            var res = Cache;
-#elif OS_LINUX
             var res = string.Empty;
-            if (Environment.GetEnvironmentVariable("XDG_DATA_HOME") is string dir)
+            if (OperatingSystem.IsWindows())
             {
-                if (!string.IsNullOrEmpty(dir))
+                res = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                res = Cache;
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                if (Environment.GetEnvironmentVariable("XDG_DATA_HOME") is string dir)
                 {
-                    res = dir;
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        res = dir;
+                    }
+                }
+                else
+                {
+                    res = Path.Combine(Home, ".local", "share");
                 }
             }
             else
             {
                 res = Path.Combine(Home, ".local", "share");
             }
-#else
-            var res = Path.Combine(Home, ".local", "share");
-#endif
             Directory.CreateDirectory(res);
             return res;
         }
     }
 
     /// <summary>
-    ///     The user's desktop directory.
+    /// The user's desktop directory.
     /// </summary>
     public static string Desktop
     {
         get
         {
-#if OS_WINDOWS
-            var res = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-#elif OS_MAC
-            var res = Path.Combine(Home, "Desktop");
-#elif OS_LINUX
             var res = string.Empty;
-            if (GetXdgUserDir("XDG_DESKTOP_DIR") is string dir)
+            if (OperatingSystem.IsWindows())
             {
-                if (!string.IsNullOrEmpty(dir))
+                res = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                res = Path.Combine(Home, "Desktop");
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                if (GetXdgUserDir("XDG_DESKTOP_DIR") is string dir)
                 {
-                    res = dir;
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        res = dir;
+                    }
+                }
+                else
+                {
+                    res = Path.Combine(Home, "Desktop");
                 }
             }
             else
             {
                 res = Path.Combine(Home, "Desktop");
             }
-#else
-            var res = Path.Combine(Home, "Desktop");
-#endif
             Directory.CreateDirectory(res);
             return res;
         }
     }
 
     /// <summary>
-    ///     The user's documents directory.
+    /// The user's documents directory.
     /// </summary>
     public static string Documents
     {
         get
         {
-#if OS_WINDOWS
-            var res = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-#elif OS_MAC
-            var res = Path.Combine(Home, "Documents");
-#elif OS_LINUX
             var res = string.Empty;
-            if (GetXdgUserDir("XDG_DOCUMENTS_DIR") is string dir)
+            if (OperatingSystem.IsWindows())
             {
-                if (!string.IsNullOrEmpty(dir))
+                res = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                res = Path.Combine(Home, "Documents");
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                if (GetXdgUserDir("XDG_DOCUMENTS_DIR") is string dir)
                 {
-                    res = dir;
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        res = dir;
+                    }
+                }
+                else
+                {
+                    res = Path.Combine(Home, "Documents");
                 }
             }
             else
             {
                 res = Path.Combine(Home, "Documents");
             }
-#else
-            var res = Path.Combine(Home, "Documents");
-#endif
             return res;
         }
     }
 
     /// <summary>
-    ///     The user's downloads directory.
+    /// The user's downloads directory.
     /// </summary>
     public static string Downloads
     {
         get
         {
-#if OS_WINDOWS
-#pragma warning disable CA1416
-            if (Shell32.SHGetKnownFolderPath(Shell32.KNOWNFOLDERID.FOLDERID_Downloads.Guid(), 0, nint.Zero, out var res) != HRESULT.S_OK)
+            var res = string.Empty;
+            if (OperatingSystem.IsWindows())
+            {
+                if (Shell32.SHGetKnownFolderPath(Shell32.KNOWNFOLDERID.FOLDERID_Downloads.Guid(), 0, nint.Zero, out res) != HRESULT.S_OK)
+                {
+                    res = Path.Combine(Home, "Downloads");
+                }
+            }
+            else if (OperatingSystem.IsMacOS())
             {
                 res = Path.Combine(Home, "Downloads");
             }
-#pragma warning restore CA1416
-#elif OS_MAC
-            var res = Path.Combine(Home, "Downloads");
-#elif OS_LINUX
-            var res = string.Empty;
-            if (GetXdgUserDir("XDG_DOWNLOAD_DIR") is string dir)
+            else if (OperatingSystem.IsLinux())
             {
-                if (!string.IsNullOrEmpty(dir))
+                if (GetXdgUserDir("XDG_DOWNLOAD_DIR") is string dir)
                 {
-                    res = dir;
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        res = dir;
+                    }
+                }
+                else
+                {
+                    res = Path.Combine(Home, "Downloads");
                 }
             }
             else
             {
                 res = Path.Combine(Home, "Downloads");
             }
-#else
-            var res = Path.Combine(Home, "Downloads");
-#endif
             return res;
         }
     }
 
     /// <summary>
-    ///     The user's music directory.
+    /// The user's music directory.
     /// </summary>
     public static string Music
     {
         get
         {
-#if OS_WINDOWS
-            var res = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
-#elif OS_MAC
-            var res = Path.Combine(Home, "Music");
-#elif OS_LINUX
             var res = string.Empty;
-            if (GetXdgUserDir("XDG_MUSIC_DIR") is string dir)
+            if (OperatingSystem.IsWindows())
             {
-                if (!string.IsNullOrEmpty(dir))
+                res = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                res = Path.Combine(Home, "Music");
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                if (GetXdgUserDir("XDG_MUSIC_DIR") is string dir)
                 {
-                    res = dir;
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        res = dir;
+                    }
+                }
+                else
+                {
+                    res = Path.Combine(Home, "Music");
                 }
             }
             else
             {
                 res = Path.Combine(Home, "Music");
             }
-#else
-            var res = Path.Combine(Home, "Music");
-#endif
             Directory.CreateDirectory(res);
             return res;
         }
     }
 
     /// <summary>
-    ///     The user's pictures directory.
+    /// The user's pictures directory.
     /// </summary>
     public static string Pictures
     {
         get
         {
-#if OS_WINDOWS
-            var res = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-#elif OS_MAC
-            var res = Path.Combine(Home, "Pictures");
-#elif OS_LINUX
             var res = string.Empty;
-            if (GetXdgUserDir("XDG_PICTURES_DIR") is string dir)
+            if (OperatingSystem.IsWindows())
             {
-                if (!string.IsNullOrEmpty(dir))
+                res = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                res = Path.Combine(Home, "Pictures");
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                if (GetXdgUserDir("XDG_PICTURES_DIR") is string dir)
                 {
-                    res = dir;
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        res = dir;
+                    }
+                }
+                else
+                {
+                    res = Path.Combine(Home, "Pictures");
                 }
             }
             else
             {
                 res = Path.Combine(Home, "Pictures");
             }
-#else
-            var res = Path.Combine(Home, "Pictures");
-#endif
             Directory.CreateDirectory(res);
             return res;
         }
     }
 
     /// <summary>
-    ///     The user's templates directory.
+    /// The user's templates directory.
     /// </summary>
     public static string Templates
     {
         get
         {
-#if OS_WINDOWS
-            var res = Environment.GetFolderPath(Environment.SpecialFolder.Templates);
-#elif OS_MAC
-            var res = Path.Combine(Home, "Templates");
-#elif OS_LINUX
             var res = string.Empty;
-            if (GetXdgUserDir("XDG_TEMPLATES_DIR") is string dir)
+            if (OperatingSystem.IsWindows())
             {
-                if (!string.IsNullOrEmpty(dir))
+                res = Environment.GetFolderPath(Environment.SpecialFolder.Templates);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                res = Path.Combine(Home, "Templates");
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                if (GetXdgUserDir("XDG_TEMPLATES_DIR") is string dir)
                 {
-                    res = dir;
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        res = dir;
+                    }
+                }
+                else
+                {
+                    res = Path.Combine(Home, "Templates");
                 }
             }
             else
             {
                 res = Path.Combine(Home, "Templates");
             }
-#else
-            var res = Path.Combine(Home, "Templates");
-#endif
             Directory.CreateDirectory(res);
             return res;
         }
     }
 
     /// <summary>
-    ///     The user's videos directory.
+    /// The user's videos directory.
     /// </summary>
     public static string Videos
     {
         get
         {
-#if OS_WINDOWS
-            var res = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
-#elif OS_MAC
-            var res = Path.Combine(Home, "Videos");
-#elif OS_LINUX
             var res = string.Empty;
-            if (GetXdgUserDir("XDG_VIDEOS_DIR") is string dir)
+            if (OperatingSystem.IsWindows())
             {
-                if (!string.IsNullOrEmpty(dir))
+                res = Environment.GetFolderPath(Environment.SpecialFolder.MyVideos);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                res = Path.Combine(Home, "Videos");
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                if (GetXdgUserDir("XDG_VIDEOS_DIR") is string dir)
                 {
-                    res = dir;
+                    if (!string.IsNullOrEmpty(dir))
+                    {
+                        res = dir;
+                    }
+                }
+                else
+                {
+                    res = Path.Combine(Home, "Videos");
                 }
             }
             else
             {
                 res = Path.Combine(Home, "Videos");
             }
-#else
-            var res = Path.Combine(Home, "Videos");
-#endif
             Directory.CreateDirectory(res);
             return res;
         }
     }
 
-#if OS_LINUX
     /// <summary>
     /// Gets an XDG user directory from the user-dirs.dirs file or environment variable.
     /// </summary>
@@ -381,5 +446,4 @@ public static class UserDirectories
         }
         return null;
     }
-#endif
 }

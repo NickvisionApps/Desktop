@@ -1,7 +1,7 @@
-﻿namespace Nickvision.Desktop.System;
+namespace Nickvision.Desktop.System;
 
 /// <summary>
-///     A class representing a secret.
+/// A class representing a secret.
 /// </summary>
 public class Secret
 {

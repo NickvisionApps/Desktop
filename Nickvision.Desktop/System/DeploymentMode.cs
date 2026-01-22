@@ -1,7 +1,7 @@
-﻿namespace Nickvision.Desktop.System;
+namespace Nickvision.Desktop.System;
 
 /// <summary>
-///     Modes of deployment for the application.
+/// Modes of deployment for the application.
 /// </summary>
 public enum DeploymentMode
 {

@@ -1,17 +1,17 @@
-﻿namespace Nickvision.Desktop.Notifications;
+namespace Nickvision.Desktop.Notifications;
 
 /// <summary>
-///     A class containing information about a shell notification.
+/// A class containing information about a shell notification.
 /// </summary>
 public class ShellNotification : AppNotification
 {
     /// <summary>
-    ///     The title of the notification.
+    /// The title of the notification.
     /// </summary>
     public string Title { get; init; }
 
     /// <summary>
-    ///     Constructs a ShellNotification.
+    /// Constructs a ShellNotification.
     /// </summary>
     /// <param name="title">The title of the notification</param>
     /// <param name="message">The message of the notification</param>

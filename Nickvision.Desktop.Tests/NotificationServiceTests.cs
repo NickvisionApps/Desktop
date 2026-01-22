@@ -1,6 +1,7 @@
 ﻿using Nickvision.Desktop.Application;
 using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.Notifications;
+using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Tests;
 
@@ -17,10 +18,10 @@ public class NotificationServiceTests
     }
 
     [TestMethod]
-    public void Case002_SendShell()
+    public async Task Case002_SendShell()
     {
         Assert.IsNotNull(_notificationService);
-        Assert.IsTrue(_notificationService.Send(new ShellNotification("Test Notification", "This is a test notification body.", NotificationSeverity.Information)
+        Assert.IsTrue(await _notificationService.SendAsync(new ShellNotification("Test Notification", "This is a test notification body.", NotificationSeverity.Information)
         {
             Action = "open",
             ActionParam = UserDirectories.Home

@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.Application;
+using Nickvision.Desktop.Application;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Nickvision.Desktop.Filesystem;
 
 /// <summary>
-///     A service for working with json files on disk.
+/// A service for working with json files on disk.
 /// </summary>
 public class JsonFileService : IJsonFileService
 {
@@ -15,7 +15,7 @@ public class JsonFileService : IJsonFileService
     private readonly string _directory;
 
     /// <summary>
-    ///     Constructs a static JsonFileService.
+    /// Constructs a static JsonFileService.
     /// </summary>
     static JsonFileService()
     {
@@ -26,7 +26,7 @@ public class JsonFileService : IJsonFileService
     }
 
     /// <summary>
-    ///     Constructs a JsonFileService.
+    /// Constructs a JsonFileService.
     /// </summary>
     /// <param name="directory">The directory of where to load and save json files from</param>
     /// <remarks>The directory will be created if it doesn't exist</remarks>
@@ -40,24 +40,24 @@ public class JsonFileService : IJsonFileService
     }
 
     /// <summary>
-    ///     Constructs a JsonFileService.
+    /// Constructs a JsonFileService.
     /// </summary>
     /// <param name="appInfo">The AppInfo object for the app</param>
     /// <remarks>
-    ///     If the environment variable "{AppInfo.Id}.portable" is set, the current working directory will be used. Else,
-    ///     a {AppInfo.Name} folder will be created and used inside the user's configuration directory.
+    /// If the environment variable "{AppInfo.Id}.portable" is set, the current working directory will be used. Else,
+    /// a {AppInfo.Name} folder will be created and used inside the user's configuration directory.
     /// </remarks>
     public JsonFileService(AppInfo appInfo) : this(Environment.GetEnvironmentVariable($"{appInfo.Id}.portable") is not null ? System.Environment.ExecutingDirectory : Path.Combine(UserDirectories.Config, appInfo.Name))
     {
     }
 
     /// <summary>
-    ///     The event for when json files are saved.
+    /// The event for when json files are saved.
     /// </summary>
     public event EventHandler<JsonFileSavedEventArgs>? Saved;
 
     /// <summary>
-    ///     Loads a json file and deserializes it into an object.
+    /// Loads a json file and deserializes it into an object.
     /// </summary>
     /// <param name="name">The name of the json file (without the .json extension)</param>
     /// <typeparam name="T">The type of the object to deserialize to</typeparam>
@@ -75,7 +75,7 @@ public class JsonFileService : IJsonFileService
     }
 
     /// <summary>
-    ///     Loads a json file and deserializes it into an object asynchronously.
+    /// Loads a json file and deserializes it into an object asynchronously.
     /// </summary>
     /// <param name="name">The name of the json file (without the .json extension)</param>
     /// <typeparam name="T">The type of the object to deserialize to</typeparam>
@@ -93,7 +93,7 @@ public class JsonFileService : IJsonFileService
     }
 
     /// <summary>
-    ///     Saves an object by serializing it into a json file.
+    /// Saves an object by serializing it into a json file.
     /// </summary>
     /// <param name="obj">The object to serialize</param>
     /// <param name="name">The name of the json file (without the .json extension)</param>
@@ -120,7 +120,7 @@ public class JsonFileService : IJsonFileService
     }
 
     /// <summary>
-    ///     Saves an object by serializing it into a json file asynchronously.
+    /// Saves an object by serializing it into a json file asynchronously.
     /// </summary>
     /// <param name="obj">The object to serialize</param>
     /// <param name="name">The name of the json file (without the .json extension)</param>

@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using Nickvision.Desktop.Application;
 using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.System;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Nickvision.Desktop.Keyring;
 
 /// <summary>
-///     A service for managing credentials in a database keyring.
+/// A service for managing credentials in a database keyring.
 /// </summary>
 public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringService
 {
@@ -20,7 +20,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     private SqliteConnection? _connection;
 
     /// <summary>
-    ///     Constructs a KeyringService.
+    /// Constructs a KeyringService.
     /// </summary>
     /// <param name="info">The AppInfo object for the app</param>
     /// <param name="secretService">The service for managing secrets</param>
@@ -33,27 +33,28 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
         _credentials = [];
         _path = Path.Combine(keyringDir, $"{info.Id}.ring2");
         _connection = null;
-#if OS_WINDOWS || OS_MAC || OS_LINUX
-        var secret = secretService.Get(info.Id) ?? secretService.Create(info.Id);
-        if (secret is not null)
+        if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsLinux())
         {
-            _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{_path}'")
+            var secret = secretService.Get(info.Id) ?? secretService.Create(info.Id);
+            if (secret is not null)
             {
-                Mode = SqliteOpenMode.ReadWriteCreate,
-                Password = secret.Value,
-                Pooling = false
-            }.ToString());
-            try
-            {
-                _connection.Open();
-            }
-            catch (SqliteException)
-            {
-                _connection.Dispose();
-                _connection = null;
+                _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{_path}'")
+                {
+                    Mode = SqliteOpenMode.ReadWriteCreate,
+                    Password = secret.Value,
+                    Pooling = false
+                }.ToString());
+                try
+                {
+                    _connection.Open();
+                }
+                catch (SqliteException)
+                {
+                    _connection.Dispose();
+                    _connection = null;
+                }
             }
         }
-#endif
         if (_connection is null)
         {
             return;
@@ -71,7 +72,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    ///     Finalizes a KeyringService.
+    /// Finalizes a KeyringService.
     /// </summary>
     ~DatabaseKeyringService()
     {
@@ -79,7 +80,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    ///     Disposes a KeyringService asynchronously.
+    /// Disposes a KeyringService asynchronously.
     /// </summary>
     public async ValueTask DisposeAsync()
     {
@@ -89,7 +90,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    ///     Disposes a KeyringService.
+    /// Disposes a KeyringService.
     /// </summary>
     public void Dispose()
     {
@@ -98,17 +99,17 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    ///     Whether the keyring is currently saving to disk.
+    /// Whether the keyring is currently saving to disk.
     /// </summary>
     public bool IsSavingToDisk => _connection is not null;
 
     /// <summary>
-    ///     The list of credentials in the keyring.
+    /// The list of credentials in the keyring.
     /// </summary>
     public IEnumerable<Credential> Credentials => _credentials;
 
     /// <summary>
-    ///     Adds a credential to the keyring.
+    /// Adds a credential to the keyring.
     /// </summary>
     /// <param name="credential">The credential to add</param>
     /// <returns>True if the keyring was successfully added, else false</returns>
@@ -133,7 +134,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    ///     Destroys the keyring and all its credentials.
+    /// Destroys the keyring and all its credentials.
     /// </summary>
     /// <returns>True if the keyring was successfully added, else false</returns>
     public async Task<bool> DestroyAsync()
@@ -145,7 +146,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    ///     Removes a credential from the keyring.
+    /// Removes a credential from the keyring.
     /// </summary>
     /// <param name="credential">The credential to remove</param>
     /// <returns>True if the keyring was successfully removed, else false</returns>
@@ -168,7 +169,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    ///     Updates a credential in the keyring.
+    /// Updates a credential in the keyring.
     /// </summary>
     /// <param name="credential">The credential to update</param>
     /// <returns>True if the keyring was successfully updated, else false</returns>
@@ -194,7 +195,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    ///     Disposes a KeyringService asynchronously.
+    /// Disposes a KeyringService asynchronously.
     /// </summary>
     protected virtual async ValueTask DisposeAsyncCore()
     {
@@ -206,7 +207,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     }
 
     /// <summary>
-    ///     Disposes a KeyringService.
+    /// Disposes a KeyringService.
     /// </summary>
     /// <param name="disposing">Whether to dispose managed resources</param>
     private void Dispose(bool disposing)

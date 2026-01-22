@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 
 namespace Nickvision.Desktop.Keyring;
 
 /// <summary>
-///     A class for generating random passwords.
+/// A class for generating random passwords.
 /// </summary>
 public class PasswordGenerator
 {
@@ -15,12 +15,12 @@ public class PasswordGenerator
     private static readonly List<char> SpecialChars;
 
     /// <summary>
-    ///     The content type flags to include when generating a password.
+    /// The content type flags to include when generating a password.
     /// </summary>
     public PasswordContent ContentFlags { get; set; }
 
     /// <summary>
-    ///     Constructs a static PasswordGenerator.
+    /// Constructs a static PasswordGenerator.
     /// </summary>
     static PasswordGenerator()
     {
@@ -31,7 +31,7 @@ public class PasswordGenerator
     }
 
     /// <summary>
-    ///     Constructs a PasswordGenerator.
+    /// Constructs a PasswordGenerator.
     /// </summary>
     /// <param name="contentFlags">The content type flags to include when generating a password</param>
     public PasswordGenerator(PasswordContent contentFlags = PasswordContent.All)
@@ -40,7 +40,7 @@ public class PasswordGenerator
     }
 
     /// <summary>
-    ///     Generates a random password.
+    /// Generates a random password.
     /// </summary>
     /// <param name="length">The length of the password to generate</param>
     /// <returns>The new generated password</returns>

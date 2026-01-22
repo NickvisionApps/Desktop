@@ -1,68 +1,33 @@
-﻿using Nickvision.Desktop.Application;
-using System;
-using System.Diagnostics;
-#if OS_WINDOWS
 using Microsoft.Toolkit.Uwp.Notifications;
-#elif OS_LINUX
-using System.IO;
-using System.Runtime.InteropServices;
-#endif
+using Nickvision.Desktop.Application;
+using Nickvision.Desktop.FreeDesktop;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using Tmds.DBus;
 
 namespace Nickvision.Desktop.Notifications;
 
 /// <summary>
-///     A service for managing notifications.
+/// A service for managing notifications.
 /// </summary>
-#if OS_LINUX
-public partial class NotificationService : IDisposable, INotificationService
-#else
 public class NotificationService : IDisposable, INotificationService
-#endif
 {
-#if OS_LINUX
-    private delegate void GDestroyNotify(nint data);
-
-    private delegate void NotifyActionCallback(nint notification, [MarshalAs(UnmanagedType.LPStr)] string action, nint user_data);
-
-    [LibraryImport("libnotify.so.4")]
-    private static partial void g_object_unref(nint data);
-
-    [LibraryImport("libnotify.so.4")]
-    [return: MarshalAs(UnmanagedType.I1)]
-    private static partial bool notify_init([MarshalAs(UnmanagedType.LPStr)] string appName);
-
-    [LibraryImport("libnotify.so.4")]
-    private static partial void notify_uninit();
-
-    [LibraryImport("libnotify.so.4")]
-    public static partial nint notify_notification_new([MarshalAs(UnmanagedType.LPStr)] string summary, [MarshalAs(UnmanagedType.LPStr)] string body, [MarshalAs(UnmanagedType.LPStr)] string icon);
-
-    [LibraryImport("libnotify.so.4")]
-    private static unsafe partial void notify_notification_add_action(nint notification, [MarshalAs(UnmanagedType.LPStr)] string action, [MarshalAs(UnmanagedType.LPStr)] string label, NotifyActionCallback callback, nint user_data, GDestroyNotify free_func);
-
-    [LibraryImport("libnotify.so.4")]
-    private static partial void notify_notification_set_urgency(nint notification, uint urgency);
-
-    [LibraryImport("libnotify.so.4")]
-    [return: MarshalAs(UnmanagedType.I1)]
-    private static partial bool notify_notification_show(nint notification, nint error);
-#endif
-
     private bool _disposed;
     private readonly AppInfo _appInfo;
     private readonly string _openTranslatedText;
-#if OS_LINUX
-    private readonly GDestroyNotify _destroyCallback;
-    private readonly NotifyActionCallback _openActionCallback;
-#endif
+    private Connection? _dbus;
+    private INotifications? _freeDesktopNotifications;
+    private Dictionary<uint, IDisposable> _watchers;
 
     /// <summary>
-    ///     The event for when app notifications are sent.
+    /// The event for when app notifications are sent.
     /// </summary>
     public event EventHandler<AppNotificationSentEventArgs>? AppNotificationSent;
 
     /// <summary>
-    ///     Constructs a NotificationService.
+    /// Constructs a NotificationService.
     /// </summary>
     /// <param name="appInfo">The AppInfo object for the app</param>
     /// <param name="openTranslatedText">The text "Open" translated</param>
@@ -71,28 +36,11 @@ public class NotificationService : IDisposable, INotificationService
         _disposed = false;
         _appInfo = appInfo;
         _openTranslatedText = openTranslatedText;
-#if OS_LINUX
-        _destroyCallback = (nint data) => Marshal.FreeHGlobal(data);
-        _openActionCallback = (nint notification, string action, nint user_data) =>
-        {
-            var parameter = Marshal.PtrToStringAnsi(user_data);
-            using var process = new Process()
-            {
-                StartInfo = new ProcessStartInfo()
-                {
-                    FileName = "xdg-open",
-                    Arguments = parameter,
-                    UseShellExecute = true
-                }
-            };
-            process.Start();
-        };
-        notify_init(_appInfo.Id);
-#endif
+        _watchers = new Dictionary<uint, IDisposable>();
     }
 
     /// <summary>
-    ///     Finalizes a NotificationService.
+    /// Finalizes a NotificationService.
     /// </summary>
     ~NotificationService()
     {
@@ -100,7 +48,7 @@ public class NotificationService : IDisposable, INotificationService
     }
 
     /// <summary>
-    ///     Disposes a NotificationService.
+    /// Disposes a NotificationService.
     /// </summary>
     public void Dispose()
     {
@@ -109,69 +57,94 @@ public class NotificationService : IDisposable, INotificationService
     }
 
     /// <summary>
-    ///     Sends an app notification.
+    /// Sends an app notification.
     /// </summary>
     /// <param name="notification">The AppNotification to send</param>
     public void Send(AppNotification notification) => AppNotificationSent?.Invoke(this, new AppNotificationSentEventArgs(notification));
 
     /// <summary>
-    ///     Sends a shell notification.
+    /// Sends a shell notification.
     /// </summary>
     /// <param name="notification">The ShellNotification to send</param>
     /// <returns>True if the shell notification was sent successfully, else false</returns>
-    public bool Send(ShellNotification notification)
+    public async Task<bool> SendAsync(ShellNotification notification)
     {
-#if OS_WINDOWS
-        var builder = new ToastContentBuilder();
-        builder.AddText(notification.Title);
-        builder.AddText(notification.Message);
-        if (notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam))
+        if (OperatingSystem.IsWindows())
         {
-            builder.AddButton(_openTranslatedText, ToastActivationType.Protocol, $"file://{notification.ActionParam}");
-        }
-#if NET_WINDOWS
-        builder.Show();
-#endif
-        return true;
-#elif OS_MAC
-        using var process = new Process()
-        {
-            StartInfo = new ProcessStartInfo()
+            var builder = new ToastContentBuilder();
+            builder.AddText(notification.Title);
+            builder.AddText(notification.Message);
+            if (notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam))
             {
-                FileName = "osascript",
-                Arguments = $"-e 'display notification \"{notification.Message}\" with title \"{notification.Title}\" subtitle \"{_appInfo.EnglishShortName}\"'",
-                UseShellExecute = false,
-                CreateNoWindow = true
+                builder.AddButton(_openTranslatedText, ToastActivationType.Protocol, $"file://{notification.ActionParam}");
             }
-        };
-        process.Start();
-        return true;
-#elif OS_LINUX
-        var notify = notify_notification_new(notification.Title, notification.Message, _appInfo.Id);
-        if (notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam))
-        {
-            notify_notification_add_action(notify, "open", _openTranslatedText, _openActionCallback, Marshal.StringToHGlobalAnsi(notification.ActionParam), _destroyCallback);
-        }
-        notify_notification_set_urgency(notify,
-            notification.Severity switch
-            {
-                NotificationSeverity.Information => 1,
-                NotificationSeverity.Success => 1,
-                NotificationSeverity.Warning => 2,
-                NotificationSeverity.Error => 2,
-                _ => 0
-            });
-        var res = notify_notification_show(notify, nint.Zero);
-        g_object_unref(notify);
-        return res;
-#else
-        AppNotificationSent?.Invoke(this, new AppNotificationSentEventArgs(args));
-        return true;
+#if NET_WINDOWS
+            builder.Show();
 #endif
+            return true;
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            using var process = new Process()
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = "osascript",
+                    Arguments = $"-e 'display notification \"{notification.Message}\" with title \"{notification.Title}\" subtitle \"{_appInfo.EnglishShortName}\"'",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            process.Start();
+            return true;
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            if(_dbus is null)
+            {
+                _dbus = new Connection(Address.Session);
+                await _dbus.ConnectAsync();
+            }
+            if (_freeDesktopNotifications is null)
+            {
+                try
+                {
+                    _freeDesktopNotifications = _dbus.CreateProxy<INotifications>("org.freedesktop.Notifications", "/org/freedesktop/Notifications");
+                    await _freeDesktopNotifications.WatchNotificationClosedAsync(((uint id, uint reason) e) =>
+                    {
+                        if(_watchers.TryGetValue(e.id, out var watcher))
+                        {
+                            watcher.Dispose();
+                            _watchers.Remove(e.id);
+                        }
+                    });
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            var actionWatcher = await _freeDesktopNotifications.WatchActionInvokedAsync(((uint id, string actionKey) e) =>
+            {
+                if(e.actionKey == "open")
+                {
+                    Process.Start(new ProcessStartInfo()
+                    {
+                        FileName = "xdg-open",
+                        Arguments = notification.ActionParam,
+                        UseShellExecute = true
+                    });
+                }
+            });
+            var id = await _freeDesktopNotifications.NotifyAsync(_appInfo.Id, 0, _appInfo.Id, notification.Title, notification.Message, notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam) ? ["open", _openTranslatedText] : [], new Dictionary<string, object>(), -1);
+            _watchers[id] = actionWatcher;
+            return id > 0;
+        }
+        return true;
     }
 
     /// <summary>
-    ///     Disposes a NotificationService.
+    /// Disposes a NotificationService.
     /// </summary>
     /// <param name="disposing">Whether to dispose managed resources</param>
     private void Dispose(bool disposing)
@@ -180,9 +153,12 @@ public class NotificationService : IDisposable, INotificationService
         {
             return;
         }
-#if OS_LINUX
-        notify_uninit();
-#endif
+        if (OperatingSystem.IsLinux())
+        {
+            _dbus?.Dispose();
+            _dbus = null;
+            _freeDesktopNotifications = null;
+        }
         _disposed = true;
     }
 }

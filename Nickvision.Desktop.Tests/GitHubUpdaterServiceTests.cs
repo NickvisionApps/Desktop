@@ -36,7 +36,7 @@ public class GitHubUpdaterServiceTests
     {
         if (Environment.GetEnvironmentVariable("CI") == "true")
         {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
+            Assert.Inconclusive("Update service is not supported in CI environments");
         }
         Assert.IsNotNull(_client);
         _updaterService = new GitHubUpdaterService(new AppInfo("org.nickvision.tubeconverter", "Nickvision Parabolic", "Parabolic")
@@ -52,7 +52,7 @@ public class GitHubUpdaterServiceTests
     {
         if (Environment.GetEnvironmentVariable("CI") == "true")
         {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
+            Assert.Inconclusive("Update service is not supported in CI environments");
         }
         Assert.IsNotNull(_updaterService);
         var version = await _updaterService.GetLatestStableVersionAsync();
@@ -65,7 +65,7 @@ public class GitHubUpdaterServiceTests
     {
         if (Environment.GetEnvironmentVariable("CI") == "true")
         {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
+            Assert.Inconclusive("Update service is not supported in CI environments");
         }
         Assert.IsNotNull(_updaterService);
         var version = await _updaterService.GetLatestPreviewVersionAsync();
@@ -78,7 +78,7 @@ public class GitHubUpdaterServiceTests
     {
         if (Environment.GetEnvironmentVariable("CI") == "true")
         {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
+            Assert.Inconclusive("Update service is not supported in CI environments");
         }
         Assert.IsNotNull(_updaterService);
         var preview = await _updaterService.GetLatestPreviewVersionAsync();
@@ -93,7 +93,7 @@ public class GitHubUpdaterServiceTests
     {
         if (Environment.GetEnvironmentVariable("CI") == "true")
         {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
+            Assert.Inconclusive("Update service is not supported in CI environments");
         }
         Assert.IsNotNull(_client);
         var updateService = new GitHubUpdaterService("yt-dlp", "yt-dlp", _client);
@@ -102,13 +102,16 @@ public class GitHubUpdaterServiceTests
         Assert.IsTrue(stable >= new AppVersion("2025.12.08"));
     }
 
-#if OS_WINDOWS
     [TestMethod]
     public async Task Check006_WindowsUpdate()
     {
+        if (!global::System.OperatingSystem.IsWindows())
+        {
+            Assert.Inconclusive("This test only runs on Windows");
+        }
         if (Environment.GetEnvironmentVariable("CI") == "true")
         {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
+            Assert.Inconclusive("Update service is not supported in CI environments");
         }
         Assert.IsNotNull(_updaterService);
         var version = await _updaterService.GetLatestStableVersionAsync();
@@ -116,5 +119,4 @@ public class GitHubUpdaterServiceTests
         Assert.IsTrue(version > new Version("2025.10.0"));
         Assert.IsTrue(await _updaterService.WindowsUpdate(version));
     }
-#endif
 }

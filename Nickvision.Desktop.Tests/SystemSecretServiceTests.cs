@@ -1,13 +1,9 @@
 ﻿using Nickvision.Desktop.System;
-using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Tests;
 
 [TestClass]
-[SupportedOSPlatform("windows")]
-[SupportedOSPlatform("linux")]
-[SupportedOSPlatform("macos")]
 public sealed class SystemSecretServiceTests
 {
     private static SystemSecretService? _secretService;
@@ -15,12 +11,6 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public void Case001_Initialize()
     {
-#if OS_LINUX
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-        {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
-        }
-#endif
         _secretService = new SystemSecretService();
         Assert.IsNotNull(_secretService);
     }
@@ -28,12 +18,6 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case002_Add()
     {
-#if OS_LINUX
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-        {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
-        }
-#endif
         Assert.IsNotNull(_secretService);
         var secret = new Secret("Nickvision.Desktop.Test", "abc");
         Assert.IsTrue(await _secretService.AddAsync(secret));
@@ -43,12 +27,6 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case003_Create()
     {
-#if OS_LINUX
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-        {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
-        }
-#endif
         Assert.IsNotNull(_secretService);
         var service = await _secretService.CreateAsync("Nickvision.Desktop.Test2");
         Assert.IsNotNull(service);
@@ -58,12 +36,6 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public void Case004_Create()
     {
-#if OS_LINUX
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-        {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
-        }
-#endif
         Assert.IsNotNull(_secretService);
         var service = _secretService.Create("Nickvision.Desktop.Test3");
         Assert.IsNotNull(service);
@@ -73,12 +45,6 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case005_Get()
     {
-#if OS_LINUX
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-        {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
-        }
-#endif
         Assert.IsNotNull(_secretService);
         Assert.IsTrue(await _secretService.AddAsync(new Secret("Nickvision.Desktop.Test4", "abc")));
         var secret = _secretService.Get("Nickvision.Desktop.Test4");
@@ -90,12 +56,6 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case006_Get()
     {
-#if OS_LINUX
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-        {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
-        }
-#endif
         Assert.IsNotNull(_secretService);
         var secret = await _secretService.CreateAsync("Nickvision.Desktop.Test5");
         Assert.IsNotNull(secret);
@@ -109,12 +69,6 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case007_Update()
     {
-#if OS_LINUX
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-        {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
-        }
-#endif
         Assert.IsNotNull(_secretService);
         Assert.IsTrue(_secretService.Add(new Secret("Nickvision.Desktop.Test6", "abc123")));
         var secret = await _secretService.GetAsync("Nickvision.Desktop.Test6");
@@ -131,12 +85,6 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case008_Update()
     {
-#if OS_LINUX
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-        {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
-        }
-#endif
         Assert.IsNotNull(_secretService);
         Assert.IsTrue(await _secretService.AddAsync(new Secret("Nickvision.Desktop.Test7", "abc123")));
         var secret = _secretService.Get("Nickvision.Desktop.Test7");
@@ -153,12 +101,6 @@ public sealed class SystemSecretServiceTests
     [TestMethod]
     public async Task Case009_Delete()
     {
-#if OS_LINUX
-        if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
-        {
-            Assert.Inconclusive("Dialogs are not supported in CI environments");
-        }
-#endif
         Assert.IsNotNull(_secretService);
         foreach (var cred in new[]
         {

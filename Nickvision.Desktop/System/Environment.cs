@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.Application;
+using Nickvision.Desktop.Application;
 using Nickvision.Desktop.Filesystem;
 using System;
 using System.Collections.Generic;
@@ -11,14 +11,14 @@ using System.Runtime.InteropServices;
 namespace Nickvision.Desktop.System;
 
 /// <summary>
-///     Helpers for working with the system environment.
+/// Helpers for working with the system environment.
 /// </summary>
 public static class Environment
 {
     private static readonly Dictionary<(string Dependency, DependencySearchOption Search), string?> Dependencies;
 
     /// <summary>
-    ///     Constructs a static Environment.
+    /// Constructs a static Environment.
     /// </summary>
     static Environment()
     {
@@ -26,7 +26,7 @@ public static class Environment
     }
 
     /// <summary>
-    ///     The deployment mode of the application.
+    /// The deployment mode of the application.
     /// </summary>
     public static DeploymentMode DeploymentMode
     {
@@ -45,33 +45,29 @@ public static class Environment
     }
 
     /// <summary>
-    ///     The application executable's directory.
+    /// The application executable's directory.
     /// </summary>
     public static string ExecutingDirectory => Path.GetDirectoryName(ExecutingPath) ?? global::System.Environment.CurrentDirectory;
 
     /// <summary>
-    ///     The application executable's path.
+    /// The application executable's path.
     /// </summary>
     public static string ExecutingPath => !string.IsNullOrEmpty(Assembly.GetEntryAssembly()!.Location) ? Assembly.GetEntryAssembly()!.Location : global::System.Environment.GetCommandLineArgs()[0];
 
     /// <summary>
-    ///     The list of directories in the PATH variable.
+    /// The list of directories in the PATH variable.
     /// </summary>
     public static IEnumerable<string> PathVariable
     {
         get
         {
             var path = global::System.Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
-#if OS_WINDOWS
-            return path.Split(';').Select(p => global::System.Environment.ExpandEnvironmentVariables(p));
-#else
-            return path.Split(':').Select(p => global::System.Environment.ExpandEnvironmentVariables(p));
-#endif
+            return (OperatingSystem.IsWindows() ? path.Split(';') : path.Split(':')).Select(global::System.Environment.ExpandEnvironmentVariables);
         }
     }
 
     /// <summary>
-    ///     Finds a dependency on the system.
+    /// Finds a dependency on the system.
     /// </summary>
     /// <param name="dependency">The dependency to find</param>
     /// <param name="search">The search options</param>
@@ -79,12 +75,13 @@ public static class Environment
     /// <exception cref="ArgumentOutOfRangeException">Thrown if the search option is invalid</exception>
     public static string? FindDependency(string dependency, DependencySearchOption search = DependencySearchOption.Global)
     {
-#if OS_WINDOWS
-        if (string.IsNullOrEmpty(Path.GetExtension(dependency) ?? string.Empty))
+        if (OperatingSystem.IsWindows())
         {
-            dependency += ".exe";
+            if (string.IsNullOrEmpty(Path.GetExtension(dependency) ?? string.Empty))
+            {
+                dependency += ".exe";
+            }
         }
-#endif
         if (Dependencies.TryGetValue((dependency, search), out var cachedPath))
         {
             if (cachedPath is not null && File.Exists(cachedPath))
@@ -149,7 +146,7 @@ public static class Environment
     }
 
     /// <summary>
-    ///     Gets the debug information for the application.
+    /// Gets the debug information for the application.
     /// </summary>
     /// <param name="info">The AppInfo object for the app</param>
     /// <param name="extra">Any extra information to include in the debug information string</param>
