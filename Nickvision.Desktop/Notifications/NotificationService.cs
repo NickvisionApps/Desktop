@@ -1,8 +1,11 @@
 using Microsoft.Toolkit.Uwp.Notifications;
 using Nickvision.Desktop.Application;
+using Nickvision.Desktop.FreeDesktop;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Tmds.DBus;
 
 namespace Nickvision.Desktop.Notifications;
 
@@ -14,8 +17,9 @@ public class NotificationService : IDisposable, INotificationService
     private bool _disposed;
     private readonly AppInfo _appInfo;
     private readonly string _openTranslatedText;
-    private LinuxNotify.GDestroyNotify? _destroyCallback;
-    private LinuxNotify.NotifyActionCallback? _openActionCallback;
+    private Connection? _dbus;
+    private INotifications? _freeDesktopNotifications;
+    private Dictionary<uint, IDisposable> _watchers;
 
     /// <summary>
     /// The event for when app notifications are sent.
@@ -32,25 +36,7 @@ public class NotificationService : IDisposable, INotificationService
         _disposed = false;
         _appInfo = appInfo;
         _openTranslatedText = openTranslatedText;
-        if (OperatingSystem.IsLinux())
-        {
-            _destroyCallback = Marshal.FreeHGlobal;
-            _openActionCallback = (nint notification, string action, nint user_data) =>
-            {
-                var parameter = Marshal.PtrToStringAnsi(user_data);
-                using var process = new Process()
-                {
-                    StartInfo = new ProcessStartInfo()
-                    {
-                        FileName = "xdg-open",
-                        Arguments = parameter,
-                        UseShellExecute = true
-                    }
-                };
-                process.Start();
-            };
-            LinuxNotify.notify_init(_appInfo.Id);
-        }
+        _watchers = new Dictionary<uint, IDisposable>();
     }
 
     /// <summary>
@@ -81,7 +67,7 @@ public class NotificationService : IDisposable, INotificationService
     /// </summary>
     /// <param name="notification">The ShellNotification to send</param>
     /// <returns>True if the shell notification was sent successfully, else false</returns>
-    public bool Send(ShellNotification notification)
+    public async Task<bool> SendAsync(ShellNotification notification)
     {
         if (OperatingSystem.IsWindows())
         {
@@ -114,28 +100,47 @@ public class NotificationService : IDisposable, INotificationService
         }
         else if (OperatingSystem.IsLinux())
         {
-            var notify = LinuxNotify.notify_notification_new(notification.Title, notification.Message, _appInfo.Id);
-            if (notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam) && _openActionCallback is not null && _destroyCallback is not null)
+            if(_dbus is null)
             {
-                LinuxNotify.notify_notification_add_action(notify, "open", _openTranslatedText, _openActionCallback, Marshal.StringToHGlobalAnsi(notification.ActionParam), _destroyCallback);
+                _dbus = new Connection(Address.Session);
+                await _dbus.ConnectAsync();
             }
-            LinuxNotify.notify_notification_set_urgency(notify,
-                notification.Severity switch
+            if (_freeDesktopNotifications is null)
+            {
+                try
                 {
-                    NotificationSeverity.Information => 1,
-                    NotificationSeverity.Success => 1,
-                    NotificationSeverity.Warning => 2,
-                    NotificationSeverity.Error => 2,
-                    _ => 0
-                });
-            var res = LinuxNotify.notify_notification_show(notify, nint.Zero);
-            LinuxNotify.g_object_unref(notify);
-            return res;
+                    _freeDesktopNotifications = _dbus.CreateProxy<INotifications>("org.freedesktop.Notifications", "/org/freedesktop/Notifications");
+                    await _freeDesktopNotifications.WatchNotificationClosedAsync(((uint id, uint reason) e) =>
+                    {
+                        if(_watchers.TryGetValue(e.id, out var watcher))
+                        {
+                            watcher.Dispose();
+                            _watchers.Remove(e.id);
+                        }
+                    });
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            var actionWatcher = await _freeDesktopNotifications.WatchActionInvokedAsync(((uint id, string actionKey) e) =>
+            {
+                if(e.actionKey == "open")
+                {
+                    Process.Start(new ProcessStartInfo()
+                    {
+                        FileName = "xdg-open",
+                        Arguments = notification.ActionParam,
+                        UseShellExecute = true
+                    });
+                }
+            });
+            var id = await _freeDesktopNotifications.NotifyAsync(_appInfo.Id, 0, _appInfo.Id, notification.Title, notification.Message, notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam) ? ["open", _openTranslatedText] : [], new Dictionary<string, object>(), -1);
+            _watchers[id] = actionWatcher;
+            return id > 0;
         }
-        else
-        {
-            return true;
-        }
+        return true;
     }
 
     /// <summary>
@@ -150,7 +155,9 @@ public class NotificationService : IDisposable, INotificationService
         }
         if (OperatingSystem.IsLinux())
         {
-            LinuxNotify.notify_uninit();
+            _dbus?.Dispose();
+            _dbus = null;
+            _freeDesktopNotifications = null;
         }
         _disposed = true;
     }

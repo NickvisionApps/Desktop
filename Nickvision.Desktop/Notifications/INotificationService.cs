@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Notifications;
 
@@ -23,5 +24,5 @@ public interface INotificationService : IService
     /// </summary>
     /// <param name="notification">The ShellNotification to send</param>
     /// <returns>True if the shell notification was sent successfully, else false</returns>
-    bool Send(ShellNotification notification);
+    Task<bool> SendAsync(ShellNotification notification);
 }

@@ -52,7 +52,7 @@ public class PowerService : IDisposable, IPowerService
     {
         if (OperatingSystem.IsWindows())
         {
-            return await Task.FromResult(Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS) != 0);
+            return Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS) != 0;
         }
         else if (OperatingSystem.IsLinux())
         {
@@ -68,16 +68,16 @@ public class PowerService : IDisposable, IPowerService
         {
             if (_preventSuspendProcess is null)
             {
-                return await Task.FromResult(false);
+                return false;
             }
             _preventSuspendProcess.Kill();
             _preventSuspendProcess.Dispose();
             _preventSuspendProcess = null;
-            return await Task.FromResult(true);
+            return true;
         }
         else
         {
-            return await Task.FromResult(false);
+            return false;
         }
     }
 
@@ -89,7 +89,7 @@ public class PowerService : IDisposable, IPowerService
     {
         if (OperatingSystem.IsWindows())
         {
-            return await Task.FromResult(Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS | Kernel32.EXECUTION_STATE.ES_SYSTEM_REQUIRED) != 0);
+            return Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS | Kernel32.EXECUTION_STATE.ES_SYSTEM_REQUIRED) != 0;
         }
         else if (OperatingSystem.IsLinux())
         {
@@ -102,7 +102,7 @@ public class PowerService : IDisposable, IPowerService
             {
                 try
                 {
-                    _freeDesktopScreenSaver = _dbus.CreateProxy<IScreenSaver>("org.freedesktop.ScreenSaver", new ObjectPath("/org/freedesktop/ScreenSaver"));
+                    _freeDesktopScreenSaver = _dbus.CreateProxy<IScreenSaver>("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver");
                 }
                 catch
                 {
@@ -120,11 +120,11 @@ public class PowerService : IDisposable, IPowerService
         {
             if (_preventSuspendProcess is not null)
             {
-                return await Task.FromResult(true);
+                return true;
             }
             if (string.IsNullOrEmpty(Environment.FindDependency("caffeinate")))
             {
-                return await Task.FromResult(false);
+                return false;
             }
             _preventSuspendProcess = new Process()
             {
@@ -137,11 +137,11 @@ public class PowerService : IDisposable, IPowerService
                 }
             };
             _preventSuspendProcess.Start();
-            return await Task.FromResult(true);
+            return true;
         }
         else
         {
-            return await Task.FromResult(false);
+            return false;
         }
     }
 

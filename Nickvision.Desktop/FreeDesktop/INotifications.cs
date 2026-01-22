@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Tmds.DBus;
 
-namespace Notifications.DBus;
+namespace Nickvision.Desktop.FreeDesktop;
 
 [DBusInterface("org.freedesktop.Notifications")]
 public interface INotifications : IDBusObject
