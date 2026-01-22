@@ -102,10 +102,13 @@ public class GitHubUpdaterServiceTests
         Assert.IsTrue(stable >= new AppVersion("2025.12.08"));
     }
 
-#if OS_WINDOWS
     [TestMethod]
     public async Task Check006_WindowsUpdate()
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            Assert.Inconclusive("This test only runs on Windows");
+        }
         if (Environment.GetEnvironmentVariable("CI") == "true")
         {
             Assert.Inconclusive("Dialogs are not supported in CI environments");
@@ -116,5 +119,4 @@ public class GitHubUpdaterServiceTests
         Assert.IsTrue(version > new Version("2025.10.0"));
         Assert.IsTrue(await _updaterService.WindowsUpdate(version));
     }
-#endif
 }

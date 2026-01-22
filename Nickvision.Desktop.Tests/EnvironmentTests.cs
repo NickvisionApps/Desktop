@@ -16,11 +16,7 @@ public sealed class EnvironmentTests
     [TestMethod]
     public void Case003_GlobalDependency()
     {
-#if OS_WINDOWS
-        const string dependency = "cmd.exe";
-#else
-        const string dependency = "ls";
-#endif
+        var dependency = global::System.OperatingSystem.IsWindows() ? "cmd.exe" : "ls";
         var path = Environment.FindDependency(dependency);
         Assert.IsFalse(string.IsNullOrEmpty(path));
         Assert.IsTrue(File.Exists(path));
@@ -29,11 +25,7 @@ public sealed class EnvironmentTests
     [TestMethod]
     public void Case004_AppDependency()
     {
-#if OS_WINDOWS
-        const string dependency = "cmd.exe";
-#else
-        const string dependency = "ls";
-#endif
+        var dependency = global::System.OperatingSystem.IsWindows() ? "cmd.exe" : "ls";
         var path = Environment.FindDependency(dependency, DependencySearchOption.App);
         Assert.IsTrue(string.IsNullOrEmpty(path));
         Assert.IsFalse(File.Exists(path));
@@ -42,11 +34,7 @@ public sealed class EnvironmentTests
     [TestMethod]
     public void Case005_SystemDependency()
     {
-#if OS_WINDOWS
-        const string dependency = "cmd.exe";
-#else
-        const string dependency = "ls";
-#endif
+        var dependency = global::System.OperatingSystem.IsWindows() ? "cmd.exe" : "ls";
         var path = Environment.FindDependency(dependency, DependencySearchOption.System);
         Assert.IsFalse(string.IsNullOrEmpty(path));
         Assert.IsTrue(File.Exists(path));
@@ -55,11 +43,7 @@ public sealed class EnvironmentTests
     [TestMethod]
     public void Case006_LocalDependency()
     {
-#if OS_WINDOWS
-        const string dependency = "cmd.exe";
-#else
-        const string dependency = "ls";
-#endif
+        var dependency = global::System.OperatingSystem.IsWindows() ? "cmd.exe" : "ls";
         var path = Environment.FindDependency(dependency, DependencySearchOption.Local);
         Assert.IsTrue(string.IsNullOrEmpty(path));
         Assert.IsFalse(File.Exists(path));
