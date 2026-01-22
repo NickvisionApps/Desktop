@@ -34,7 +34,7 @@ public class NotificationService : IDisposable, INotificationService
         _openTranslatedText = openTranslatedText;
         if (OperatingSystem.IsLinux())
         {
-            _destroyCallback = (nint data) => Marshal.FreeHGlobal(data);
+            _destroyCallback = Marshal.FreeHGlobal;
             _openActionCallback = (nint notification, string action, nint user_data) =>
             {
                 var parameter = Marshal.PtrToStringAnsi(user_data);

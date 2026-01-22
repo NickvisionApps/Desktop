@@ -105,7 +105,7 @@ public class GitHubUpdaterServiceTests
     [TestMethod]
     public async Task Check006_WindowsUpdate()
     {
-        if (!OperatingSystem.IsWindows())
+        if (!global::System.OperatingSystem.IsWindows())
         {
             Assert.Inconclusive("This test only runs on Windows");
         }

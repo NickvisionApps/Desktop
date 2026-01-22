@@ -1,6 +1,7 @@
 ﻿using Nickvision.Desktop.System;
 using System.IO;
 using System.Linq;
+using Environment = Nickvision.Desktop.System.Environment;
 
 namespace Nickvision.Desktop.Tests;
 

@@ -17,7 +17,7 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public void Case001_Init()
     {
-        if (OperatingSystem.IsLinux())
+        if (global::System.OperatingSystem.IsLinux())
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
@@ -32,7 +32,7 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public void Case002_Check()
     {
-        if (OperatingSystem.IsLinux())
+        if (global::System.OperatingSystem.IsLinux())
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
@@ -46,7 +46,7 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public async Task Case003_Add()
     {
-        if (OperatingSystem.IsLinux())
+        if (global::System.OperatingSystem.IsLinux())
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
@@ -62,7 +62,7 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public async Task Case004_Update()
     {
-        if (OperatingSystem.IsLinux())
+        if (global::System.OperatingSystem.IsLinux())
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
@@ -83,7 +83,7 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public async Task Case005_Remove()
     {
-        if (OperatingSystem.IsLinux())
+        if (global::System.OperatingSystem.IsLinux())
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
@@ -101,7 +101,7 @@ public sealed class DatabaseKeyringServiceTests
     [TestMethod]
     public async Task Case006_Cleanup()
     {
-        if (OperatingSystem.IsLinux())
+        if (global::System.OperatingSystem.IsLinux())
         {
             if (global::System.Environment.GetEnvironmentVariable("CI") == "true")
             {
