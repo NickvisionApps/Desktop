@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FileMode = System.IO.FileMode;
@@ -186,9 +187,25 @@ public class GitHubUpdaterService : IUpdaterService
             return false;
         }
         var setupPath = Path.Combine(UserDirectories.Cache, $"{_owner}_{_name}_Setup.exe");
-        if (!await DownloadReleaseAssetAsync(version, setupPath, "setup.exe", false, progress))
+        if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
         {
-            return false;
+            if (!await DownloadReleaseAssetAsync(version, setupPath, "setup-arm64.exe", false, progress))
+            {
+                if (!await DownloadReleaseAssetAsync(version, setupPath, "setup.exe", false, progress))
+                {
+                    return false;
+                }
+            }
+        }
+        else
+        {
+            if (!await DownloadReleaseAssetAsync(version, setupPath, "setup-x64.exe", false, progress))
+            {
+                if (!await DownloadReleaseAssetAsync(version, setupPath, "setup.exe", false, progress))
+                {
+                    return false;
+                }
+            }
         }
         Process.Start(new ProcessStartInfo
         {

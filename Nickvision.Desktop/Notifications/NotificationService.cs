@@ -100,7 +100,7 @@ public class NotificationService : IDisposable, INotificationService
         }
         else if (OperatingSystem.IsLinux())
         {
-            if(_dbus is null)
+            if (_dbus is null)
             {
                 _dbus = new Connection(Address.Session);
                 await _dbus.ConnectAsync();
@@ -112,7 +112,7 @@ public class NotificationService : IDisposable, INotificationService
                     _freeDesktopNotifications = _dbus.CreateProxy<INotifications>("org.freedesktop.Notifications", "/org/freedesktop/Notifications");
                     await _freeDesktopNotifications.WatchNotificationClosedAsync(((uint id, uint reason) e) =>
                     {
-                        if(_watchers.TryGetValue(e.id, out var watcher))
+                        if (_watchers.TryGetValue(e.id, out var watcher))
                         {
                             watcher.Dispose();
                             _watchers.Remove(e.id);
@@ -126,7 +126,7 @@ public class NotificationService : IDisposable, INotificationService
             }
             var actionWatcher = await _freeDesktopNotifications.WatchActionInvokedAsync(((uint id, string actionKey) e) =>
             {
-                if(e.actionKey == "open")
+                if (e.actionKey == "open")
                 {
                     Process.Start(new ProcessStartInfo()
                     {
