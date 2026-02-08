@@ -124,21 +124,28 @@ public class NotificationService : IDisposable, INotificationService
                     return false;
                 }
             }
-            var actionWatcher = await _freeDesktopNotifications.WatchActionInvokedAsync(((uint id, string actionKey) e) =>
+            try
             {
-                if (e.actionKey == "open")
+                var actionWatcher = await _freeDesktopNotifications.WatchActionInvokedAsync(((uint id, string actionKey) e) =>
                 {
-                    Process.Start(new ProcessStartInfo()
+                    if (e.actionKey == "open")
                     {
-                        FileName = "xdg-open",
-                        Arguments = notification.ActionParam,
-                        UseShellExecute = true
-                    });
-                }
-            });
-            var id = await _freeDesktopNotifications.NotifyAsync(_appInfo.Id, 0, _appInfo.Id, notification.Title, notification.Message, notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam) ? ["open", _openTranslatedText] : [], new Dictionary<string, object>(), -1);
-            _watchers[id] = actionWatcher;
-            return id > 0;
+                        Process.Start(new ProcessStartInfo()
+                        {
+                            FileName = "xdg-open",
+                            Arguments = notification.ActionParam,
+                            UseShellExecute = true
+                        });
+                    }
+                });
+                var id = await _freeDesktopNotifications.NotifyAsync(_appInfo.Id, 0, _appInfo.Id, notification.Title, notification.Message, notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam) ? ["open", _openTranslatedText] : [], new Dictionary<string, object>(), -1);
+                _watchers[id] = actionWatcher;
+                return id > 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
         return true;
     }

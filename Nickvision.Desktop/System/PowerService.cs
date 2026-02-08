@@ -113,7 +113,14 @@ public class PowerService : IDisposable, IPowerService
             {
                 return true;
             }
-            _inhibitCookie = await _freeDesktopScreenSaver.InhibitAsync("Nickvision Desktop", "Preventing suspend");
+            try
+            {
+                _inhibitCookie = await _freeDesktopScreenSaver.InhibitAsync("Nickvision Desktop", "Preventing suspend");
+            }
+            catch
+            {
+                return false;
+            }
             return true;
         }
         else if (OperatingSystem.IsMacOS())

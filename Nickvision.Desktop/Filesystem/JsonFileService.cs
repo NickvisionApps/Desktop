@@ -2,6 +2,7 @@ using Nickvision.Desktop.Application;
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Filesystem;
@@ -21,6 +22,7 @@ public class JsonFileService : IJsonFileService
     {
         JsonOptions = new JsonSerializerOptions
         {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             WriteIndented = true
         };
     }
@@ -70,7 +72,7 @@ public class JsonFileService : IJsonFileService
             return Activator.CreateInstance<T>();
         }
         var text = File.ReadAllText(path);
-        var obj = JsonSerializer.Deserialize<T>(text);
+        var obj = JsonSerializer.Deserialize<T>(text, JsonOptions);
         return obj ?? Activator.CreateInstance<T>();
     }
 
@@ -88,7 +90,7 @@ public class JsonFileService : IJsonFileService
             return Activator.CreateInstance<T>();
         }
         var text = await File.ReadAllTextAsync(path);
-        var obj = JsonSerializer.Deserialize<T>(text);
+        var obj = JsonSerializer.Deserialize<T>(text, JsonOptions);
         return obj ?? Activator.CreateInstance<T>();
     }
 
