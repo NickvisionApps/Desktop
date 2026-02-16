@@ -41,7 +41,7 @@ public class GettextTranslationService : ITranslationService
         }
         else
         {
-            _catalog = !AvailableLanguages.Contains(_language) ? new Catalog(_appInfo.EnglishShortName) : _catalog = new Catalog(_appInfo.EnglishShortName, new CultureInfo(language));
+            _catalog = !AvailableLanguages.Contains(_language) ? new Catalog(_appInfo.EnglishShortName, System.Environment.ExecutingDirectory) : _catalog = new Catalog(_appInfo.EnglishShortName, System.Environment.ExecutingDirectory, new CultureInfo(language));
         }
     }
 
@@ -61,7 +61,7 @@ public class GettextTranslationService : ITranslationService
             _language = value;
             if (string.IsNullOrEmpty(_language))
             {
-                _catalog = new Catalog(_appInfo.EnglishShortName);
+                _catalog = new Catalog(_appInfo.EnglishShortName, System.Environment.ExecutingDirectory);
             }
             else if (_language == "C")
             {
@@ -69,7 +69,7 @@ public class GettextTranslationService : ITranslationService
             }
             else
             {
-                _catalog = !AvailableLanguages.Contains(_language) ? new Catalog(_appInfo.EnglishShortName) : _catalog = new Catalog(_appInfo.EnglishShortName, new CultureInfo(_language));
+                _catalog = !AvailableLanguages.Contains(_language) ? new Catalog(_appInfo.EnglishShortName, System.Environment.ExecutingDirectory) : _catalog = new Catalog(_appInfo.EnglishShortName, System.Environment.ExecutingDirectory, new CultureInfo(_language));
             }
         }
     }
