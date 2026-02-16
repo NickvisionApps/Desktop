@@ -33,7 +33,7 @@ public class GettextTranslationService : ITranslationService
         _language = language;
         if (string.IsNullOrEmpty(_language))
         {
-            _catalog = new Catalog(_appInfo.EnglishShortName);
+            _catalog = new Catalog(_appInfo.EnglishShortName, System.Environment.ExecutingDirectory);
         }
         else if (_language == "C")
         {
