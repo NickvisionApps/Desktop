@@ -7,7 +7,7 @@ public class SelectionItem<T> : ISelectionItem
 {
     public T Value { get; }
     public string Label { get; }
-    public bool ShouldSelect { get; }
+    public bool ShouldSelect { get; set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
