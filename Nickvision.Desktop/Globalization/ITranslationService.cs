@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace Nickvision.Desktop.Globalization;
@@ -107,13 +106,6 @@ public interface ITranslationService : IService
     /// <param name="args">The arguments for the format string</param>
     /// <returns>The translated format string</returns>
     string Get(string text, params object[] args) => _(text, args);
-
-    /// <summary>
-    /// Gets the localized help page url for a given page name.
-    /// </summary>
-    /// <param name="pageName">The name of the help page</param>
-    /// <returns>The help page url for the current system locale</returns>
-    Uri GetHelpUrl(string pageName);
 
     /// <summary>
     /// Translates a possible plural string.

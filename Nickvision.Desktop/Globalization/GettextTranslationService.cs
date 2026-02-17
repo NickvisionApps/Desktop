@@ -1,6 +1,5 @@
 using GetText;
 using Nickvision.Desktop.Application;
-using Nickvision.Desktop.System;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,7 +13,7 @@ namespace Nickvision.Desktop.Globalization;
 /// </summary>
 public class GettextTranslationService : ITranslationService
 {
-    private readonly AppInfo _appInfo;
+    private readonly string _domainName;
     private Catalog? _catalog;
     private string _language;
 
@@ -29,11 +28,11 @@ public class GettextTranslationService : ITranslationService
     /// </remarks>
     public GettextTranslationService(AppInfo appInfo, string language = "")
     {
-        _appInfo = appInfo;
+        _domainName = appInfo.EnglishShortName.Replace(" ", "").ToLower();
         _language = language;
         if (string.IsNullOrEmpty(_language))
         {
-            _catalog = new Catalog(_appInfo.EnglishShortName, System.Environment.ExecutingDirectory);
+            _catalog = new Catalog(_domainName, System.Environment.ExecutingDirectory);
         }
         else if (_language == "C")
         {
@@ -41,7 +40,7 @@ public class GettextTranslationService : ITranslationService
         }
         else
         {
-            _catalog = !AvailableLanguages.Contains(_language) ? new Catalog(_appInfo.EnglishShortName, System.Environment.ExecutingDirectory) : _catalog = new Catalog(_appInfo.EnglishShortName, System.Environment.ExecutingDirectory, new CultureInfo(language));
+            _catalog = !AvailableLanguages.Contains(_language) ? new Catalog(_domainName, System.Environment.ExecutingDirectory) : _catalog = new Catalog(_domainName, System.Environment.ExecutingDirectory, new CultureInfo(language));
         }
     }
 
@@ -61,7 +60,7 @@ public class GettextTranslationService : ITranslationService
             _language = value;
             if (string.IsNullOrEmpty(_language))
             {
-                _catalog = new Catalog(_appInfo.EnglishShortName, System.Environment.ExecutingDirectory);
+                _catalog = new Catalog(_domainName, System.Environment.ExecutingDirectory);
             }
             else if (_language == "C")
             {
@@ -69,7 +68,7 @@ public class GettextTranslationService : ITranslationService
             }
             else
             {
-                _catalog = !AvailableLanguages.Contains(_language) ? new Catalog(_appInfo.EnglishShortName, System.Environment.ExecutingDirectory) : _catalog = new Catalog(_appInfo.EnglishShortName, System.Environment.ExecutingDirectory, new CultureInfo(_language));
+                _catalog = !AvailableLanguages.Contains(_language) ? new Catalog(_domainName, System.Environment.ExecutingDirectory) : _catalog = new Catalog(_domainName, System.Environment.ExecutingDirectory, new CultureInfo(_language));
             }
         }
     }
@@ -84,7 +83,7 @@ public class GettextTranslationService : ITranslationService
             var languages = new List<string>();
             foreach (var directory in Directory.EnumerateDirectories(System.Environment.ExecutingDirectory))
             {
-                if (File.Exists(Path.Combine(directory, $"{_appInfo.EnglishShortName}.mo")))
+                if (File.Exists(Path.Combine(directory, $"{_domainName}.mo")))
                 {
                     languages.Add(new DirectoryInfo(directory).Name);
                 }
@@ -164,36 +163,4 @@ public class GettextTranslationService : ITranslationService
     /// <param name="args">The arguments for the format string</param>
     /// <returns>The translated plural format string if n != 1, else the translated non-plural format string for the context</returns>
     public string _pn(string context, string text, string pluralText, long n, params object[] args) => _catalog?.GetParticularPluralString(context, text, pluralText, n, args) ?? (n == 1 ? text : pluralText);
-
-    /// <summary>
-    /// Gets the localized help page url for a given page name.
-    /// </summary>
-    /// <param name="pageName">The name of the help page</param>
-    /// <returns>The help page url for the current system locale</returns>
-    public Uri GetHelpUrl(string pageName)
-    {
-        if (OperatingSystem.IsLinux())
-        {
-            if (System.Environment.DeploymentMode == DeploymentMode.Flatpak)
-            {
-                return new Uri($"help:{_appInfo.EnglishShortName.ToLower()}/{pageName}");
-            }
-        }
-        var lang = "C";
-        var sysLocale = CultureInfo.CurrentCulture.Name.Replace('-', '_');
-        if (!string.IsNullOrEmpty(sysLocale) && sysLocale != "C" && sysLocale != "en_US" && sysLocale != "*")
-        {
-            var twoLetter = sysLocale.Split('_')[0];
-            foreach (var language in AvailableLanguages)
-            {
-                if (language != sysLocale && language != twoLetter)
-                {
-                    continue;
-                }
-                lang = language;
-                break;
-            }
-        }
-        return new Uri($"https://htmlpreview.github.io/?{_appInfo.DocumentationStore}/{lang}/{pageName}.html");
-    }
 }
