@@ -88,6 +88,10 @@ public class AppInfo
     /// The current running version of the app.
     /// </summary>
     public AppVersion? Version { get; set; }
+    /// <summary>
+    /// Whether or not the app is running in portable mode.
+    /// </summary>
+    public bool IsPortable { get; set; }
 
     /// <summary>
     /// Constructs an AppInfo.
@@ -104,6 +108,7 @@ public class AppInfo
         Developers = [];
         Designers = [];
         Artists = [];
+        IsPortable = false;
     }
 
     /// <summary>
