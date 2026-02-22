@@ -17,7 +17,7 @@ public static class HostApplicationBuilderExtensions
     {
         public IHostApplicationBuilder ConfigureWinUI<T>() where T : Microsoft.UI.Xaml.Application
         {
-            if(!builder.Properties.TryGetValue(HostingContextKey, out var obj) || obj is not HostingContext context)
+            if (!builder.Properties.TryGetValue(HostingContextKey, out var obj) || obj is not HostingContext context)
             {
                 context = new HostingContext(true);
                 builder.Properties[HostingContextKey] = context;
@@ -26,7 +26,7 @@ public static class HostApplicationBuilderExtensions
             builder.Services.AddSingleton<IUserInterfaceThread, UserInterfaceThread>();
             builder.Services.AddHostedService<UserInterfaceHostedService>();
             builder.Services.AddSingleton<T>();
-            if(typeof(T) != typeof(Microsoft.UI.Xaml.Application))
+            if (typeof(T) != typeof(Microsoft.UI.Xaml.Application))
             {
                 builder.Services.AddSingleton<Microsoft.UI.Xaml.Application>(x => x.GetRequiredService<T>());
             }

@@ -1,9 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -24,7 +20,7 @@ public partial class UserInterfaceHostedService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        if(cancellationToken.IsCancellationRequested)
+        if (cancellationToken.IsCancellationRequested)
         {
             return Task.CompletedTask;
         }
@@ -34,7 +30,7 @@ public partial class UserInterfaceHostedService : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        if(cancellationToken.IsCancellationRequested || _context.IsRunning)
+        if (cancellationToken.IsCancellationRequested || _context.IsRunning)
         {
             return Task.CompletedTask;
         }

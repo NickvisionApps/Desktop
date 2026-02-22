@@ -80,10 +80,10 @@ public partial class UserInterfaceThread : IDisposable, IUserInterfaceThread
     private void OnCompletion()
     {
         _context.IsRunning = false;
-        if(_context.IsLifetimeLinked)
+        if (_context.IsLifetimeLinked)
         {
             StoppingHostApplication();
-            if(!_lifetime.ApplicationStarted.IsCancellationRequested && _lifetime.ApplicationStopping.IsCancellationRequested)
+            if (!_lifetime.ApplicationStarted.IsCancellationRequested && _lifetime.ApplicationStopping.IsCancellationRequested)
             {
                 _lifetime.StopApplication();
             }
