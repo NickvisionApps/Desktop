@@ -26,8 +26,9 @@ public sealed class JsonFileServiceTests
     [ClassInitialize]
     public static void ClassInitialize(TestContext context)
     {
-        var configPath = Path.Combine(Path.Combine(Environment.ExecutingDirectory, "config.json"));
-        var configAsyncPath = Path.Combine(Path.Combine(Environment.ExecutingDirectory, "config-async.json"));
+        var configPath = Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests", "config.json");
+        var configAsyncPath = Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests", "config-async.json");
+        Directory.CreateDirectory(Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests"));
         if (File.Exists(configPath))
         {
             File.Delete(configPath);
@@ -41,7 +42,7 @@ public sealed class JsonFileServiceTests
     [TestMethod]
     public void Case001_Initialize()
     {
-        _jsonFileService = new JsonFileService(Environment.ExecutingDirectory);
+        _jsonFileService = new JsonFileService(Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests"));
         Assert.IsNotNull(_jsonFileService);
     }
 
@@ -54,7 +55,7 @@ public sealed class JsonFileServiceTests
         Assert.IsFalse(config.DarkModeEnabled);
         Assert.AreEqual(900, config.WindowGeometry.Width);
         Assert.AreEqual(700, config.WindowGeometry.Height);
-        Assert.IsFalse(File.Exists(Path.Combine(Environment.ExecutingDirectory, "config.json")));
+        Assert.IsFalse(File.Exists(Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests", "config.json")));
     }
 
     [TestMethod]
@@ -66,7 +67,7 @@ public sealed class JsonFileServiceTests
         Assert.IsFalse(configAsync.DarkModeEnabled);
         Assert.AreEqual(900, configAsync.WindowGeometry.Width);
         Assert.AreEqual(700, configAsync.WindowGeometry.Height);
-        Assert.IsFalse(File.Exists(Path.Combine(Environment.ExecutingDirectory, "config-async.json")));
+        Assert.IsFalse(File.Exists(Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests", "config-async.json")));
     }
 
     [TestMethod]
@@ -77,7 +78,7 @@ public sealed class JsonFileServiceTests
         config.DarkModeEnabled = true;
         Assert.IsTrue(config.DarkModeEnabled);
         Assert.IsTrue(_jsonFileService.Save(config));
-        Assert.IsTrue(File.Exists(Path.Combine(Environment.ExecutingDirectory, "config.json")));
+        Assert.IsTrue(File.Exists(Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests", "config.json")));
     }
 
     [TestMethod]
@@ -88,7 +89,7 @@ public sealed class JsonFileServiceTests
         configAsync.DarkModeEnabled = true;
         Assert.IsTrue(configAsync.DarkModeEnabled);
         Assert.IsTrue(await _jsonFileService.SaveAsync(configAsync, "config-async"));
-        Assert.IsTrue(File.Exists(Path.Combine(Environment.ExecutingDirectory, "config-async.json")));
+        Assert.IsTrue(File.Exists(Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests", "config-async.json")));
     }
 
     [TestMethod]
@@ -112,8 +113,8 @@ public sealed class JsonFileServiceTests
     [TestMethod]
     public void Case008_Cleanup()
     {
-        var configPath = Path.Combine(Path.Combine(Environment.ExecutingDirectory, "config.json"));
-        var configAsyncPath = Path.Combine(Path.Combine(Environment.ExecutingDirectory, "config-async.json"));
+        var configPath = Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests", "config.json");
+        var configAsyncPath = Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests", "config-async.json");
         if (File.Exists(configPath))
         {
             File.Delete(configPath);
@@ -124,5 +125,6 @@ public sealed class JsonFileServiceTests
         }
         Assert.IsFalse(File.Exists(configPath));
         Assert.IsFalse(File.Exists(configAsyncPath));
+        Directory.Delete(Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests"));
     }
 }
