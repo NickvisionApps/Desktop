@@ -13,7 +13,7 @@ namespace Nickvision.Desktop.Keyring;
 /// <summary>
 /// A service for managing credentials in a database keyring.
 /// </summary>
-public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringService
+public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
 {
     private readonly List<Credential> _credentials;
     private readonly string _path;
@@ -26,7 +26,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     /// <param name="secretService">The service for managing secrets</param>
     /// <remarks>This will create a new encrypted database store if it doesn't already exist.</remarks>
     /// <remarks> If the database is unable to be created or unlocked, changes will not be saved to disk.</remarks>
-    public DatabaseKeyringService(AppInfo info, ISecretService secretService)
+    public KeyringService(AppInfo info, ISecretService secretService)
     {
         var keyringDir = Path.Combine(UserDirectories.Config, "Nickvision", "Keyring");
         Directory.CreateDirectory(keyringDir);
@@ -74,7 +74,7 @@ public class DatabaseKeyringService : IAsyncDisposable, IDisposable, IKeyringSer
     /// <summary>
     /// Finalizes a KeyringService.
     /// </summary>
-    ~DatabaseKeyringService()
+    ~KeyringService()
     {
         Dispose(false);
     }

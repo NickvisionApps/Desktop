@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 namespace Nickvision.Desktop.Tests;
 
 [TestClass]
-public sealed class DatabaseKeyringServiceTests
+public sealed class KeyringServiceTests
 {
-    private static DatabaseKeyringService? _keyringService;
+    private static KeyringService? _keyringService;
 
     [TestMethod]
     public void Case001_Init()
     {
-        _keyringService = new DatabaseKeyringService(new AppInfo("org.nickvision.desktop.test", "Nickvision.Desktop.Test", "Test"), new SystemSecretService());
+        _keyringService = new KeyringService(new AppInfo("org.nickvision.desktop.test", "Nickvision.Desktop.Test", "Test"), new SecretService());
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(_keyringService.IsSavingToDisk);
     }

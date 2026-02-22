@@ -11,11 +11,10 @@ namespace Nickvision.Desktop.Globalization;
 /// <summary>
 /// A service for translations using Gettext.
 /// </summary>
-public class GettextTranslationService : ITranslationService
+public class TranslationService : ITranslationService
 {
     private readonly string _domainName;
     private Catalog? _catalog;
-    private string _language;
 
     /// <summary>
     /// Constructs a TranslationService.
@@ -26,22 +25,9 @@ public class GettextTranslationService : ITranslationService
     /// An empty string language code will use the system's language code for translations. The language code "C" will
     /// cause strings to remain untranslated
     /// </remarks>
-    public GettextTranslationService(AppInfo appInfo, string language = "")
+    public TranslationService(AppInfo appInfo)
     {
         _domainName = appInfo.EnglishShortName.Replace(" ", "").ToLower();
-        _language = language;
-        if (string.IsNullOrEmpty(_language))
-        {
-            _catalog = new Catalog(_domainName, System.Environment.ExecutingDirectory);
-        }
-        else if (_language == "C")
-        {
-            _catalog = null;
-        }
-        else
-        {
-            _catalog = !AvailableLanguages.Contains(_language) ? new Catalog(_domainName, System.Environment.ExecutingDirectory) : _catalog = new Catalog(_domainName, System.Environment.ExecutingDirectory, new CultureInfo(language));
-        }
     }
 
     /// <summary>
@@ -53,22 +39,22 @@ public class GettextTranslationService : ITranslationService
     /// </remarks>
     public string Language
     {
-        get => _language;
+        get => field;
 
         set
         {
-            _language = value;
-            if (string.IsNullOrEmpty(_language))
+            field = value;
+            if (string.IsNullOrEmpty(field))
             {
                 _catalog = new Catalog(_domainName, System.Environment.ExecutingDirectory);
             }
-            else if (_language == "C")
+            else if (field == "C")
             {
                 _catalog = null;
             }
             else
             {
-                _catalog = !AvailableLanguages.Contains(_language) ? new Catalog(_domainName, System.Environment.ExecutingDirectory) : _catalog = new Catalog(_domainName, System.Environment.ExecutingDirectory, new CultureInfo(_language));
+                _catalog = !AvailableLanguages.Contains(field) ? new Catalog(_domainName, System.Environment.ExecutingDirectory) : _catalog = new Catalog(_domainName, System.Environment.ExecutingDirectory, new CultureInfo(field));
             }
         }
     }

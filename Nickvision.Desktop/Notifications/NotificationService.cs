@@ -16,7 +16,6 @@ public class NotificationService : IDisposable, INotificationService
 {
     private bool _disposed;
     private readonly AppInfo _appInfo;
-    private readonly string _openTranslatedText;
     private Connection? _dbus;
     private INotifications? _freeDesktopNotifications;
     private Dictionary<uint, IDisposable> _watchers;
@@ -27,16 +26,20 @@ public class NotificationService : IDisposable, INotificationService
     public event EventHandler<AppNotificationSentEventArgs>? AppNotificationSent;
 
     /// <summary>
+    /// The text "Open" translated
+    /// </summary>
+    public string OpenTranslatedText { get; set; }
+
+    /// <summary>
     /// Constructs a NotificationService.
     /// </summary>
     /// <param name="appInfo">The AppInfo object for the app</param>
-    /// <param name="openTranslatedText">The text "Open" translated</param>
-    public NotificationService(AppInfo appInfo, string openTranslatedText)
+    public NotificationService(AppInfo appInfo)
     {
         _disposed = false;
         _appInfo = appInfo;
-        _openTranslatedText = openTranslatedText;
         _watchers = new Dictionary<uint, IDisposable>();
+        OpenTranslatedText = "Open";
     }
 
     /// <summary>
@@ -76,7 +79,7 @@ public class NotificationService : IDisposable, INotificationService
             builder.AddText(notification.Message);
             if (notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam))
             {
-                builder.AddButton(_openTranslatedText, ToastActivationType.Protocol, $"file://{notification.ActionParam}");
+                builder.AddButton(OpenTranslatedText, ToastActivationType.Protocol, $"file://{notification.ActionParam}");
             }
 #if NET_WINDOWS
             builder.Show();
@@ -138,7 +141,7 @@ public class NotificationService : IDisposable, INotificationService
                         });
                     }
                 });
-                var id = await _freeDesktopNotifications.NotifyAsync(_appInfo.Id, 0, _appInfo.Id, notification.Title, notification.Message, notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam) ? ["open", _openTranslatedText] : [], new Dictionary<string, object>(), -1);
+                var id = await _freeDesktopNotifications.NotifyAsync(_appInfo.Id, 0, _appInfo.Id, notification.Title, notification.Message, notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam) ? ["open", OpenTranslatedText] : [], new Dictionary<string, object>(), -1);
                 _watchers[id] = actionWatcher;
                 return id > 0;
             }

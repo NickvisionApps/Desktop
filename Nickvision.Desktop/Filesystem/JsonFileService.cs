@@ -32,7 +32,7 @@ public class JsonFileService : IJsonFileService
     /// </summary>
     /// <param name="directory">The directory of where to load and save json files from</param>
     /// <remarks>The directory will be created if it doesn't exist</remarks>
-    public JsonFileService(string directory)
+    private JsonFileService(string directory)
     {
         if (!Directory.Exists(directory))
         {
@@ -47,6 +47,7 @@ public class JsonFileService : IJsonFileService
     /// <param name="appInfo">The AppInfo object for the app</param>
     public JsonFileService(AppInfo appInfo) : this(appInfo.IsPortable ? System.Environment.ExecutingDirectory : Path.Combine(UserDirectories.Config, appInfo.Name))
     {
+
     }
 
     /// <summary>

@@ -23,6 +23,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="GirCore.Adw-1" Version="0.7.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="11.0.0-preview.1.26104.118" />
 		<PackageReference Include="Nickvision.Desktop" Version="2026.2.8" />
 	</ItemGroup>
 

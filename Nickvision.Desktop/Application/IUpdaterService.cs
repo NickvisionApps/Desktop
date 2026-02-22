@@ -7,7 +7,7 @@ namespace Nickvision.Desktop.Application;
 /// <summary>
 /// An interface of a service for updating an application.
 /// </summary>
-public interface IUpdaterService : IService
+public interface IUpdaterService
 {
     /// <summary>
     /// Downloads an asset from a released version.

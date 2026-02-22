@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 namespace Nickvision.Desktop.Tests;
 
 [TestClass]
-public sealed class SystemSecretServiceTests
+public sealed class SecretServiceTests
 {
-    private static SystemSecretService? _secretService;
+    private static SecretService? _secretService;
 
     [TestMethod]
     public void Case001_Initialize()
     {
-        _secretService = new SystemSecretService();
+        _secretService = new SecretService();
         Assert.IsNotNull(_secretService);
     }
 

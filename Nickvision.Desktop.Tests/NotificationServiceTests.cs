@@ -13,7 +13,7 @@ public class NotificationServiceTests
     [TestMethod]
     public void Case001_Initialize()
     {
-        _notificationService = new NotificationService(new AppInfo("org.nickvision.desktop.tests", "Nickvision Desktop Tests", "Desktop Tests"), "Open");
+        _notificationService = new NotificationService(new AppInfo("org.nickvision.desktop.tests", "Nickvision Desktop Tests", "Desktop Tests"));
         Assert.IsNotNull(_notificationService);
     }
 

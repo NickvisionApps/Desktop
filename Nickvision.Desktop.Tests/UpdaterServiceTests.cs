@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 namespace Nickvision.Desktop.Tests;
 
 [TestClass]
-public class GitHubUpdaterServiceTests
+public class UpdaterServiceTests
 {
     private static HttpClient? _client;
-    private static GitHubUpdaterService? _updaterService;
+    private static UpdaterService? _updaterService;
 
     [ClassInitialize]
     public static void ClassInitialize(TestContext context)
@@ -39,7 +39,7 @@ public class GitHubUpdaterServiceTests
             Assert.Inconclusive("Update service is not supported in CI environments");
         }
         Assert.IsNotNull(_client);
-        _updaterService = new GitHubUpdaterService(new AppInfo("org.nickvision.tubeconverter", "Nickvision Parabolic", "Parabolic")
+        _updaterService = new UpdaterService(new AppInfo("org.nickvision.tubeconverter", "Nickvision Parabolic", "Parabolic")
         {
             SourceRepository = new Uri("https://github.com/NickvisionApps/Parabolic")
         },
@@ -96,7 +96,7 @@ public class GitHubUpdaterServiceTests
             Assert.Inconclusive("Update service is not supported in CI environments");
         }
         Assert.IsNotNull(_client);
-        var updateService = new GitHubUpdaterService("yt-dlp", "yt-dlp", _client);
+        var updateService = new UpdaterService("yt-dlp", "yt-dlp", _client);
         var stable = await updateService.GetLatestStableVersionAsync();
         Assert.IsNotNull(stable);
         Assert.IsTrue(stable >= new AppVersion("2025.12.08"));

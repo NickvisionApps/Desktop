@@ -6,7 +6,7 @@ namespace Nickvision.Desktop.Keyring;
 /// <summary>
 /// An interface of a service for managing credentials in a keyring.
 /// </summary>
-public interface IKeyringService : IService
+public interface IKeyringService
 {
     /// <summary>
     /// The list of credentials in the keyring.

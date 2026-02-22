@@ -12,7 +12,7 @@ namespace Nickvision.Desktop.System;
 /// <summary>
 /// A service for managing secrets using the system's secret storage.
 /// </summary>
-public class SystemSecretService : ISecretService
+public class SecretService : ISecretService
 {
     /// <summary>
     /// Adds a secret.

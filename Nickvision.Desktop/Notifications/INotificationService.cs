@@ -6,12 +6,17 @@ namespace Nickvision.Desktop.Notifications;
 /// <summary>
 /// An interface for a service for managing notifications.
 /// </summary>
-public interface INotificationService : IService
+public interface INotificationService
 {
     /// <summary>
     /// The event for when app notifications are sent.
     /// </summary>
     event EventHandler<AppNotificationSentEventArgs>? AppNotificationSent;
+
+    /// <summary>
+    /// The text "Open" translated
+    /// </summary>
+    public string OpenTranslatedText { get; set; }
 
     /// <summary>
     /// Sends an app notification.

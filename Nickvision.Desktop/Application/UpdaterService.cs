@@ -18,7 +18,7 @@ namespace Nickvision.Desktop.Application;
 /// <summary>
 /// A service for updating an application via GitHub releases.
 /// </summary>
-public class GitHubUpdaterService : IUpdaterService
+public class UpdaterService : IUpdaterService
 {
     private readonly GitHubClient _githubClient;
     private readonly HttpClient _httpClient;
@@ -32,7 +32,7 @@ public class GitHubUpdaterService : IUpdaterService
     /// <param name="appInfo">The AppInfo object for the app</param>
     /// <param name="httpClient">The HttpClient for the app</param>
     /// <exception cref="ArgumentException">Thrown if the AppInfo.SourceRepository is missing or ill-formated</exception>
-    public GitHubUpdaterService(AppInfo appInfo, HttpClient httpClient)
+    public UpdaterService(AppInfo appInfo, HttpClient httpClient)
     {
         if (appInfo.SourceRepository is null || appInfo.SourceRepository.IsEmpty)
         {
@@ -61,7 +61,7 @@ public class GitHubUpdaterService : IUpdaterService
     /// <param name="name">The repository name</param>
     /// <param name="httpClient">The HttpClient for the app</param>
     /// <exception cref="ArgumentException">Thrown if the Owner and/or Name are empty</exception>
-    public GitHubUpdaterService(string owner, string name, HttpClient httpClient)
+    public UpdaterService(string owner, string name, HttpClient httpClient)
     {
         if (string.IsNullOrEmpty(owner) || string.IsNullOrEmpty(name))
         {

@@ -42,7 +42,8 @@ public sealed class JsonFileServiceTests
     [TestMethod]
     public void Case001_Initialize()
     {
-        _jsonFileService = new JsonFileService(Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests"));
+        var appInfo = new AppInfo("org.nickvision.desktop.tests", "Nickvision.Desktop Tests", "Tests");
+        _jsonFileService = new JsonFileService(appInfo);
         Assert.IsNotNull(_jsonFileService);
     }
 

@@ -5,7 +5,7 @@ namespace Nickvision.Desktop.Globalization;
 /// <summary>
 /// An interface for a service for translations.
 /// </summary>
-public interface ITranslationService : IService
+public interface ITranslationService
 {
     /// <summary>
     /// The list of available language codes for translations.

@@ -6,7 +6,7 @@ namespace Nickvision.Desktop.Filesystem;
 /// <summary>
 /// An interface of a service for working with json files.
 /// </summary>
-public interface IJsonFileService : IService
+public interface IJsonFileService
 {
     /// <summary>
     /// The event for when json files are saved.

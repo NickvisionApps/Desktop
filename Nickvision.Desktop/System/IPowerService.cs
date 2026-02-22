@@ -5,7 +5,7 @@ namespace Nickvision.Desktop.System;
 /// <summary>
 /// An interface for a service for managing power options.
 /// </summary>
-public interface IPowerService : IService
+public interface IPowerService
 {
     /// <summary>
     /// Allows the system to suspend.
