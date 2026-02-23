@@ -25,6 +25,7 @@ public static class HostApplicationBuilderExtensions
                 throw new InvalidOperationException("AppInfo must be configured before calling ConfigureAdw.");
             }
             builder.Services.AddSingleton(context);
+            builder.Services.AddSingleton<IUserInterfaceContext<Adw.Application>>(context);
             builder.Services.AddSingleton<IUserInterfaceThread, AdwUserInterfaceThread>();
             builder.Services.AddHostedService<UserInterfaceHostedService<Adw.Application>>();
             builder.Services.AddSingleton(Adw.Application.New(appInfo.Id, context.HandlesOpen ? Gio.ApplicationFlags.HandlesOpen : Gio.ApplicationFlags.DefaultFlags));

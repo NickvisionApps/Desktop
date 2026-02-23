@@ -23,6 +23,7 @@ public static class HostApplicationBuilderExtensions
                 throw new InvalidOperationException("AppInfo must be configured before calling ConfigureWinUI.");
             }
             builder.Services.AddSingleton(context);
+            builder.Services.AddSingleton<IUserInterfaceContext<Microsoft.UI.Xaml.Application>>(context);
             builder.Services.AddSingleton<IUserInterfaceThread, WinUIUserInterfaceThread>();
             builder.Services.AddHostedService<UserInterfaceHostedService<Microsoft.UI.Xaml.Application>>();
             builder.Services.AddSingleton<T>();
