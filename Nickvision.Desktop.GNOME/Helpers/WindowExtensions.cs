@@ -4,6 +4,8 @@ namespace Nickvision.Desktop.GNOME.Helpers;
 
 public static class WindowExtensions
 {
+    public delegate void OpenCallback(nint application, nint[] files, int n_files, nint hint, nint data);
+
     extension(Gtk.Window window)
     {
         public WindowGeometry WindowGeometry

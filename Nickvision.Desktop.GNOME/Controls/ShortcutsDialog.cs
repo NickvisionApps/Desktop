@@ -1,5 +1,4 @@
-﻿using Nickvision.Desktop.Globalization;
-using Nickvision.Desktop.GNOME.Helpers;
+﻿using Nickvision.Desktop.GNOME.Helpers;
 
 namespace Nickvision.Desktop.GNOME.Controls;
 
@@ -8,9 +7,9 @@ public class ShortcutsDialog
     private readonly Gtk.Builder _builder;
     private readonly Adw.ShortcutsDialog _shortcutsDialog;
 
-    public ShortcutsDialog(ITranslationService translator)
+    public ShortcutsDialog(IGtkBuilderFactory builderFactory)
     {
-        _builder = Gtk.Builder.NewFromBlueprint("ShortcutsDialog", translator);
+        _builder = builderFactory.Create("ShortcutsDialog");
         _shortcutsDialog = new Adw.ShortcutsDialog(new Adw.Internal.ShortcutsDialogHandle(_builder.GetPointer("root"), false));
     }
 
