@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.Helpers;
 using Nickvision.Desktop.Network;
@@ -32,6 +33,7 @@ public class UpdaterService : IUpdaterService
     /// <param name="appInfo">The AppInfo object for the app</param>
     /// <param name="httpClient">The HttpClient for the app</param>
     /// <exception cref="ArgumentException">Thrown if the AppInfo.SourceRepository is missing or ill-formated</exception>
+    [ActivatorUtilitiesConstructor]
     public UpdaterService(AppInfo appInfo, HttpClient httpClient)
     {
         if (appInfo.SourceRepository is null || appInfo.SourceRepository.IsEmpty)

@@ -42,8 +42,7 @@ public class UpdaterServiceTests
         _updaterService = new UpdaterService(new AppInfo("org.nickvision.tubeconverter", "Nickvision Parabolic", "Parabolic")
         {
             SourceRepository = new Uri("https://github.com/NickvisionApps/Parabolic")
-        },
-            _client);
+        }, _client);
         Assert.IsNotNull(_updaterService);
     }
 

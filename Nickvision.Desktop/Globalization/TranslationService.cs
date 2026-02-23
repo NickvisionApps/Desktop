@@ -28,6 +28,7 @@ public class TranslationService : ITranslationService
     public TranslationService(AppInfo appInfo)
     {
         _domainName = appInfo.EnglishShortName.Replace(" ", "").ToLower();
+        Language = "C";
     }
 
     /// <summary>
