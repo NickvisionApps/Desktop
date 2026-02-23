@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Nickvision.Desktop.Application;
 
@@ -7,10 +8,12 @@ namespace Nickvision.Desktop.Application;
 /// </summary>
 public class ArgumentsService : IArgumentsService
 {
+    private readonly List<string> _args;
+
     /// <summary>
     /// The raw arguments.
     /// </summary>
-    public string[] Data { get; }
+    public IReadOnlyList<string> Data => _args;
 
     /// <summary>
     /// Constructs an ArgumentService.
@@ -18,7 +21,17 @@ public class ArgumentsService : IArgumentsService
     /// <param name="args">The raw arguments</param>
     public ArgumentsService(string[] args)
     {
-        Data = args;
+        _args = args.ToList();
+    }
+
+    public bool Add(string arg)
+    {
+        if (_args.Contains(arg))
+        {
+            return false;
+        }
+        _args.Add(arg);
+        return true;
     }
 
     /// <summary>
@@ -26,7 +39,7 @@ public class ArgumentsService : IArgumentsService
     /// </summary>
     /// <param name="arg">The argument to check for</param>
     /// <returns>True if the arguments contain the specified argument, else false</returns>
-    public bool Contains(string arg) => Data.Contains(arg);
+    public bool Contains(string arg) => _args.Contains(arg);
 
     /// <summary>
     /// Gets the next argument after a specific argument.
@@ -35,11 +48,11 @@ public class ArgumentsService : IArgumentsService
     /// <returns>The argument after the specified argument if exists, else null</returns>
     public string? GetNext(string arg)
     {
-        for (int i = 0; i < Data.Length - 1; i++)
+        for (int i = 0; i < _args.Count - 1; i++)
         {
-            if (Data[i] == arg)
+            if (_args[i] == arg)
             {
-                return Data[i + 1];
+                return _args[i + 1];
             }
         }
         return null;
