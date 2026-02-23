@@ -28,6 +28,7 @@ public class AdwUserInterfaceThread : IDisposable, IUserInterfaceThread
         {
             var argumentsService = _serviceProvider.GetRequiredService<IArgumentsService>();
             _context.Application = _serviceProvider.GetRequiredService<Adw.Application>();
+            _context.Application.OnStartup += (_, _) => _context.Application.AddWindow(_serviceProvider.GetRequiredService<Adw.ApplicationWindow>());
             _context.Application.OnShutdown += (_, _) =>
             {
                 _context.IsRunning = false;
