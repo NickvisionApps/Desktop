@@ -29,7 +29,7 @@ public sealed class HostingTests
     public void Case002_Configure()
     {
         Assert.IsNotNull(_applicationBuilder);
-        _applicationBuilder.ConfigureNickvision([]);
+        _applicationBuilder.ConfigureNickvision([], "app.log");
         _applicationBuilder.Services.AddSingleton(new AppInfo("org.nickvision.tubeconverter", "Nickvision Parabolic", "Parabolic")
         {
             SourceRepository = new Uri("https://github.com/NickvisionApps/Parabolic")
