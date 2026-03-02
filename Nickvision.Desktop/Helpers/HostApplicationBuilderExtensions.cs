@@ -31,7 +31,7 @@ public static class HostApplicationBuilderExtensions
             builder.Logging.AddConsole();
             if(!string.IsNullOrEmpty(loggingPath))
             {
-                builder.Logging.AddFile(loggingPath);
+                builder.Logging.AddFile(loggingPath, false);
             }
             return builder;
         }
