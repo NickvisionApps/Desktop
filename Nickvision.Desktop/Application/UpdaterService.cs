@@ -34,13 +34,13 @@ public class UpdaterService : IUpdaterService
     /// <param name="httpClient">The HttpClient for the app</param>
     /// <exception cref="ArgumentException">Thrown if the AppInfo.SourceRepository is missing or ill-formated</exception>
     [ActivatorUtilitiesConstructor]
-    public UpdaterService(AppInfo appInfo, HttpClient httpClient)
+    public UpdaterService(AppInfo appInfo, IHttpClientFactory httpClientFactory)
     {
         if (appInfo.SourceRepository is null || appInfo.SourceRepository.IsEmpty)
         {
             throw new ArgumentException("AppInfo.SourceRepository cannot be null or empty");
         }
-        _httpClient = httpClient;
+        _httpClient = httpClientFactory.CreateClient();
         _githubClient = new GitHubClient(new ProductHeaderValue("Nickvision.Desktop"));
         try
         {

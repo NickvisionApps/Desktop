@@ -17,6 +17,7 @@ public static class HostApplicationBuilderExtensions
     {
         public IHostApplicationBuilder ConfigureNickvision(string[] args, string loggingPath)
         {
+            builder.Services.AddHttpClient();
             builder.Services.AddSingleton<IArgumentsService>(new ArgumentsService(args));
             builder.Services.AddSingleton<IJsonFileService, JsonFileService>();
             builder.Services.AddSingleton<IKeyringService, KeyringService>();
@@ -25,7 +26,6 @@ public static class HostApplicationBuilderExtensions
             builder.Services.AddSingleton<ISecretService, SecretService>();
             builder.Services.AddSingleton<ITranslationService, TranslationService>();
             builder.Services.AddSingleton<IUpdaterService, UpdaterService>();
-            builder.Services.AddHttpClient<IUpdaterService, UpdaterService>();
             builder.Logging.ClearProviders();
             builder.Logging.SetMinimumLevel(LogLevel.Information);
             builder.Logging.AddConsole();

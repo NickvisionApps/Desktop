@@ -1,11 +1,32 @@
 ﻿using Nickvision.Desktop.Application;
 using Nickvision.Desktop.Filesystem;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Tests;
+
+public class MockHttpClientFacotry : IHttpClientFactory
+{
+    private static readonly Dictionary<string, HttpClient> Clients;
+
+    static MockHttpClientFacotry()
+    {
+        Clients = [];
+    }
+
+    public HttpClient CreateClient(string name)
+    {
+        if (Clients.TryGetValue(name, out var client))
+        {
+            return client;
+        }
+        Clients[name] = new HttpClient();
+        return Clients[name];
+    }
+}
 
 [TestClass]
 public class UpdaterServiceTests
@@ -39,10 +60,11 @@ public class UpdaterServiceTests
             Assert.Inconclusive("Update service is not supported in CI environments");
         }
         Assert.IsNotNull(_client);
+        var httpClientFactorty = 
         _updaterService = new UpdaterService(new AppInfo("org.nickvision.tubeconverter", "Nickvision Parabolic", "Parabolic")
         {
             SourceRepository = new Uri("https://github.com/NickvisionApps/Parabolic")
-        }, _client);
+        }, new MockHttpClientFacotry());
         Assert.IsNotNull(_updaterService);
     }
 
