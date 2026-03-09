@@ -24,6 +24,10 @@ public static class HostApplicationBuilderExtensions
             {
                 throw new InvalidOperationException("AppInfo must be configured before calling ConfigureAdw.");
             }
+            if (OperatingSystem.IsMacOS())
+            {
+                context.ResourceBasePath = $"/{appInfo.Id.Replace('.', '/')}";
+            }
             builder.Services.AddSingleton(context);
             builder.Services.AddSingleton<IUserInterfaceContext<Adw.Application>>(context);
             builder.Services.AddSingleton<IUserInterfaceThread, AdwUserInterfaceThread>();

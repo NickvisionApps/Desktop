@@ -98,7 +98,18 @@ public class AdwUserInterfaceThread : IDisposable, IUserInterfaceThread
     {
         var argumentsService = _serviceProvider.GetRequiredService<IArgumentsService>();
         _context.Application = _serviceProvider.GetRequiredService<Adw.Application>();
-        _context.Application.OnStartup += (_, _) => _context.Application.AddWindow(_serviceProvider.GetRequiredService<Adw.ApplicationWindow>());
+        _context.Application.OnStartup += (_, _) =>
+        {
+            if (!string.IsNullOrEmpty(_context.ResourceBasePath))
+            {
+                var display = Gdk.Display.GetDefault();
+                if (display is not null)
+                {
+                    Gtk.IconTheme.GetForDisplay(display).AddResourcePath(_context.ResourceBasePath);
+                }
+            }
+            _context.Application.AddWindow(_serviceProvider.GetRequiredService<Adw.ApplicationWindow>());
+        };
         _context.Application.OnShutdown += (_, _) =>
         {
             _context.IsRunning = false;
