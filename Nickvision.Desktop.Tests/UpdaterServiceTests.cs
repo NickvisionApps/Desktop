@@ -1,32 +1,12 @@
 ﻿using Nickvision.Desktop.Application;
 using Nickvision.Desktop.Filesystem;
+using Nickvision.Desktop.Tests.Mocks;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Tests;
-
-public class MockHttpClientFacotry : IHttpClientFactory
-{
-    private static readonly Dictionary<string, HttpClient> Clients;
-
-    static MockHttpClientFacotry()
-    {
-        Clients = [];
-    }
-
-    public HttpClient CreateClient(string name)
-    {
-        if (Clients.TryGetValue(name, out var client))
-        {
-            return client;
-        }
-        Clients[name] = new HttpClient();
-        return Clients[name];
-    }
-}
 
 [TestClass]
 public class UpdaterServiceTests
@@ -60,8 +40,8 @@ public class UpdaterServiceTests
             Assert.Inconclusive("Update service is not supported in CI environments");
         }
         Assert.IsNotNull(_client);
-        var httpClientFactorty = 
-        _updaterService = new UpdaterService(new AppInfo("org.nickvision.tubeconverter", "Nickvision Parabolic", "Parabolic")
+        var httpClientFactorty =
+        _updaterService = new UpdaterService(new MockLogger<UpdaterService>(), new AppInfo("org.nickvision.tubeconverter", "Nickvision Parabolic", "Parabolic")
         {
             SourceRepository = new Uri("https://github.com/NickvisionApps/Parabolic")
         }, new MockHttpClientFacotry());
@@ -117,7 +97,7 @@ public class UpdaterServiceTests
             Assert.Inconclusive("Update service is not supported in CI environments");
         }
         Assert.IsNotNull(_client);
-        var updateService = new UpdaterService("yt-dlp", "yt-dlp", _client);
+        var updateService = new UpdaterService(new MockLogger<UpdaterService>(), "yt-dlp", "yt-dlp", _client);
         var stable = await updateService.GetLatestStableVersionAsync();
         Assert.IsNotNull(stable);
         Assert.IsTrue(stable >= new AppVersion("2025.12.08"));
@@ -138,6 +118,6 @@ public class UpdaterServiceTests
         var version = await _updaterService.GetLatestStableVersionAsync();
         Assert.IsNotNull(version);
         Assert.IsTrue(version > new Version("2025.10.0"));
-        Assert.IsTrue(await _updaterService.WindowsUpdate(version));
+        Assert.IsTrue(await _updaterService.WindowsApplicationUpdateAsync(version));
     }
 }

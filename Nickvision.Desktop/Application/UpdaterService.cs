@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.Helpers;
 using Nickvision.Desktop.Network;
@@ -21,6 +22,7 @@ namespace Nickvision.Desktop.Application;
 /// </summary>
 public class UpdaterService : IUpdaterService
 {
+    private readonly ILogger<UpdaterService> _logger;
     private readonly GitHubClient _githubClient;
     private readonly HttpClient _httpClient;
     private readonly string _owner;
@@ -30,14 +32,17 @@ public class UpdaterService : IUpdaterService
     /// <summary>
     /// Constructs an UpdaterService.
     /// </summary>
+    /// <param name="logger">Logger for the service</param>
     /// <param name="appInfo">The AppInfo object for the app</param>
     /// <param name="httpClient">The HttpClient for the app</param>
     /// <exception cref="ArgumentException">Thrown if the AppInfo.SourceRepository is missing or ill-formated</exception>
     [ActivatorUtilitiesConstructor]
-    public UpdaterService(AppInfo appInfo, IHttpClientFactory httpClientFactory)
+    public UpdaterService(ILogger<UpdaterService> logger, AppInfo appInfo, IHttpClientFactory httpClientFactory)
     {
+        _logger = logger;
         if (appInfo.SourceRepository is null || appInfo.SourceRepository.IsEmpty)
         {
+            _logger.LogCritical("AppInfo.SourceRepository is null or empty.");
             throw new ArgumentException("AppInfo.SourceRepository cannot be null or empty");
         }
         _httpClient = httpClientFactory.CreateClient();
@@ -50,6 +55,7 @@ public class UpdaterService : IUpdaterService
         }
         catch (Exception e)
         {
+            _logger.LogCritical(e, $"AppInfo.SourceRepository ({appInfo.SourceRepository}) is ill-formated.");
             throw new ArgumentException("AppInfo.SourceRepository is ill-formated", e);
         }
         _cacheReleasesPath = Path.Combine(UserDirectories.Cache, "Nickvision", $"{_owner}-{_name}-releases.json");
@@ -59,16 +65,18 @@ public class UpdaterService : IUpdaterService
     /// <summary>
     /// Constructs an UpdaterService.
     /// </summary>
+    /// <param name="logger">Logger for the service</param>
     /// <param name="owner">The repository owner</param>
     /// <param name="name">The repository name</param>
     /// <param name="httpClient">The HttpClient for the app</param>
     /// <exception cref="ArgumentException">Thrown if the Owner and/or Name are empty</exception>
-    public UpdaterService(string owner, string name, HttpClient httpClient)
+    public UpdaterService(ILogger<UpdaterService> logger, string owner, string name, HttpClient httpClient)
     {
         if (string.IsNullOrEmpty(owner) || string.IsNullOrEmpty(name))
         {
             throw new ArgumentException("Owner and Name cannot be null or empty");
         }
+        _logger = logger;
         _owner = owner;
         _name = name;
         _httpClient = httpClient;
@@ -87,6 +95,7 @@ public class UpdaterService : IUpdaterService
     /// <returns></returns>
     public async Task<bool> DownloadReleaseAssetAsync(AppVersion version, string path, string assertName, bool exactMatch = true, IProgress<DownloadProgress>? progress = null)
     {
+        _logger.LogInformation($"Starting download of asset ({assertName}{(exactMatch ? string.Empty : "*")}) for {_owner}/{_name} version {version}...");
         foreach (var release in await GetReleasesAsync())
         {
             if (!AppVersion.TryParse(release.TagName.TrimStart('v'), out var releaseVersion))
@@ -101,10 +110,12 @@ public class UpdaterService : IUpdaterService
             {
                 if ((!exactMatch || asset.Name.ToLower() != assertName.ToLower()) && (exactMatch || !asset.Name.ToLower().Contains(assertName.ToLower())))
                 {
+                    _logger.LogInformation($"Skipping asset {asset.Name} as it does not match the requested name ({assertName}{(exactMatch ? string.Empty : "*")}).");
                     continue;
                 }
                 try
                 {
+                    _logger.LogInformation($"Downloading asset {asset.Name} from {asset.BrowserDownloadUrl} to {path}...");
                     using var response = await _httpClient.GetAsync(asset.BrowserDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
                     response.EnsureSuccessStatusCode();
                     var totalBytesToRead = response.Content.Headers.ContentLength ?? 0L;
@@ -119,7 +130,16 @@ public class UpdaterService : IUpdaterService
                         if (bytesRead == 0)
                         {
                             progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, true));
-                            return new FileInfo(path).Length == asset.Size;
+                            var sizeMatch = new FileInfo(path).Length == asset.Size;
+                            if (sizeMatch)
+                            {
+                                _logger.LogInformation($"Downloaded asset {asset.Name} to {path} successfully.");
+                            }
+                            else
+                            {
+                                _logger.LogError($"Error in downloaded asset ({asset.Name}). File size does not match expected size (expected: {asset.Size}, actual: {new FileInfo(path).Length}).");
+                            }
+                            return sizeMatch;
                         }
                         await fileStream.WriteAsync(buffer, 0, bytesRead);
                         totalBytesRead += bytesRead;
@@ -131,8 +151,9 @@ public class UpdaterService : IUpdaterService
                         }
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    _logger.LogError(e, $"Failed to download asset {asset.Name} from {asset.BrowserDownloadUrl}.");
                     return false;
                 }
             }
@@ -182,65 +203,86 @@ public class UpdaterService : IUpdaterService
     /// <param name="version">The released version</param>
     /// <param name="progress">An optional progress reporter</param>
     /// <returns>True if the update was downloaded and ran successfully, else false</returns>
-    public async Task<bool> WindowsUpdate(AppVersion version, IProgress<DownloadProgress>? progress = null)
+    public async Task<bool> WindowsApplicationUpdateAsync(AppVersion version, IProgress<DownloadProgress>? progress = null)
     {
+        _logger.LogInformation($"Starting Windows application update for {_owner}/{_name} version {version}...");
         if (!OperatingSystem.IsWindows())
         {
+            _logger.LogError($"Unable to perform update as system is not Windows.");
             return false;
         }
         var setupPath = Path.Combine(UserDirectories.Cache, $"{_owner}_{_name}_Setup.exe");
         if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
         {
+            _logger.LogInformation($"Downloading ARM64 installer...");
             if (!await DownloadReleaseAssetAsync(version, setupPath, "setup-arm64.exe", false, progress))
             {
                 if (!await DownloadReleaseAssetAsync(version, setupPath, "setup.exe", false, progress))
                 {
+                    _logger.LogError($"Failed to download ARM64 installer.");
                     return false;
                 }
             }
         }
         else
         {
+            _logger.LogInformation($"Downloading x64 installer...");
             if (!await DownloadReleaseAssetAsync(version, setupPath, "setup-x64.exe", false, progress))
             {
                 if (!await DownloadReleaseAssetAsync(version, setupPath, "setup.exe", false, progress))
                 {
+                    _logger.LogError($"Failed to download x64 installer.");
                     return false;
                 }
             }
         }
-        Process.Start(new ProcessStartInfo
+        _logger.LogInformation($"Starting downloaded installer ({setupPath})...");
+        var res = Process.Start(new ProcessStartInfo
         {
             FileName = setupPath,
             UseShellExecute = true,
             Verb = "open"
         });
+        if (res is null)
+        {
+            _logger.LogError($"Failed to start installer process.");
+            return false;
+        }
+        _logger.LogInformation($"Started downloaded installer. Update complete.");
         return true;
     }
 
     private async Task<IReadOnlyList<GitHubRelease>> GetReleasesAsync()
     {
+        _logger.LogInformation($"Fetching all releases for {_owner}/{_name}...");
         try
         {
+            _logger.LogInformation($"Checking for releases in cache ({_cacheReleasesPath})...");
             if (File.Exists(_cacheReleasesPath) && new FileInfo(_cacheReleasesPath).CreationTime < DateTime.Now.Subtract(TimeSpan.FromHours(6)))
             {
                 File.Delete(_cacheReleasesPath);
+                _logger.LogWarning($"Deleted cache file as it is older than 6 hours.");
             }
             IReadOnlyList<GitHubRelease> releases = [];
             if (File.Exists(_cacheReleasesPath))
             {
+                _logger.LogInformation($"Cache file found, loading releases from cache...");
                 releases = JsonSerializer.Deserialize<IReadOnlyList<GitHubRelease>>(await File.ReadAllTextAsync(_cacheReleasesPath)) ?? [];
+                _logger.LogInformation($"Loaded {releases.Count} releases from cache.");
             }
             if (releases.Count == 0)
             {
+                _logger.LogInformation($"No releases found in cache, fetching from GitHub API...");
                 var json = JsonSerializer.Serialize(await _githubClient.Repository.Release.GetAll(_owner, _name));
                 await File.WriteAllTextAsync(_cacheReleasesPath, json);
                 releases = JsonSerializer.Deserialize<IReadOnlyList<GitHubRelease>>(json) ?? [];
+                _logger.LogInformation($"Fetched {releases.Count} releases from GitHub API and saved to cache.");
             }
             return releases;
         }
-        catch
+        catch (Exception e)
         {
+            _logger.LogError(e, $"Failed to fetch releases for {_owner}/{_name}.");
             return [];
         }
     }
