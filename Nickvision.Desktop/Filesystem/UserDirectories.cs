@@ -63,7 +63,7 @@ public static class UserDirectories
             var res = string.Empty;
             if (OperatingSystem.IsWindows())
             {
-                res = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}/Temp";
+                res = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Temp");
             }
             else if (OperatingSystem.IsMacOS())
             {
@@ -423,7 +423,7 @@ public static class UserDirectories
                 return path;
             }
         }
-        var dirsPath = $"{Config}/user-dirs.dirs";
+        var dirsPath = Path.Combine(Config, "user-dirs.dirs");
         if (!File.Exists(dirsPath))
         {
             return null;

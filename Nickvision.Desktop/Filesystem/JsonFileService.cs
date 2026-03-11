@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Nickvision.Desktop.Application;
 using System;
 using System.IO;
@@ -13,6 +14,8 @@ namespace Nickvision.Desktop.Filesystem;
 public class JsonFileService : IJsonFileService
 {
     private static readonly JsonSerializerOptions JsonOptions;
+
+    private readonly ILogger<JsonFileService> _logger;
     private readonly string _directory;
 
     /// <summary>
@@ -30,10 +33,12 @@ public class JsonFileService : IJsonFileService
     /// <summary>
     /// Constructs a JsonFileService.
     /// </summary>
+    /// <param name="logger">Logger for the service</param>
     /// <param name="directory">The directory of where to load and save json files from</param>
     /// <remarks>The directory will be created if it doesn't exist</remarks>
-    private JsonFileService(string directory)
+    private JsonFileService(ILogger<JsonFileService> logger, string directory)
     {
+        _logger = logger;
         if (!Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);
@@ -44,8 +49,9 @@ public class JsonFileService : IJsonFileService
     /// <summary>
     /// Constructs a JsonFileService.
     /// </summary>
+    /// <param name="logger">Logger for the service</param>
     /// <param name="appInfo">The AppInfo object for the app</param>
-    public JsonFileService(AppInfo appInfo) : this(appInfo.IsPortable ? System.Environment.ExecutingDirectory : Path.Combine(UserDirectories.Config, appInfo.Name))
+    public JsonFileService(ILogger<JsonFileService> logger, AppInfo appInfo) : this(logger, appInfo.IsPortable ? System.Environment.ExecutingDirectory : Path.Combine(UserDirectories.Config, appInfo.Name))
     {
 
     }
@@ -64,13 +70,24 @@ public class JsonFileService : IJsonFileService
     public T Load<T>(string? name = null)
     {
         var path = Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name.ToLower() : name)}.json");
+        _logger.LogInformation($"Loading {typeof(T).Name} from {path}...");
         if (!File.Exists(path))
         {
+            _logger.LogWarning($"{path} not found, returning default {typeof(T).Name}.");
             return Activator.CreateInstance<T>();
         }
-        var text = File.ReadAllText(path);
-        var obj = JsonSerializer.Deserialize<T>(text, JsonOptions);
-        return obj ?? Activator.CreateInstance<T>();
+        try
+        {
+            var text = File.ReadAllText(path);
+            var obj = JsonSerializer.Deserialize<T>(text, JsonOptions);
+            _logger.LogInformation($"Loaded {typeof(T).Name} successfully.");
+            return obj ?? Activator.CreateInstance<T>();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, $"Failed to load {path}, returning default {typeof(T).Name}.");
+            return Activator.CreateInstance<T>();
+        }
     }
 
     /// <summary>
@@ -82,13 +99,24 @@ public class JsonFileService : IJsonFileService
     public async Task<T> LoadAsync<T>(string? name = null)
     {
         var path = Path.Combine(_directory, $"{(string.IsNullOrEmpty(name) ? typeof(T).Name.ToLower() : name)}.json");
+        _logger.LogInformation($"Loading {typeof(T).Name} from {path}...");
         if (!File.Exists(path))
         {
+            _logger.LogInformation($"{path} not found, returning default {typeof(T).Name}.");
             return Activator.CreateInstance<T>();
         }
-        var text = await File.ReadAllTextAsync(path);
-        var obj = JsonSerializer.Deserialize<T>(text, JsonOptions);
-        return obj ?? Activator.CreateInstance<T>();
+        try
+        {
+            var text = await File.ReadAllTextAsync(path);
+            var obj = JsonSerializer.Deserialize<T>(text, JsonOptions);
+            _logger.LogInformation($"Loaded {typeof(T).Name} successfully.");
+            return obj ?? Activator.CreateInstance<T>();
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning(e, $"Failed to load {path}, returning default {typeof(T).Name}.");
+            return Activator.CreateInstance<T>();
+        }
     }
 
     /// <summary>
@@ -105,15 +133,19 @@ public class JsonFileService : IJsonFileService
             return false;
         }
         name = string.IsNullOrEmpty(name) ? typeof(T).Name.ToLower() : name;
+        var path = Path.Combine(_directory, $"{name}.json");
+        _logger.LogInformation($"Saving {typeof(T).Name} to {path}...");
         try
         {
             var text = JsonSerializer.Serialize(obj, JsonOptions);
-            File.WriteAllText(Path.Combine(_directory, $"{name}.json"), text);
+            File.WriteAllText(path, text);
             Saved?.Invoke(this, new JsonFileSavedEventArgs(obj, typeof(T), name));
+            _logger.LogInformation($"Saved {path} successfully.");
             return true;
         }
-        catch
+        catch (Exception e)
         {
+            _logger.LogError($"Failed to save {path}: {e}");
             return false;
         }
     }
@@ -132,15 +164,19 @@ public class JsonFileService : IJsonFileService
             return false;
         }
         name = string.IsNullOrEmpty(name) ? typeof(T).Name.ToLower() : name;
+        var path = Path.Combine(_directory, $"{name}.json");
+        _logger.LogInformation($"Saving {typeof(T).Name} to {path}...");
         try
         {
             var text = JsonSerializer.Serialize(obj, JsonOptions);
             await File.WriteAllTextAsync(Path.Combine(_directory, $"{name}.json"), text);
             Saved?.Invoke(this, new JsonFileSavedEventArgs(obj, typeof(T), name));
+            _logger.LogInformation($"Saved {path} successfully.");
             return true;
         }
-        catch
+        catch (Exception e)
         {
+            _logger.LogError($"Failed to save {path}: {e}");
             return false;
         }
     }

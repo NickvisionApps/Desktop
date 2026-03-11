@@ -1,4 +1,5 @@
 ﻿using Nickvision.Desktop.System;
+using Nickvision.Desktop.Tests.Mocks;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Tests;
@@ -11,7 +12,7 @@ public class PowerServiceTests
     [TestMethod]
     public void Case001_Initialize()
     {
-        _powerService = new PowerService();
+        _powerService = new PowerService(new MockLogger<PowerService>());
         Assert.IsNotNull(_powerService);
     }
 

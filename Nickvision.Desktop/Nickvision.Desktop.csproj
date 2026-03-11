@@ -39,10 +39,10 @@
 		<PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.11" />
 		<PackageReference Include="System.Drawing.Common" Version="10.0.4" />
 		<PackageReference Include="Tmds.DBus" Version="0.90.3" />
-		<PackageReference Include="Vanara.PInvoke.Kernel32" Version="5.0.0" />
-		<PackageReference Include="Vanara.PInvoke.PowrProf" Version="5.0.0" />
-		<PackageReference Include="Vanara.PInvoke.Security" Version="5.0.0" />
-		<PackageReference Include="Vanara.PInvoke.Shell32" Version="5.0.0" />
+		<PackageReference Include="Vanara.PInvoke.Kernel32" Version="5.0.1" />
+		<PackageReference Include="Vanara.PInvoke.PowrProf" Version="5.0.1" />
+		<PackageReference Include="Vanara.PInvoke.Security" Version="5.0.1" />
+		<PackageReference Include="Vanara.PInvoke.Shell32" Version="5.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

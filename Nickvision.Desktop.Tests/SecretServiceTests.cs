@@ -1,4 +1,5 @@
 ﻿using Nickvision.Desktop.System;
+using Nickvision.Desktop.Tests.Mocks;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Tests;
@@ -11,7 +12,7 @@ public sealed class SecretServiceTests
     [TestMethod]
     public void Case001_Initialize()
     {
-        _secretService = new SecretService();
+        _secretService = new SecretService(new MockLogger<SecretService>());
         Assert.IsNotNull(_secretService);
     }
 

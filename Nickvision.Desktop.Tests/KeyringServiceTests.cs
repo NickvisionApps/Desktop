@@ -2,6 +2,7 @@
 using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.Keyring;
 using Nickvision.Desktop.System;
+using Nickvision.Desktop.Tests.Mocks;
 using System;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,7 @@ public sealed class KeyringServiceTests
     [TestMethod]
     public void Case001_Init()
     {
-        _keyringService = new KeyringService(new AppInfo("org.nickvision.desktop.test", "Nickvision.Desktop.Test", "Test"), new SecretService());
+        _keyringService = new KeyringService(new MockLogger<KeyringService>(), new AppInfo("org.nickvision.desktop.test", "Nickvision.Desktop.Test", "Test"), new SecretService(new MockLogger<SecretService>()));
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(_keyringService.IsSavingToDisk);
     }
