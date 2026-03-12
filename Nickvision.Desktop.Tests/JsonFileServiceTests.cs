@@ -1,5 +1,6 @@
 ﻿using Nickvision.Desktop.Application;
 using Nickvision.Desktop.Filesystem;
+using Nickvision.Desktop.Tests.Mocks;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -42,7 +43,7 @@ public sealed class JsonFileServiceTests
     public void Case001_Initialize()
     {
         var appInfo = new AppInfo("org.nickvision.desktop.tests", "Nickvision.Desktop Tests", "Tests");
-        _jsonFileService = new JsonFileService(appInfo);
+        _jsonFileService = new JsonFileService(new MockLogger<JsonFileService>(), appInfo);
         Assert.IsNotNull(_jsonFileService);
     }
 

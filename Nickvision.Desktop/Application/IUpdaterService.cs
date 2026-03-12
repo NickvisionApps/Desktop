@@ -38,5 +38,5 @@ public interface IUpdaterService
     /// <param name="version">The released version</param>
     /// <param name="progress">An optional progress reporter</param>
     /// <returns>True if the update was downloaded and ran successfully, else false</returns>
-    Task<bool> WindowsUpdate(AppVersion version, IProgress<DownloadProgress>? progress = null);
+    Task<bool> WindowsApplicationUpdateAsync(AppVersion version, IProgress<DownloadProgress>? progress = null);
 }

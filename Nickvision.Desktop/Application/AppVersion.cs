@@ -67,6 +67,8 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
 
     public static bool operator <=(AppVersion? pv1, AppVersion? pv2) => pv1 is null ? pv2 is null : pv1 < pv2 || pv1 == pv2;
 
+    public static bool operator <=(AppVersion? pv, Version? v) => pv is null ? v is null : pv.BaseVersion <= v;
+
     public static bool operator >(AppVersion? pv1, AppVersion? pv2)
     {
         if (pv1 is null)
@@ -87,6 +89,8 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
     public static bool operator >(AppVersion? pv, Version? v) => pv is null ? v is null : pv.BaseVersion > v;
 
     public static bool operator >=(AppVersion? pv1, AppVersion? pv2) => pv1 is null ? pv2 is null : pv1 > pv2 || pv1 == pv2;
+
+    public static bool operator >=(AppVersion? pv, Version? v) => pv is null ? v is null : pv.BaseVersion >= v;
 
     public static bool operator ==(AppVersion? pv1, AppVersion? pv2) => pv1 is null ? pv2 is null : pv1.BaseVersion == pv2?.BaseVersion && pv1.PreviewLabel == pv2?.PreviewLabel;
 
