@@ -139,15 +139,15 @@ public class SecretService : ISecretService
     /// <returns>True if the secret was added successfully, else false</returns>
     public async Task<bool> AddAsync(Secret secret)
     {
-        _logger.LogInformation($"Adding secret {secret.Name}...");
+        _logger.LogInformation($"Adding system secret ({secret.Name}).");
         if (secret.Empty)
         {
-            _logger.LogError($"Unable to add secret {secret.Name} as it is empty.");
+            _logger.LogError($"Unable to add system secret ({secret.Name}) as it is empty.");
             return false;
         }
         if (await GetAsync(secret.Name) is not null)
         {
-            _logger.LogError($"Secret {secret.Name} already exists.");
+            _logger.LogError($"Unable to add system secret ({secret.Name}) as it already exists.");
             return false;
         }
         if (OperatingSystem.IsWindows())
@@ -168,11 +168,11 @@ public class SecretService : ISecretService
             Marshal.FreeHGlobal(stringPtr);
             if (res)
             {
-                _logger.LogInformation($"Added secret {secret.Name} successfully.");
+                _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to add secret {secret.Name} on Windows.");
+                _logger.LogError($"Failed to add system secret ({secret.Name}): {Win32Error.GetLastError().GetException()}");
             }
             return res;
         }
@@ -194,11 +194,11 @@ public class SecretService : ISecretService
             await process.WaitForExitAsync();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Added secret {secret.Name} successfully.");
+                _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to add secret {secret.Name} on macOS.");
+                _logger.LogError($"Failed to add system secret ({secret.Name}): {await process.StandardOutput.ReadToEndAsync()}\n{await process.StandardError.ReadToEndAsync()}");
             }
             return process.ExitCode == 0;
         }
@@ -224,17 +224,17 @@ public class SecretService : ISecretService
             await process.WaitForExitAsync();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Added secret {secret.Name} successfully.");
+                _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to add secret {secret.Name} on Linux.");
+                _logger.LogError($"Failed to add system secret ({secret.Name}): {await process.StandardOutput.ReadToEndAsync()}\n{await process.StandardError.ReadToEndAsync()}");
             }
             return process.ExitCode == 0;
         }
         else
         {
-            _logger.LogError($"Unable to add secret {secret.Name} as the operating system is not supported.");
+            _logger.LogError($"Unable to add system secret. The OS is unsupported.");
             return false;
         }
     }
@@ -246,26 +246,26 @@ public class SecretService : ISecretService
     /// <returns>The created secret if successful, else null</returns>
     public Secret? Create(string name)
     {
-        _logger.LogInformation($"Creating secret {name}...");
+        _logger.LogInformation($"Creating system secret ({name}).");
         if (string.IsNullOrEmpty(name))
         {
-            _logger.LogWarning("Unable to create secret as the name is null or empty.");
+            _logger.LogError("Unable to create system secret as the name is null or empty.");
             return null;
         }
         if (Get(name) is not null)
         {
-            _logger.LogWarning($"Secret {name} already exists.");
+            _logger.LogError($"Unable to create system secret ({name}) as it already exists.");
             return null;
         }
         var secret = new Secret(name, new PasswordGenerator().Next(64));
         var result = Add(secret) ? secret : null;
         if (result is null)
         {
-            _logger.LogError($"Failed to create secret {name}.");
+            _logger.LogError($"Failed to create system secret ({name}).");
         }
         else
         {
-            _logger.LogInformation($"Created secret {name} successfully.");
+            _logger.LogInformation($"Created system secret ({name}) successfully.");
         }
         return result;
     }
@@ -277,26 +277,26 @@ public class SecretService : ISecretService
     /// <returns>The created secret if successful, else null</returns>
     public async Task<Secret?> CreateAsync(string name)
     {
-        _logger.LogInformation($"Creating secret {name}...");
+        _logger.LogInformation($"Creating system secret ({name}).");
         if (string.IsNullOrEmpty(name))
         {
-            _logger.LogWarning("Unable to create secret as the name is null or empty.");
+            _logger.LogError("Unable to create system secret as the name is null or empty.");
             return null;
         }
         if (await GetAsync(name) is not null)
         {
-            _logger.LogWarning($"Secret {name} already exists.");
+            _logger.LogError($"Unable to create system secret ({name}) as it already exists.");
             return null;
         }
         var secret = new Secret(name, new PasswordGenerator().Next(64));
         var result = await AddAsync(secret) ? secret : null;
         if (result is null)
         {
-            _logger.LogError($"Failed to create secret {name}.");
+            _logger.LogError($"Failed to create system secret ({name}).");
         }
         else
         {
-            _logger.LogInformation($"Created secret {name} successfully.");
+            _logger.LogInformation($"Created system secret ({name}) successfully.");
         }
         return result;
     }
@@ -308,10 +308,10 @@ public class SecretService : ISecretService
     /// <returns>True if the secret was deleted successfully, else false</returns>
     public bool Delete(string name)
     {
-        _logger.LogInformation($"Deleting secret {name}...");
+        _logger.LogInformation($"Deleting system secret ({name}).");
         if (string.IsNullOrEmpty(name))
         {
-            _logger.LogError("Unable to delete secret as the name is null or empty.");
+            _logger.LogError("Unable to delete system secret as the name is null or empty.");
             return false;
         }
         if (OperatingSystem.IsWindows())
@@ -319,11 +319,11 @@ public class SecretService : ISecretService
             var res = AdvApi32.CredDelete(name, AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC);
             if (res)
             {
-                _logger.LogInformation($"Deleted secret {name} successfully.");
+                _logger.LogInformation($"Deleted system secret ({name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to delete secret {name} on Windows.");
+                _logger.LogError($"Failed to delete system secret ({name}): {Win32Error.GetLastError().GetException()}");
             }
             return res;
         }
@@ -345,11 +345,11 @@ public class SecretService : ISecretService
             process.WaitForExit();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Deleted secret {name} successfully.");
+                _logger.LogInformation($"Deleted system secret ({name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to delete secret {name} on macOS.");
+                _logger.LogError($"Failed to delete system secret ({name}): {process.StandardOutput.ReadToEnd()}\n{process.StandardError.ReadToEnd()}");
             }
             return process.ExitCode == 0;
         }
@@ -371,17 +371,17 @@ public class SecretService : ISecretService
             process.WaitForExit();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Deleted secret {name} successfully.");
+                _logger.LogInformation($"Deleted system secret ({name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to delete secret {name} on Linux.");
+                _logger.LogError($"Failed to delete system secret ({name}): {process.StandardOutput.ReadToEnd()}\n{process.StandardError.ReadToEnd()}");
             }
             return process.ExitCode == 0;
         }
         else
         {
-            _logger.LogError($"Unable to delete secret {name} as the operating system is not supported.");
+            _logger.LogError($"Unable to delete system secret. The OS is unsupported.");
             return false;
         }
     }
@@ -393,10 +393,10 @@ public class SecretService : ISecretService
     /// <returns>True if the secret was deleted successfully, else false</returns>
     public async Task<bool> DeleteAsync(string name)
     {
-        _logger.LogInformation($"Deleting secret {name}...");
+        _logger.LogInformation($"Deleting system secret ({name}).");
         if (string.IsNullOrEmpty(name))
         {
-            _logger.LogError("Unable to delete secret as the name is null or empty.");
+            _logger.LogError("Unable to delete system secret as the name is null or empty.");
             return false;
         }
         if (OperatingSystem.IsWindows())
@@ -404,11 +404,11 @@ public class SecretService : ISecretService
             var res = await Task.Run(() => AdvApi32.CredDelete(name, AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC));
             if (res)
             {
-                _logger.LogInformation($"Deleted secret {name} successfully.");
+                _logger.LogInformation($"Deleted system secret ({name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to delete secret {name} on Windows.");
+                _logger.LogError($"Failed to delete system secret ({name}): {Win32Error.GetLastError().GetException()}");
             }
             return res;
         }
@@ -430,11 +430,11 @@ public class SecretService : ISecretService
             await process.WaitForExitAsync();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Deleted secret {name} successfully.");
+                _logger.LogInformation($"Deleted system secret ({name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to delete secret {name} on macOS.");
+                _logger.LogError($"Failed to delete system secret ({name}): {await process.StandardOutput.ReadToEndAsync()}\n{await process.StandardError.ReadToEndAsync()}");
             }
             return process.ExitCode == 0;
         }
@@ -456,17 +456,17 @@ public class SecretService : ISecretService
             await process.WaitForExitAsync();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Deleted secret {name} successfully.");
+                _logger.LogInformation($"Deleted system secret ({name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to delete secret {name} on Linux.");
+                _logger.LogError($"Failed to delete system secret ({name}): {await process.StandardOutput.ReadToEndAsync()}\n{await process.StandardError.ReadToEndAsync()}");
             }
             return process.ExitCode == 0;
         }
         else
         {
-            _logger.LogError($"Unable to delete secret {name} as the operating system is not supported.");
+            _logger.LogError($"Unable to delete system secret. The OS is unsupported.");
             return false;
         }
     }
@@ -478,17 +478,17 @@ public class SecretService : ISecretService
     /// <returns>The secret if found, else null</returns>
     public Secret? Get(string name)
     {
-        _logger.LogInformation($"Getting secret {name}...");
+        _logger.LogInformation($"Getting system secret ({name}).");
         if (string.IsNullOrEmpty(name))
         {
-            _logger.LogWarning("Unable to get secret as the name is null or empty.");
+            _logger.LogError("Unable to get system secret as the name is null or empty.");
             return null;
         }
         if (OperatingSystem.IsWindows())
         {
             if (!AdvApi32.CredRead(name, AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC, out var credential))
             {
-                _logger.LogInformation($"Secret {name} not found.");
+                _logger.LogInformation($"System secret ({name}) not found.");
                 return null;
             }
             return credential.CredentialBlob is not null ? new Secret(name, Encoding.Unicode.GetString(credential.CredentialBlob)) : null;
@@ -511,7 +511,7 @@ public class SecretService : ISecretService
             process.WaitForExit();
             if (process.ExitCode != 0)
             {
-                _logger.LogInformation($"Secret {name} not found.");
+                _logger.LogInformation($"System secret ({name}) not found.");
                 return null;
             }
             var stdout = process.StandardOutput.ReadToEnd();
@@ -535,14 +535,14 @@ public class SecretService : ISecretService
             process.WaitForExit();
             if (process.ExitCode != 0)
             {
-                _logger.LogInformation($"Secret {name} not found.");
+                _logger.LogInformation($"System secret ({name}) not found.");
                 return null;
             }
             return new Secret(name, process.StandardOutput.ReadToEnd());
         }
         else
         {
-            _logger.LogError($"Unable to get secret {name} as the operating system is not supported.");
+            _logger.LogError($"Unable to get system secret. The OS is unsupported.");
             return null;
         }
     }
@@ -554,10 +554,10 @@ public class SecretService : ISecretService
     /// <returns>The secret if found, else null</returns>
     public async Task<Secret?> GetAsync(string name)
     {
-        _logger.LogInformation($"Getting secret {name}...");
+        _logger.LogInformation($"Getting system secret ({name}).");
         if (string.IsNullOrEmpty(name))
         {
-            _logger.LogWarning("Unable to get secret as the name is null or empty.");
+            _logger.LogError("Unable to get system secret as the name is null or empty.");
             return null;
         }
         if (OperatingSystem.IsWindows())
@@ -572,7 +572,7 @@ public class SecretService : ISecretService
             });
             if (credential is null)
             {
-                _logger.LogInformation($"Secret {name} not found.");
+                _logger.LogInformation($"System secret ({name}) not found.");
             }
             return credential?.CredentialBlob is not null ? new Secret(name, Encoding.Unicode.GetString(credential.Value.CredentialBlob)) : null;
         }
@@ -594,7 +594,7 @@ public class SecretService : ISecretService
             await process.WaitForExitAsync();
             if (process.ExitCode != 0)
             {
-                _logger.LogInformation($"Secret {name} not found.");
+                _logger.LogInformation($"System secret ({name}) not found.");
                 return null;
             }
             var stdout = process.StandardOutput.ReadToEnd();
@@ -618,14 +618,14 @@ public class SecretService : ISecretService
             await process.WaitForExitAsync();
             if (process.ExitCode != 0)
             {
-                _logger.LogInformation($"Secret {name} not found.");
+                _logger.LogInformation($"System secret ({name}) not found.");
                 return null;
             }
             return new Secret(name, await process.StandardOutput.ReadToEndAsync());
         }
         else
         {
-            _logger.LogError($"Unable to get secret {name} as the operating system is not supported.");
+            _logger.LogError($"Unable to get system secret. The OS is unsupported.");
             return null;
         }
     }
@@ -637,17 +637,17 @@ public class SecretService : ISecretService
     /// <returns>True if the secret was updated successfully, else false</returns>
     public bool Update(Secret secret)
     {
-        _logger.LogInformation($"Updating secret {secret.Name}...");
+        _logger.LogInformation($"Updating system secret ({secret.Name}).");
         if (secret.Empty)
         {
-            _logger.LogError($"Unable to update secret {secret.Name} as it is empty.");
+            _logger.LogError($"Unable to update system secret ({secret.Name}) as it is empty.");
             return false;
         }
         if (OperatingSystem.IsWindows())
         {
             if (Get(secret.Name) is null)
             {
-                _logger.LogError($"Secret {secret.Name} not found.");
+                _logger.LogError($"Unable to update system secret ({secret.Name}) as it does not exist.");
                 return false;
             }
             var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
@@ -666,11 +666,11 @@ public class SecretService : ISecretService
             Marshal.FreeHGlobal(stringPtr);
             if (res)
             {
-                _logger.LogInformation($"Updated secret {secret.Name} successfully.");
+                _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to update secret {secret.Name} on Windows.");
+                _logger.LogError($"Failed to update system secret ({secret.Name}): {Win32Error.GetLastError().GetException()}");
             }
             return res;
         }
@@ -692,11 +692,11 @@ public class SecretService : ISecretService
             process.WaitForExit();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Updated secret {secret.Name} successfully.");
+                _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to update secret {secret.Name} on macOS.");
+                _logger.LogError($"Failed to update system secret ({secret.Name}): {process.StandardOutput.ReadToEnd()}\n{process.StandardError.ReadToEnd()}");
             }
             return process.ExitCode == 0;
         }
@@ -722,17 +722,17 @@ public class SecretService : ISecretService
             process.WaitForExit();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Updated secret {secret.Name} successfully.");
+                _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to update secret {secret.Name} on Linux.");
+                _logger.LogError($"Failed to update system secret ({secret.Name}): {process.StandardOutput.ReadToEnd()}\n{process.StandardError.ReadToEnd()}");
             }
             return process.ExitCode == 0;
         }
         else
         {
-            _logger.LogError($"Unable to update secret {secret.Name} as the operating system is not supported.");
+            _logger.LogError($"Unable to update system secret. The OS is unsupported.");
             return false;
         }
     }
@@ -744,17 +744,17 @@ public class SecretService : ISecretService
     /// <returns>True if the secret was updated successfully, else false</returns>
     public async Task<bool> UpdateAsync(Secret secret)
     {
-        _logger.LogInformation($"Updating secret {secret.Name}...");
+        _logger.LogInformation($"Updating system secret ({secret.Name}).");
         if (secret.Empty)
         {
-            _logger.LogError($"Unable to update secret {secret.Name} as it is empty.");
+            _logger.LogError($"Unable to update system secret ({secret.Name}) as it is empty.");
             return false;
         }
         if (OperatingSystem.IsWindows())
         {
             if (await GetAsync(secret.Name) is null)
             {
-                _logger.LogError($"Secret {secret.Name} not found.");
+                _logger.LogError($"Unable to update system secret ({secret.Name}) as it does not exist.");
                 return false;
             }
             var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
@@ -773,11 +773,11 @@ public class SecretService : ISecretService
             Marshal.FreeHGlobal(stringPtr);
             if (res)
             {
-                _logger.LogInformation($"Updated secret {secret.Name} successfully.");
+                _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to update secret {secret.Name} on Windows.");
+                _logger.LogError($"Failed to update system secret ({secret.Name}): {Win32Error.GetLastError().GetException()}");
             }
             return res;
         }
@@ -799,11 +799,11 @@ public class SecretService : ISecretService
             await process.WaitForExitAsync();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Updated secret {secret.Name} successfully.");
+                _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to update secret {secret.Name} on macOS.");
+                _logger.LogError($"Failed to update system secret ({secret.Name}): {await process.StandardOutput.ReadToEndAsync()}\n{await process.StandardError.ReadToEndAsync()}");
             }
             return process.ExitCode == 0;
         }
@@ -829,17 +829,17 @@ public class SecretService : ISecretService
             await process.WaitForExitAsync();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Updated secret {secret.Name} successfully.");
+                _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to update secret {secret.Name} on Linux.");
+                _logger.LogError($"Failed to update system secret ({secret.Name}): {await process.StandardOutput.ReadToEndAsync()}\n{await process.StandardError.ReadToEndAsync()}");
             }
             return process.ExitCode == 0;
         }
         else
         {
-            _logger.LogError($"Unable to update secret {secret.Name} as the operating system is not supported.");
+            _logger.LogError($"Unable to update system secret. The OS is unsupported.");
             return false;
         }
     }
