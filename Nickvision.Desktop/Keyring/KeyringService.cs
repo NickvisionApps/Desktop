@@ -37,7 +37,7 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         _credentials = [];
         _path = Path.Combine(keyringDir, $"{info.Id}.ring2");
         _connection = null;
-        _logger.LogInformation($"Opening keyring database at {_path}...");
+        _logger.LogInformation($"Opening keyring database ({_path}).");
         if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsLinux())
         {
             var secret = secretService.Get(info.Id) ?? secretService.Create(info.Id);
@@ -52,23 +52,23 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
                 try
                 {
                     _connection.Open();
-                    _logger.LogInformation($"Opened keyring database at {_path} successfully.");
+                    _logger.LogInformation($"Opened keyring database ({_path}) successfully.");
                 }
                 catch (SqliteException e)
                 {
-                    _logger.LogError($"Failed to open keyring database at {_path}: {e}");
+                    _logger.LogError($"Failed to open keyring database ({_path}): {e}");
                     _connection.Dispose();
                     _connection = null;
                 }
             }
             else
             {
-                _logger.LogWarning($"Unable to retrieve or create secret for {info.Id}. Keyring will not be saved to disk.");
+                _logger.LogError($"Unable to open keyring database ({_path}). The system secret ({info.Id}) could not be retrieved or created.");
             }
         }
         if (_connection is null)
         {
-            _logger.LogWarning($"Keyring database connection is unavailable. Changes will not be saved to disk.");
+            _logger.LogError($"Keyring database ({_path}) connection is unavailable. Changes will not be saved to disk.");
             return;
         }
         using var createTableCommand = _connection.CreateCommand();
@@ -128,16 +128,16 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
     /// <returns>True if the keyring was successfully added, else false</returns>
     public async Task<bool> AddCredentialAsync(Credential credential)
     {
-        _logger.LogInformation($"Adding credential {credential.Name} to keyring...");
+        _logger.LogInformation($"Adding keyring credential ({credential.Name}).");
         if (_credentials.Any(c => c.Name == credential.Name))
         {
-            _logger.LogWarning($"Credential {credential.Name} already exists in keyring.");
+            _logger.LogError($"Unable to add keyring credential ({credential.Name}) as it already exists.");
             return false;
         }
         _credentials.Add(credential);
         if (_connection is null)
         {
-            _logger.LogWarning($"Keyring database connection is unavailable. Credential {credential.Name} will not be persisted to disk.");
+            _logger.LogError($"Unable to persist keyring credential ({credential.Name}) to disk as the database connection is unavailable.");
             return false;
         }
         await using var insertCommand = _connection.CreateCommand();
@@ -149,11 +149,11 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         var result = await insertCommand.ExecuteNonQueryAsync() > 0;
         if (result)
         {
-            _logger.LogInformation($"Added credential {credential.Name} to keyring successfully.");
+            _logger.LogInformation($"Added keyring credential ({credential.Name}) successfully.");
         }
         else
         {
-            _logger.LogError($"Failed to persist credential {credential.Name} to keyring database.");
+            _logger.LogError($"Failed to add keyring credential ({credential.Name}) to database.");
         }
         return result;
     }
@@ -164,18 +164,18 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
     /// <returns>True if the keyring was successfully added, else false</returns>
     public async Task<bool> DestroyAsync()
     {
-        _logger.LogInformation($"Destroying keyring database at {_path}...");
+        _logger.LogInformation($"Destroying keyring database ({_path}).");
         await DisposeAsync();
         _credentials.Clear();
         File.Delete(_path);
         var result = !File.Exists(_path);
         if (result)
         {
-            _logger.LogInformation($"Destroyed keyring database at {_path} successfully.");
+            _logger.LogInformation($"Destroyed keyring database ({_path}) successfully.");
         }
         else
         {
-            _logger.LogError($"Failed to destroy keyring database at {_path}.");
+            _logger.LogError($"Failed to destroy keyring database ({_path}).");
         }
         return result;
     }
@@ -187,17 +187,17 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
     /// <returns>True if the keyring was successfully removed, else false</returns>
     public async Task<bool> RemoveCredentialAsync(Credential credential)
     {
-        _logger.LogInformation($"Removing credential {credential.Name} from keyring...");
+        _logger.LogInformation($"Removing keyring credential ({credential.Name}).");
         var credentialIndex = _credentials.FindIndex(c => c.Name == credential.Name);
         if (credentialIndex == -1)
         {
-            _logger.LogWarning($"Credential {credential.Name} not found in keyring.");
+            _logger.LogError($"Unable to remove keyring credential ({credential.Name}) as it does not exist.");
             return false;
         }
         _credentials.RemoveAt(credentialIndex);
         if (_connection is null)
         {
-            _logger.LogWarning($"Keyring database connection is unavailable. Credential {credential.Name} will not be removed from disk.");
+            _logger.LogError($"Unable to remove keyring credential ({credential.Name}) from disk as the database connection is unavailable.");
             return false;
         }
         await using var deleteCommand = _connection.CreateCommand();
@@ -206,11 +206,11 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         var result = await deleteCommand.ExecuteNonQueryAsync() > 0;
         if (result)
         {
-            _logger.LogInformation($"Removed credential {credential.Name} from keyring successfully.");
+            _logger.LogInformation($"Removed keyring credential ({credential.Name}) successfully.");
         }
         else
         {
-            _logger.LogError($"Failed to remove credential {credential.Name} from keyring database.");
+            _logger.LogError($"Failed to remove keyring credential ({credential.Name}) from database.");
         }
         return result;
     }
@@ -222,17 +222,17 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
     /// <returns>True if the keyring was successfully updated, else false</returns>
     public async Task<bool> UpdateCredentialAsync(Credential credential)
     {
-        _logger.LogInformation($"Updating credential {credential.Name} in keyring...");
+        _logger.LogInformation($"Updating keyring credential ({credential.Name}).");
         var credentialIndex = _credentials.FindIndex(c => c.Name == credential.Name);
         if (credentialIndex == -1)
         {
-            _logger.LogWarning($"Credential {credential.Name} not found in keyring.");
+            _logger.LogError($"Unable to update keyring credential ({credential.Name}) as it does not exist.");
             return false;
         }
         _credentials[credentialIndex] = credential;
         if (_connection is null)
         {
-            _logger.LogWarning($"Keyring database connection is unavailable. Credential {credential.Name} will not be updated on disk.");
+            _logger.LogError($"Unable to update keyring credential ({credential.Name}) on disk as the database connection is unavailable.");
             return false;
         }
         await using var updateCommand = _connection.CreateCommand();
@@ -244,11 +244,11 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         var result = await updateCommand.ExecuteNonQueryAsync() > 0;
         if (result)
         {
-            _logger.LogInformation($"Updated credential {credential.Name} in keyring successfully.");
+            _logger.LogInformation($"Updated keyring credential ({credential.Name}) successfully.");
         }
         else
         {
-            _logger.LogError($"Failed to update credential {credential.Name} in keyring database.");
+            _logger.LogError($"Failed to update keyring credential ({credential.Name}) in database.");
         }
         return result;
     }
