@@ -108,7 +108,7 @@ public class JsonFileService : IJsonFileService
         _logger.LogInformation($"Loading {typeof(T).Name} from {path}...");
         if (!File.Exists(path))
         {
-            _logger.LogInformation($"{path} not found, returning default {typeof(T).Name}.");
+            _logger.LogWarning($"{path} not found, returning default {typeof(T).Name}.");
             return new T();
         }
         try
@@ -177,7 +177,7 @@ public class JsonFileService : IJsonFileService
         try
         {
             var text = JsonSerializer.Serialize(obj, jsonTypeInfo);
-            await File.WriteAllTextAsync(Path.Combine(_directory, $"{name}.json"), text);
+            await File.WriteAllTextAsync(path, text);
             Saved?.Invoke(this, new JsonFileSavedEventArgs(obj, typeof(T), name));
             _logger.LogInformation($"Saved {path} successfully.");
             return true;
@@ -305,7 +305,7 @@ public class JsonFileService : IJsonFileService
         try
         {
             var text = JsonSerializer.Serialize(obj, JsonOptions);
-            await File.WriteAllTextAsync(Path.Combine(_directory, $"{name}.json"), text);
+            await File.WriteAllTextAsync(path, text);
             Saved?.Invoke(this, new JsonFileSavedEventArgs(obj, typeof(T), name));
             _logger.LogInformation($"Saved {path} successfully.");
             return true;
