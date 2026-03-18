@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Filesystem;
@@ -16,9 +18,49 @@ public interface IJsonFileService
     /// <summary>
     /// Loads a json file and deserializes it into an object.
     /// </summary>
+    /// <param name="jsonTypeInfo">The JsonTypeInfo for T, obtained from a source-generated JsonSerializerContext</param>
     /// <param name="name">The name of the json file (without the .json extension)</param>
     /// <typeparam name="T">The type of the object to deserialize to</typeparam>
     /// <returns>A deserialized object from the json file if successful, else a default constructed object</returns>
+    T Load<T>(JsonTypeInfo<T> jsonTypeInfo, string? name = null) where T : new();
+
+    /// <summary>
+    /// Loads a json file and deserializes it into an object asynchronously.
+    /// </summary>
+    /// <param name="jsonTypeInfo">The JsonTypeInfo for T, obtained from a source-generated JsonSerializerContext</param>
+    /// <param name="name">The name of the json file (without the .json extension)</param>
+    /// <typeparam name="T">The type of the object to deserialize to</typeparam>
+    /// <returns>A deserialized object from the json file if successful, else a default constructed object</returns>
+    Task<T> LoadAsync<T>(JsonTypeInfo<T> jsonTypeInfo, string? name = null) where T : new();
+
+    /// <summary>
+    /// Saves an object by serializing it into a json file.
+    /// </summary>
+    /// <param name="obj">The object to serialize</param>
+    /// <param name="jsonTypeInfo">The JsonTypeInfo for T, obtained from a source-generated JsonSerializerContext</param>
+    /// <param name="name">The name of the json file (without the .json extension)</param>
+    /// <typeparam name="T">The type of the object to serialize</typeparam>
+    /// <returns>True if the file was saved successfully, else false</returns>
+    bool Save<T>(T obj, JsonTypeInfo<T> jsonTypeInfo, string? name = null);
+
+    /// <summary>
+    /// Saves an object by serializing it into a json file asynchronously.
+    /// </summary>
+    /// <param name="obj">The object to serialize</param>
+    /// <param name="jsonTypeInfo">The JsonTypeInfo for T, obtained from a source-generated JsonSerializerContext</param>
+    /// <param name="name">The name of the json file (without the .json extension)</param>
+    /// <typeparam name="T">The type of the object to serialize</typeparam>
+    /// <returns>True if the file was saved successfully, else false</returns>
+    Task<bool> SaveAsync<T>(T obj, JsonTypeInfo<T> jsonTypeInfo, string? name = null);
+
+    /// <summary>
+    /// Loads a json file and deserializes it into an object.
+    /// </summary>
+    /// <param name="name">The name of the json file (without the .json extension)</param>
+    /// <typeparam name="T">The type of the object to deserialize to</typeparam>
+    /// <returns>A deserialized object from the json file if successful, else a default constructed object</returns>
+    [RequiresUnreferencedCode("JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that accepts a JsonTypeInfo<T> for NativeAOT compatibility.")]
+    [RequiresDynamicCode("JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that accepts a JsonTypeInfo<T> for NativeAOT compatibility.")]
     T Load<T>(string? name = null);
 
     /// <summary>
@@ -27,6 +69,8 @@ public interface IJsonFileService
     /// <param name="name">The name of the json file (without the .json extension)</param>
     /// <typeparam name="T">The type of the object to deserialize to</typeparam>
     /// <returns>A deserialized object from the json file if successful, else a default constructed object</returns>
+    [RequiresUnreferencedCode("JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that accepts a JsonTypeInfo<T> for NativeAOT compatibility.")]
+    [RequiresDynamicCode("JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that accepts a JsonTypeInfo<T> for NativeAOT compatibility.")]
     Task<T> LoadAsync<T>(string? name = null);
 
     /// <summary>
@@ -36,6 +80,8 @@ public interface IJsonFileService
     /// <param name="name">The name of the json file (without the .json extension)</param>
     /// <typeparam name="T">The type of the object to serialize</typeparam>
     /// <returns>True if the file was saved successfully, else false</returns>
+    [RequiresUnreferencedCode("JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that accepts a JsonTypeInfo<T> for NativeAOT compatibility.")]
+    [RequiresDynamicCode("JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that accepts a JsonTypeInfo<T> for NativeAOT compatibility.")]
     bool Save<T>(T obj, string? name = null);
 
     /// <summary>
@@ -45,5 +91,7 @@ public interface IJsonFileService
     /// <param name="name">The name of the json file (without the .json extension)</param>
     /// <typeparam name="T">The type of the object to serialize</typeparam>
     /// <returns>True if the file was saved successfully, else false</returns>
+    [RequiresUnreferencedCode("JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that accepts a JsonTypeInfo<T> for NativeAOT compatibility.")]
+    [RequiresDynamicCode("JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that accepts a JsonTypeInfo<T> for NativeAOT compatibility.")]
     Task<bool> SaveAsync<T>(T obj, string? name = null);
 }
