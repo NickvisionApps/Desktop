@@ -7,7 +7,6 @@ public class SelectionItem<T> : ISelectionItem
 {
     public T Value { get; }
     public string Label { get; }
-    public bool ShouldSelect { get; set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -16,6 +15,17 @@ public class SelectionItem<T> : ISelectionItem
         Value = value;
         Label = label;
         ShouldSelect = shouldSelect;
+    }
+
+    public bool ShouldSelect
+    {
+        get => field;
+
+        set
+        {
+            field = value;
+            OnPropertyChanged();
+        }
     }
 
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
