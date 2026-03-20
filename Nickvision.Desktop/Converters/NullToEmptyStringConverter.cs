@@ -12,8 +12,8 @@ public class NullToEmptyStringConverter : JsonConverter<string>
         {
             return string.Empty;
         }
-        return JsonSerializer.Deserialize<string>(ref reader, options) ?? string.Empty;
+        return reader.GetString() ?? string.Empty;
     }
 
-    public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options) => JsonSerializer.Serialize(writer, value, options);
+    public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options) => writer.WriteStringValue(value);
 }

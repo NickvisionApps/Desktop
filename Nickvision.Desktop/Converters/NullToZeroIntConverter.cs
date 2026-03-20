@@ -12,8 +12,8 @@ public class NullToZeroIntConverter : JsonConverter<int>
         {
             return 0;
         }
-        return JsonSerializer.Deserialize<int>(ref reader, options);
+        return reader.GetInt32();
     }
 
-    public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options) => JsonSerializer.Serialize(writer, value, options);
+    public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options) => writer.WriteNumberValue(value);
 }
