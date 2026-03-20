@@ -4,7 +4,7 @@ using System;
 
 namespace Nickvision.Desktop.WinUI.Converters;
 
-public class BoolToStyleConverter : IValueConverter
+public partial class BoolToStyleConverter : IValueConverter
 {
     public Style? TrueValue { get; set; }
     public Style? FalseValue { get; set; }
