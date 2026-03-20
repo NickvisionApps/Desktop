@@ -3,7 +3,6 @@ using Nickvision.Desktop.Application;
 using System;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 
@@ -14,22 +13,8 @@ namespace Nickvision.Desktop.Filesystem;
 /// </summary>
 public class JsonFileService : IJsonFileService
 {
-    private static readonly JsonSerializerOptions JsonOptions;
-
     private readonly ILogger<JsonFileService> _logger;
     private readonly string _directory;
-
-    /// <summary>
-    /// Constructs a static JsonFileService.
-    /// </summary>
-    static JsonFileService()
-    {
-        JsonOptions = new JsonSerializerOptions
-        {
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            WriteIndented = true
-        };
-    }
 
     /// <summary>
     /// The event for when json files are saved.
