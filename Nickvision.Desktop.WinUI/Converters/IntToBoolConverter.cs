@@ -3,7 +3,7 @@ using System;
 
 namespace Nickvision.Desktop.WinUI.Converters;
 
-public class IntToBoolConverter : IValueConverter
+public partial class IntToBoolConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, string language)
     {

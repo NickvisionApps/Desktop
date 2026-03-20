@@ -4,7 +4,7 @@ using System;
 
 namespace Nickvision.Desktop.WinUI.Converters;
 
-public class NullableToVisibilityConverter : IValueConverter
+public partial class NullableToVisibilityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language) => value is not null ? Visibility.Visible : Visibility.Collapsed;
 
