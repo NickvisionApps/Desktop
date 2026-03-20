@@ -380,7 +380,7 @@ internal class GitHubReleaseAsset
     }
 }
 
-[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
+[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower, WriteIndented = true)]
 [JsonSerializable(typeof(List<GitHubRelease>))]
 [JsonSerializable(typeof(GitHubReleaseAsset))]
 internal partial class UpdaterServiceJsonContext : JsonSerializerContext { }

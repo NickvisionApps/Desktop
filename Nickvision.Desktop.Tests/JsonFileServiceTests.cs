@@ -19,6 +19,7 @@ public class Config
     }
 }
 
+[JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, WriteIndented = true)]
 [JsonSerializable(typeof(Config))]
 [JsonSerializable(typeof(WindowGeometry))]
 internal partial class TestJsonContext : JsonSerializerContext { }
