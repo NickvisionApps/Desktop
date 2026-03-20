@@ -2,6 +2,7 @@
 using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.Tests.Mocks;
 using System.IO;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Tests;
@@ -18,6 +19,10 @@ public class Config
     }
 }
 
+[JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, WriteIndented = true)]
+[JsonSerializable(typeof(Config))]
+internal partial class TestJsonContext : JsonSerializerContext { }
+
 [TestClass]
 public sealed class JsonFileServiceTests
 {
@@ -29,13 +34,12 @@ public sealed class JsonFileServiceTests
         var configPath = Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests", "config.json");
         var configAsyncPath = Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests", "config-async.json");
         Directory.CreateDirectory(Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests"));
-        if (File.Exists(configPath))
+        foreach (var path in new[] { configPath, configAsyncPath })
         {
-            File.Delete(configPath);
-        }
-        if (File.Exists(configAsyncPath))
-        {
-            File.Delete(configAsyncPath);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
         }
     }
 
@@ -51,7 +55,7 @@ public sealed class JsonFileServiceTests
     public void Case002_Load()
     {
         Assert.IsNotNull(_jsonFileService);
-        var config = _jsonFileService.Load<Config>();
+        var config = _jsonFileService.Load(TestJsonContext.Default.Config);
         Assert.IsNotNull(config);
         Assert.IsFalse(config.DarkModeEnabled);
         Assert.AreEqual(900, config.WindowGeometry.Width);
@@ -63,7 +67,7 @@ public sealed class JsonFileServiceTests
     public async Task Case003_LoadAsync()
     {
         Assert.IsNotNull(_jsonFileService);
-        var configAsync = await _jsonFileService.LoadAsync<Config>("config-async");
+        var configAsync = await _jsonFileService.LoadAsync(TestJsonContext.Default.Config, "config-async");
         Assert.IsNotNull(configAsync);
         Assert.IsFalse(configAsync.DarkModeEnabled);
         Assert.AreEqual(900, configAsync.WindowGeometry.Width);
@@ -75,10 +79,10 @@ public sealed class JsonFileServiceTests
     public void Case004_Change()
     {
         Assert.IsNotNull(_jsonFileService);
-        var config = _jsonFileService.Load<Config>();
+        var config = _jsonFileService.Load(TestJsonContext.Default.Config);
         config.DarkModeEnabled = true;
         Assert.IsTrue(config.DarkModeEnabled);
-        Assert.IsTrue(_jsonFileService.Save(config));
+        Assert.IsTrue(_jsonFileService.Save(config, TestJsonContext.Default.Config));
         Assert.IsTrue(File.Exists(Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests", "config.json")));
     }
 
@@ -86,10 +90,10 @@ public sealed class JsonFileServiceTests
     public async Task Case005_ChangeAsync()
     {
         Assert.IsNotNull(_jsonFileService);
-        var configAsync = await _jsonFileService.LoadAsync<Config>("config-async");
+        var configAsync = await _jsonFileService.LoadAsync(TestJsonContext.Default.Config, "config-async");
         configAsync.DarkModeEnabled = true;
         Assert.IsTrue(configAsync.DarkModeEnabled);
-        Assert.IsTrue(await _jsonFileService.SaveAsync(configAsync, "config-async"));
+        Assert.IsTrue(await _jsonFileService.SaveAsync(configAsync, TestJsonContext.Default.Config, "config-async"));
         Assert.IsTrue(File.Exists(Path.Combine(UserDirectories.Config, "Nickvision.Desktop Tests", "config-async.json")));
     }
 
@@ -97,7 +101,7 @@ public sealed class JsonFileServiceTests
     public void Case006_Verify()
     {
         Assert.IsNotNull(_jsonFileService);
-        var config = _jsonFileService.Load<Config>();
+        var config = _jsonFileService.Load(TestJsonContext.Default.Config);
         Assert.IsNotNull(config);
         Assert.IsTrue(config.DarkModeEnabled);
     }
@@ -106,7 +110,7 @@ public sealed class JsonFileServiceTests
     public async Task Case007_VerifyAsync()
     {
         Assert.IsNotNull(_jsonFileService);
-        var configAsync = await _jsonFileService.LoadAsync<Config>("config-async");
+        var configAsync = await _jsonFileService.LoadAsync(TestJsonContext.Default.Config, "config-async");
         Assert.IsNotNull(configAsync);
         Assert.IsTrue(configAsync.DarkModeEnabled);
     }

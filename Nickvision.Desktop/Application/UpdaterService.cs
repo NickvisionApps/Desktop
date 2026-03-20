@@ -24,8 +24,6 @@ namespace Nickvision.Desktop.Application;
 /// </summary>
 public class UpdaterService : IDisposable, IUpdaterService
 {
-    private static readonly JsonSerializerOptions JsonOptions;
-
     private readonly ILogger<UpdaterService> _logger;
     private readonly SHA256 _hasher;
     private readonly GitHubClient _githubClient;
@@ -33,17 +31,6 @@ public class UpdaterService : IDisposable, IUpdaterService
     private readonly string _owner;
     private readonly string _name;
     private readonly string _cacheReleasesPath;
-
-    /// <summary>
-    /// Statically constructs an UpdaterService.
-    /// </summary>
-    static UpdaterService()
-    {
-        JsonOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-        };
-    }
 
     /// <summary>
     /// Constructs an UpdaterService.
@@ -168,8 +155,8 @@ public class UpdaterService : IDisposable, IUpdaterService
                         {
                             fileStream.Seek(0, SeekOrigin.Begin);
                             progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, true));
-                            var assetWithDigest = await _httpClient.GetFromJsonAsync<GitHubReleaseAsset>(asset.Url, JsonOptions);
-                            if(assetWithDigest is null)
+                            var assetWithDigest = await _httpClient.GetFromJsonAsync(asset.Url, GitHubJsonContext.Default.GitHubReleaseAsset);
+                            if (assetWithDigest is null)
                             {
                                 _logger.LogError($"Failed to get asset information for {asset.Name} from GitHub API.");
                                 return false;
@@ -300,7 +287,7 @@ public class UpdaterService : IDisposable, IUpdaterService
 
     private void Dispose(bool disposing)
     {
-        if(!disposing)
+        if (!disposing)
         {
             return;
         }
@@ -322,16 +309,30 @@ public class UpdaterService : IDisposable, IUpdaterService
             if (File.Exists(_cacheReleasesPath))
             {
                 _logger.LogInformation($"Cache file found, loading releases from cache...");
-                releases = JsonSerializer.Deserialize<IReadOnlyList<GitHubRelease>>(await File.ReadAllTextAsync(_cacheReleasesPath)) ?? [];
+                releases = JsonSerializer.Deserialize(await File.ReadAllTextAsync(_cacheReleasesPath), GitHubJsonContext.Default.ListGitHubRelease) ?? [];
                 _logger.LogInformation($"Loaded {releases.Count} releases from cache.");
             }
             if (releases.Count == 0)
             {
                 _logger.LogInformation($"No releases found in cache, fetching from GitHub API...");
-                var json = JsonSerializer.Serialize(await _githubClient.Repository.Release.GetAll(_owner, _name));
+                var octokitReleases = await _githubClient.Repository.Release.GetAll(_owner, _name);
+                var mappedReleases = octokitReleases.Select(r => new GitHubRelease
+                {
+                    TagName = r.TagName,
+                    Prerelease = r.Prerelease,
+                    Draft = r.Draft,
+                    Assets = r.Assets?.Select(a => new GitHubReleaseAsset
+                    {
+                        Url = a.Url,
+                        Name = a.Name,
+                        Size = a.Size,
+                        BrowserDownloadUrl = a.BrowserDownloadUrl
+                    }).ToList() ?? new List<GitHubReleaseAsset>()
+                }).ToList();
+                var json = JsonSerializer.Serialize(mappedReleases, GitHubJsonContext.Default.ListGitHubRelease);
                 await File.WriteAllTextAsync(_cacheReleasesPath, json);
                 File.SetLastWriteTimeUtc(_cacheReleasesPath, DateTime.UtcNow);
-                releases = JsonSerializer.Deserialize<IReadOnlyList<GitHubRelease>>(json) ?? [];
+                releases = mappedReleases;
                 _logger.LogInformation($"Fetched {releases.Count} releases from GitHub API and saved to cache.");
             }
             return releases;
@@ -344,36 +345,7 @@ public class UpdaterService : IDisposable, IUpdaterService
     }
 }
 
-internal class GitHubRelease
-{
-    public string TagName { get; set; }
-    public bool Prerelease { get; set; }
-    public bool Draft { get; set; }
-    public List<GitHubReleaseAsset> Assets { get; set; }
 
-    public GitHubRelease()
-    {
-        TagName = string.Empty;
-        Prerelease = false;
-        Draft = false;
-        Assets = new List<GitHubReleaseAsset>();
-    }
-}
 
-internal class GitHubReleaseAsset
-{
-    public string Url { get; set; }
-    public string Name { get; set; }
-    public long Size { get; set; }
-    public string Digest { get; set; }
-    public string BrowserDownloadUrl { get; set; }
 
-    public GitHubReleaseAsset()
-    {
-        Url = string.Empty;
-        Name = string.Empty;
-        Size = 0;
-        Digest = string.Empty;
-        BrowserDownloadUrl = string.Empty;
-    }
-}
+

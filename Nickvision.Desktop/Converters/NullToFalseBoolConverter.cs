@@ -12,8 +12,8 @@ public class NullToFalseBoolConverter : JsonConverter<bool>
         {
             return false;
         }
-        return JsonSerializer.Deserialize<bool>(ref reader, options);
+        return reader.GetBoolean();
     }
 
-    public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options) => JsonSerializer.Serialize(writer, value, options);
+    public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options) => writer.WriteBooleanValue(value);
 }
