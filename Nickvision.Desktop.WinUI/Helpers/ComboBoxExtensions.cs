@@ -11,7 +11,7 @@ public static class ComboBoxExtensions
     {
         public void SelectSelectionItem()
         {
-            if (comboBox.ItemsSource is IEnumerable<ISelectionItem> items)
+            if (comboBox.ItemsSource is IEnumerable<SelectionItem> items)
             {
                 comboBox.SelectedItem = items.FirstOrDefault(item => item.ShouldSelect);
             }

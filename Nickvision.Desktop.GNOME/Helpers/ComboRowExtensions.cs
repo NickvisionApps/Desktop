@@ -7,7 +7,7 @@ public static class ComboRowExtensions
 {
     extension(Adw.ComboRow row)
     {
-        public void SetModel(IReadOnlyList<ISelectionItem> selectionItems, bool allowElipse = true)
+        public void SetModel(IReadOnlyList<SelectionItem> selectionItems, bool allowElipse = true)
         {
             var selectedIndex = 0u;
             var list = Gtk.StringList.New(null);
