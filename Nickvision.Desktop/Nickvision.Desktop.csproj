@@ -20,6 +20,8 @@
 		<RepositoryUrl>https://github.com/NickvisionApps/Desktop</RepositoryUrl>
 		<Title>Nickvision.Desktop</Title>
 		<PackageIcon>icon.png</PackageIcon>
+		<IsAotCompatible>true</IsAotCompatible>
+		<PublishAot>true</PublishAot>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)'=='net8.0-windows10.0.19041.0' Or '$(TargetFramework)'=='net9.0-windows10.0.19041.0' Or '$(TargetFramework)'=='net10.0-windows10.0.19041.0'">

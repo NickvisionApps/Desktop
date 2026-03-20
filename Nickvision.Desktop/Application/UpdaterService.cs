@@ -157,7 +157,7 @@ public class UpdaterService : IDisposable, IUpdaterService
                             fileStream.Seek(0, SeekOrigin.Begin);
                             progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, true));
                             var assetWithDigest = await _httpClient.GetFromJsonAsync(asset.Url, UpdaterServiceJsonContext.Default.GitHubReleaseAsset);
-                            if(assetWithDigest is null)
+                            if (assetWithDigest is null)
                             {
                                 _logger.LogError($"Failed to get asset information for {asset.Name} from GitHub API.");
                                 return false;
@@ -288,7 +288,7 @@ public class UpdaterService : IDisposable, IUpdaterService
 
     private void Dispose(bool disposing)
     {
-        if(!disposing)
+        if (!disposing)
         {
             return;
         }
