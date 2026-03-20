@@ -5,6 +5,7 @@ using Nickvision.Desktop.GNOME.Controls;
 using Nickvision.Desktop.GNOME.Hosting;
 using Nickvision.Desktop.Hosting;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace Nickvision.Desktop.GNOME.Helpers;
@@ -13,7 +14,8 @@ public static class HostApplicationBuilderExtensions
 {
     extension(IHostApplicationBuilder builder)
     {
-        public IHostApplicationBuilder ConfigureAdw<T>(bool handlesOpen = false, bool includeResources = true) where T : Adw.ApplicationWindow
+        [RequiresDynamicCode("Calls AddSingleton<T> which may use dynamic code generation.")]
+        public IHostApplicationBuilder ConfigureAdw<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(bool handlesOpen = false, bool includeResources = true) where T : Adw.ApplicationWindow
         {
             if (!builder.Properties.TryGetValue("UserInterfaceHostingContext", out var obj) || obj is not AdwUserInterfaceContext context)
             {

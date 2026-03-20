@@ -8,7 +8,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
 		<PackageId>Nickvision.Desktop.GNOME</PackageId>
-		<Version>2026.3.2</Version>
+		<Version>2026.3.3</Version>
 		<Company>Nickvision</Company>
 		<Authors>Nickvision</Authors>
 		<Description>A set of controls and helpers for GNOME based Nickvision apps.</Description>
@@ -20,11 +20,12 @@
 		<RepositoryUrl>https://github.com/NickvisionApps/Desktop</RepositoryUrl>
 		<Title>Nickvision.Desktop.GNOME</Title>
 		<PackageIcon>icon.png</PackageIcon>
+		<IsAotCompatible>true</IsAotCompatible>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="GirCore.Adw-1" Version="0.7.0" />
-		<PackageReference Include="Nickvision.Desktop" Version="2026.3.3" />
+		<PackageReference Include="Nickvision.Desktop" Version="2026.3.4" />
 	</ItemGroup>
 
 	<ItemGroup>

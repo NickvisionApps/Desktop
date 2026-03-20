@@ -3,7 +3,7 @@ using System;
 
 namespace Nickvision.Desktop.WinUI.Converters;
 
-public class BoolToDoubleConverter : IValueConverter
+public partial class BoolToDoubleConverter : IValueConverter
 {
     public double TrueValue { get; set; }
     public double FalseValue { get; set; }

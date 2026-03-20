@@ -4,7 +4,7 @@ using System;
 
 namespace Nickvision.Desktop.WinUI.Converters;
 
-public class VisibilityToBoolConverter : IValueConverter
+public partial class VisibilityToBoolConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, string language)
     {

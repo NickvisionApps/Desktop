@@ -4,6 +4,7 @@ using Nickvision.Desktop.Application;
 using Nickvision.Desktop.Hosting;
 using Nickvision.Desktop.WinUI.Hosting;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Nickvision.Desktop.WinUI.Helpers;
 
@@ -11,7 +12,8 @@ public static class HostApplicationBuilderExtensions
 {
     extension(IHostApplicationBuilder builder)
     {
-        public IHostApplicationBuilder ConfigureWinUI<T>() where T : Microsoft.UI.Xaml.Application
+        [RequiresDynamicCode("Calls AddSingleton<T> which may use dynamic code generation.")]
+        public IHostApplicationBuilder ConfigureWinUI<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>() where T : Microsoft.UI.Xaml.Application
         {
             if (!builder.Properties.TryGetValue("UserInterfaceHostingContext", out var obj) || obj is not WinUIUserInterfaceContext context)
             {
