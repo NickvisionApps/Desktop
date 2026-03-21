@@ -18,6 +18,13 @@ public static class ListViewExtensions
                     listView.SelectedItems.Add(item);
                 }
             }
+            else if (listView.ItemsSource is IEnumerable<BindableSelectionItem> bindableItems)
+            {
+                foreach (var item in bindableItems.Where(i => i.ShouldSelect))
+                {
+                    listView.SelectedItems.Add(item);
+                }
+            }
         }
     }
 }

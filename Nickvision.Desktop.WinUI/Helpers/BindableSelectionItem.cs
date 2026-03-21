@@ -26,5 +26,12 @@ public sealed partial class BindableSelectionItem : INotifyPropertyChanged
         set => _selectionItem.ShouldSelect = value;
     }
 
-    public static implicit operator BindableSelectionItem(SelectionItem item) => new BindableSelectionItem(item);
+    public SelectionItem<T>? ToSelectionItem<T>()
+    {
+        if (_selectionItem is SelectionItem<T> source)
+        {
+            return source;
+        }
+        return null;
+    }
 }

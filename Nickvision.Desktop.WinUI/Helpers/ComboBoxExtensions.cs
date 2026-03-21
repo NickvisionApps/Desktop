@@ -15,6 +15,10 @@ public static class ComboBoxExtensions
             {
                 comboBox.SelectedItem = items.FirstOrDefault(item => item.ShouldSelect);
             }
+            else if (comboBox.ItemsSource is IEnumerable<BindableSelectionItem> bindableItems)
+            {
+                comboBox.SelectedItem = bindableItems.FirstOrDefault(item => item.ShouldSelect);
+            }
         }
     }
 }
