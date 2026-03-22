@@ -2,21 +2,31 @@
 using Microsoft.UI.Xaml;
 using Nickvision.Desktop.Application;
 using System;
-using Vanara.PInvoke;
+using System.Runtime.InteropServices;
 using Windows.Graphics;
 using WinRT.Interop;
 
 namespace Nickvision.Desktop.WinUI.Helpers;
 
-public static class WindowExtensions
+public static partial class WindowExtensions
 {
+    private const int SW_SHOWMAXIMIZED = 3;
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool IsZoomed(nint hWnd);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool ShowWindow(nint hWnd, int nCmdShow);
+
     extension(Window window)
     {
-        public HWND Hwnd => WindowNative.GetWindowHandle(window);
+        public nint Hwnd => WindowNative.GetWindowHandle(window);
 
         public WindowGeometry Geometry
         {
-            get => new WindowGeometry(window.AppWindow.Size.Width, window.AppWindow.Size.Height, User32.IsZoomed(window.Hwnd), window.AppWindow.Position.X, window.AppWindow.Position.Y);
+            get => new WindowGeometry(window.AppWindow.Size.Width, window.AppWindow.Size.Height, IsZoomed(window.Hwnd), window.AppWindow.Position.X, window.AppWindow.Position.Y);
 
             set
             {
@@ -27,7 +37,7 @@ public static class WindowExtensions
                         Width = 900,
                         Height = 700
                     });
-                    User32.ShowWindow(window.Hwnd, ShowWindowCommand.SW_SHOWMAXIMIZED);
+                    ShowWindow(window.Hwnd, SW_SHOWMAXIMIZED);
                 }
                 else
                 {

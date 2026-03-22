@@ -1,14 +1,19 @@
 using System;
 using System.IO;
-using Vanara.PInvoke;
+using System.Runtime.InteropServices;
 
 namespace Nickvision.Desktop.Filesystem;
 
 /// <summary>
 /// A helper class for getting user directories cross-platform.
 /// </summary>
-public static class UserDirectories
+public static partial class UserDirectories
 {
+    private static readonly Guid _folderidDownloads = new Guid("374DE290-123F-4565-9164-39C4925E467B");
+
+    [LibraryImport("shell32.dll")]
+    private static partial int SHGetKnownFolderPath(in Guid rfid, uint dwFlags, nint hToken, out nint ppszPath);
+
     /// <summary>
     /// The user's home directory.
     /// </summary>
@@ -218,7 +223,13 @@ public static class UserDirectories
             var res = string.Empty;
             if (OperatingSystem.IsWindows())
             {
-                if (Shell32.SHGetKnownFolderPath(Shell32.KNOWNFOLDERID.FOLDERID_Downloads.Guid(), 0, nint.Zero, out res) != HRESULT.S_OK)
+                nint ptr = nint.Zero;
+                if (SHGetKnownFolderPath(in _folderidDownloads, 0, nint.Zero, out ptr) == 0)
+                {
+                    res = Marshal.PtrToStringUni(ptr) ?? Path.Combine(Home, "Downloads");
+                    Marshal.FreeCoTaskMem(ptr);
+                }
+                else
                 {
                     res = Path.Combine(Home, "Downloads");
                 }

@@ -1,18 +1,25 @@
 using Microsoft.Extensions.Logging;
 using Nickvision.Desktop.FreeDesktop;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Tmds.DBus;
-using Vanara.PInvoke;
 
 namespace Nickvision.Desktop.System;
 
 /// <summary>
 /// A server for managing power options.
 /// </summary>
-public class PowerService : IDisposable, IPowerService
+public partial class PowerService : IDisposable, IPowerService
 {
+    private const uint ES_CONTINUOUS = 0x80000000u;
+    private const uint ES_SYSTEM_REQUIRED = 0x00000001u;
+
+    [LibraryImport("kernel32.dll", SetLastError = true)]
+    private static partial uint SetThreadExecutionState(uint esFlags);
+
     private readonly ILogger<PowerService> _logger;
     private bool _disposed;
     private Connection? _dbus;
@@ -57,14 +64,14 @@ public class PowerService : IDisposable, IPowerService
         _logger.LogInformation("Allowing system suspend...");
         if (OperatingSystem.IsWindows())
         {
-            var result = Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS) != 0;
+            var result = SetThreadExecutionState(ES_CONTINUOUS) != 0;
             if (result)
             {
                 _logger.LogInformation("Allowed system suspend.");
             }
             else
             {
-                _logger.LogError($"Failed to allow system suspend: {Win32Error.GetLastError().GetException()}");
+                _logger.LogError($"Failed to allow system suspend: {new Win32Exception(Marshal.GetLastPInvokeError())}");
             }
             return result;
         }
@@ -109,14 +116,14 @@ public class PowerService : IDisposable, IPowerService
         _logger.LogInformation("Preventing system suspend...");
         if (OperatingSystem.IsWindows())
         {
-            var result = Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS | Kernel32.EXECUTION_STATE.ES_SYSTEM_REQUIRED) != 0;
+            var result = SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED) != 0;
             if (result)
             {
                 _logger.LogInformation("Prevented system suspend.");
             }
             else
             {
-                _logger.LogError($"Failed to prevent system suspend: {Win32Error.GetLastError().GetException()}");
+                _logger.LogError($"Failed to prevent system suspend: {new Win32Exception(Marshal.GetLastPInvokeError())}");
             }
             return result;
         }
