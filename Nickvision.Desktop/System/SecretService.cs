@@ -5,7 +5,6 @@ using Nickvision.Desktop.Keyring;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -47,56 +46,16 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var blob = Encoding.Unicode.GetBytes(secret.Value);
-            var targetNamePtr = IntPtr.Zero;
-            var userNamePtr = IntPtr.Zero;
-            var blobPtr = IntPtr.Zero;
-            var credPtr = IntPtr.Zero;
-            try
+            var (res, errorCode) = await Task.Run(() => WindowsSecretHelpers.WriteCredential(secret.Name, secret.Value));
+            if (res)
             {
-                targetNamePtr = Marshal.StringToHGlobalUni(secret.Name);
-                userNamePtr = Marshal.StringToHGlobalUni("default");
-                blobPtr = Marshal.AllocHGlobal(blob.Length);
-                Marshal.Copy(blob, 0, blobPtr, blob.Length);
-                unsafe
-                {
-                    credPtr = Marshal.AllocHGlobal(sizeof(WindowsSecretHelpers.CREDENTIAL_WIN32));
-                    var cred = (WindowsSecretHelpers.CREDENTIAL_WIN32*)credPtr;
-                    cred->Flags = 0;
-                    cred->Type = WindowsSecretHelpers.CredTypeGeneric;
-                    cred->TargetName = (char*)targetNamePtr;
-                    cred->Comment = null;
-                    cred->LastWritten = 0;
-                    cred->CredentialBlobSize = (uint)blob.Length;
-                    cred->CredentialBlob = (byte*)blobPtr;
-                    cred->Persist = WindowsSecretHelpers.CredPersistLocalMachine;
-                    cred->AttributeCount = 0;
-                    cred->Attributes = null;
-                    cred->TargetAlias = null;
-                    cred->UserName = (char*)userNamePtr;
-                }
-                var (res, errorCode) = await Task.Run(() =>
-                {
-                    var r = WindowsSecretHelpers.CredWriteNative(credPtr, 0);
-                    return (r, r ? 0 : Marshal.GetLastWin32Error());
-                });
-                if (res)
-                {
-                    _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
-                }
-                else
-                {
-                    _logger.LogError($"Failed to add system secret ({secret.Name}): Win32 error {errorCode}");
-                }
-                return res;
+                _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
             }
-            finally
+            else
             {
-                if (credPtr != IntPtr.Zero) Marshal.FreeHGlobal(credPtr);
-                if (blobPtr != IntPtr.Zero) Marshal.FreeHGlobal(blobPtr);
-                if (userNamePtr != IntPtr.Zero) Marshal.FreeHGlobal(userNamePtr);
-                if (targetNamePtr != IntPtr.Zero) Marshal.FreeHGlobal(targetNamePtr);
+                _logger.LogError($"Failed to add system secret ({secret.Name}): Win32 error {errorCode}");
             }
+            return res;
         }
         else if (OperatingSystem.IsMacOS())
         {
@@ -196,11 +155,7 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var (res, errorCode) = await Task.Run(() =>
-            {
-                var r = WindowsSecretHelpers.CredDeleteNative(name, WindowsSecretHelpers.CredTypeGeneric, 0);
-                return (r, r ? 0 : Marshal.GetLastWin32Error());
-            });
+            var (res, errorCode) = await Task.Run(() => WindowsSecretHelpers.DeleteCredential(name));
             if (res)
             {
                 _logger.LogInformation($"Deleted system secret ({name}) successfully.");
@@ -284,37 +239,13 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var credentialPtr = await Task.Run(() =>
-            {
-                if (WindowsSecretHelpers.CredReadNative(name, WindowsSecretHelpers.CredTypeGeneric, 0, out var ptr))
-                {
-                    return ptr;
-                }
-                return IntPtr.Zero;
-            });
-            if (credentialPtr == IntPtr.Zero)
+            var value = await Task.Run(() => WindowsSecretHelpers.ReadCredential(name));
+            if (value is null)
             {
                 _logger.LogInformation($"System secret ({name}) not found.");
                 return null;
             }
-            try
-            {
-                unsafe
-                {
-                    var cred = (WindowsSecretHelpers.CREDENTIAL_WIN32*)credentialPtr;
-                    if (cred->CredentialBlob == null || cred->CredentialBlobSize == 0)
-                    {
-                        _logger.LogInformation($"System secret ({name}) not found.");
-                        return null;
-                    }
-                    var blob = new ReadOnlySpan<byte>(cred->CredentialBlob, (int)cred->CredentialBlobSize);
-                    return new Secret(name, Encoding.Unicode.GetString(blob));
-                }
-            }
-            finally
-            {
-                WindowsSecretHelpers.CredFreeNative(credentialPtr);
-            }
+            return new Secret(name, value);
         }
         else if (OperatingSystem.IsMacOS())
         {
@@ -388,56 +319,16 @@ public class SecretService : ISecretService
                 _logger.LogError($"Unable to update system secret ({secret.Name}) as it does not exist.");
                 return false;
             }
-            var blob = Encoding.Unicode.GetBytes(secret.Value);
-            var targetNamePtr = IntPtr.Zero;
-            var userNamePtr = IntPtr.Zero;
-            var blobPtr = IntPtr.Zero;
-            var credPtr = IntPtr.Zero;
-            try
+            var (res, errorCode) = await Task.Run(() => WindowsSecretHelpers.WriteCredential(secret.Name, secret.Value));
+            if (res)
             {
-                targetNamePtr = Marshal.StringToHGlobalUni(secret.Name);
-                userNamePtr = Marshal.StringToHGlobalUni("default");
-                blobPtr = Marshal.AllocHGlobal(blob.Length);
-                Marshal.Copy(blob, 0, blobPtr, blob.Length);
-                unsafe
-                {
-                    credPtr = Marshal.AllocHGlobal(sizeof(WindowsSecretHelpers.CREDENTIAL_WIN32));
-                    var cred = (WindowsSecretHelpers.CREDENTIAL_WIN32*)credPtr;
-                    cred->Flags = 0;
-                    cred->Type = WindowsSecretHelpers.CredTypeGeneric;
-                    cred->TargetName = (char*)targetNamePtr;
-                    cred->Comment = null;
-                    cred->LastWritten = 0;
-                    cred->CredentialBlobSize = (uint)blob.Length;
-                    cred->CredentialBlob = (byte*)blobPtr;
-                    cred->Persist = WindowsSecretHelpers.CredPersistLocalMachine;
-                    cred->AttributeCount = 0;
-                    cred->Attributes = null;
-                    cred->TargetAlias = null;
-                    cred->UserName = (char*)userNamePtr;
-                }
-                var (res, errorCode) = await Task.Run(() =>
-                {
-                    var r = WindowsSecretHelpers.CredWriteNative(credPtr, 0);
-                    return (r, r ? 0 : Marshal.GetLastWin32Error());
-                });
-                if (res)
-                {
-                    _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
-                }
-                else
-                {
-                    _logger.LogError($"Failed to update system secret ({secret.Name}): Win32 error {errorCode}");
-                }
-                return res;
+                _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
             }
-            finally
+            else
             {
-                if (credPtr != IntPtr.Zero) Marshal.FreeHGlobal(credPtr);
-                if (blobPtr != IntPtr.Zero) Marshal.FreeHGlobal(blobPtr);
-                if (userNamePtr != IntPtr.Zero) Marshal.FreeHGlobal(userNamePtr);
-                if (targetNamePtr != IntPtr.Zero) Marshal.FreeHGlobal(targetNamePtr);
+                _logger.LogError($"Failed to update system secret ({secret.Name}): Win32 error {errorCode}");
             }
+            return res;
         }
         else if (OperatingSystem.IsMacOS())
         {
