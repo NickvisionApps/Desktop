@@ -133,12 +133,12 @@ public class NotificationService : IDisposable, INotificationService
                 {
                     if (e.actionKey == "open")
                     {
-                        Process.Start(new ProcessStartInfo()
+                        using (Process.Start(new ProcessStartInfo()
                         {
                             FileName = "xdg-open",
                             Arguments = notification.ActionParam,
                             UseShellExecute = true
-                        });
+                        })) { }
                     }
                 });
                 var id = await _freeDesktopNotifications.NotifyAsync(_appInfo.Id, 0, _appInfo.Id, notification.Title, notification.Message, notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam) ? ["open", OpenTranslatedText] : [], new Dictionary<string, object>(), -1);
