@@ -252,11 +252,6 @@ public class SecretService : ISecretService
             _logger.LogError("Unable to create system secret as the name is null or empty.");
             return null;
         }
-        if (Get(name) is not null)
-        {
-            _logger.LogError($"Unable to create system secret ({name}) as it already exists.");
-            return null;
-        }
         var secret = new Secret(name, new PasswordGenerator().Next(64));
         var result = Add(secret) ? secret : null;
         if (result is null)
@@ -281,11 +276,6 @@ public class SecretService : ISecretService
         if (string.IsNullOrEmpty(name))
         {
             _logger.LogError("Unable to create system secret as the name is null or empty.");
-            return null;
-        }
-        if (await GetAsync(name) is not null)
-        {
-            _logger.LogError($"Unable to create system secret ({name}) as it already exists.");
             return null;
         }
         var secret = new Secret(name, new PasswordGenerator().Next(64));

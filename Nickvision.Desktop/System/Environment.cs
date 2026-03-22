@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Nickvision.Desktop.System;
@@ -158,6 +159,7 @@ public static class Environment
          Deployment Mode: {DeploymentMode}
          Locale: {CultureInfo.CurrentCulture.Name}
          Running From: {ExecutingDirectory}
+         NativeAOT: {!RuntimeFeature.IsDynamicCodeSupported}
 
          {extra}
          """;

@@ -326,8 +326,3 @@ public class UpdaterService : IDisposable, IUpdaterService
         }
     }
 }
-
-
-
-
-
