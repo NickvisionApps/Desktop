@@ -1,14 +1,12 @@
 using DBus.Services.Secrets;
 using Microsoft.Extensions.Logging;
+using Nickvision.Desktop.Helpers;
 using Nickvision.Desktop.Keyring;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using Vanara.InteropServices;
-using Vanara.PInvoke;
 
 namespace Nickvision.Desktop.System;
 
@@ -48,27 +46,14 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
-            var res = await Task.Run(() => AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
-            {
-                AttributeCount = 0,
-                Attributes = nint.Zero,
-                Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
-                Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
-                TargetName = new StrPtrAuto(secret.Name),
-                UserName = new StrPtrAuto("default"),
-                CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
-                CredentialBlob = stringPtr
-            },
-                0));
-            Marshal.FreeHGlobal(stringPtr);
+            var (res, errorCode) = await Task.Run(() => WindowsSecretHelpers.WriteCredential(secret.Name, secret.Value));
             if (res)
             {
                 _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to add system secret ({secret.Name}): {Win32Error.GetLastError().GetException()}");
+                _logger.LogError($"Failed to add system secret ({secret.Name}): Win32 error {errorCode}");
             }
             return res;
         }
@@ -170,14 +155,14 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var res = await Task.Run(() => AdvApi32.CredDelete(name, AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC));
+            var (res, errorCode) = await Task.Run(() => WindowsSecretHelpers.DeleteCredential(name));
             if (res)
             {
                 _logger.LogInformation($"Deleted system secret ({name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to delete system secret ({name}): {Win32Error.GetLastError().GetException()}");
+                _logger.LogError($"Failed to delete system secret ({name}): Win32 error {errorCode}");
             }
             return res;
         }
@@ -254,19 +239,13 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var credential = await Task.Run<AdvApi32.CREDENTIAL_MGD?>(() =>
-            {
-                if (AdvApi32.CredRead(name, AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC, out var c))
-                {
-                    return c;
-                }
-                return null;
-            });
-            if (credential is null)
+            var value = await Task.Run(() => WindowsSecretHelpers.ReadCredential(name));
+            if (value is null)
             {
                 _logger.LogInformation($"System secret ({name}) not found.");
+                return null;
             }
-            return credential?.CredentialBlob is not null ? new Secret(name, Encoding.Unicode.GetString(credential.Value.CredentialBlob)) : null;
+            return new Secret(name, value);
         }
         else if (OperatingSystem.IsMacOS())
         {
@@ -333,34 +312,21 @@ public class SecretService : ISecretService
             _logger.LogError($"Unable to update system secret ({secret.Name}) as it is empty.");
             return false;
         }
+        if (await GetAsync(secret.Name) is null)
+        {
+            _logger.LogError($"Unable to update system secret ({secret.Name}) as it does not exist.");
+            return false;
+        }
         if (OperatingSystem.IsWindows())
         {
-            if (await GetAsync(secret.Name) is null)
-            {
-                _logger.LogError($"Unable to update system secret ({secret.Name}) as it does not exist.");
-                return false;
-            }
-            var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
-            var res = await Task.Run(() => AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
-            {
-                AttributeCount = 0,
-                Attributes = nint.Zero,
-                Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
-                Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
-                TargetName = new StrPtrAuto(secret.Name),
-                UserName = new StrPtrAuto("default"),
-                CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
-                CredentialBlob = stringPtr
-            },
-                0));
-            Marshal.FreeHGlobal(stringPtr);
+            var (res, errorCode) = await Task.Run(() => WindowsSecretHelpers.WriteCredential(secret.Name, secret.Value));
             if (res)
             {
                 _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to update system secret ({secret.Name}): {Win32Error.GetLastError().GetException()}");
+                _logger.LogError($"Failed to update system secret ({secret.Name}): Win32 error {errorCode}");
             }
             return res;
         }
@@ -421,4 +387,5 @@ public class SecretService : ISecretService
             return false;
         }
     }
+
 }

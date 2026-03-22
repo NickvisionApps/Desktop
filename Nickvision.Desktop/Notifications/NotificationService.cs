@@ -133,7 +133,7 @@ public class NotificationService : IDisposable, INotificationService
                 {
                     if (e.actionKey == "open")
                     {
-                        Process.Start(new ProcessStartInfo()
+                        using var _ = Process.Start(new ProcessStartInfo()
                         {
                             FileName = "xdg-open",
                             Arguments = notification.ActionParam,

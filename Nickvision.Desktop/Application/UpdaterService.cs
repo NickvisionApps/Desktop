@@ -266,7 +266,7 @@ public class UpdaterService : IDisposable, IUpdaterService
             }
         }
         _logger.LogInformation($"Starting downloaded installer ({setupPath})...");
-        var res = Process.Start(new ProcessStartInfo
+        using var res = Process.Start(new ProcessStartInfo
         {
             FileName = setupPath,
             UseShellExecute = true,
