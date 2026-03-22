@@ -1,4 +1,5 @@
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Nickvision.Desktop.Application;
 using Nickvision.Desktop.Filesystem;
@@ -19,7 +20,7 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
     private readonly ILogger<KeyringService> _logger;
     private readonly List<Credential> _credentials;
     private readonly string _path;
-    private SqliteConnection? _connection;
+    private KeyringDbContext? _context;
 
     /// <summary>
     /// Constructs a KeyringService.
@@ -36,29 +37,34 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         Directory.CreateDirectory(keyringDir);
         _credentials = [];
         _path = Path.Combine(keyringDir, $"{info.Id}.ring2");
-        _connection = null;
+        _context = null;
         _logger.LogInformation($"Opening keyring database ({_path}).");
         if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsLinux())
         {
             var secret = secretService.Get(info.Id) ?? secretService.Create(info.Id);
             if (secret is not null)
             {
-                _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{_path}'")
+                var connectionString = new SqliteConnectionStringBuilder($"Data Source='{_path}'")
                 {
                     Mode = SqliteOpenMode.ReadWriteCreate,
                     Password = secret.Value,
                     Pooling = false
-                }.ToString());
+                }.ToString();
+                var options = new DbContextOptionsBuilder<KeyringDbContext>()
+                    .UseSqlite(connectionString)
+                    .Options;
+                _context = new KeyringDbContext(options);
                 try
                 {
-                    _connection.Open();
+                    _context.Database.OpenConnection();
+                    _context.Database.EnsureCreated();
                     _logger.LogInformation($"Opened keyring database ({_path}) successfully.");
                 }
-                catch (SqliteException e)
+                catch (Exception e)
                 {
                     _logger.LogError($"Failed to open keyring database ({_path}): {e}");
-                    _connection.Dispose();
-                    _connection = null;
+                    _context.Dispose();
+                    _context = null;
                 }
             }
             else
@@ -66,21 +72,12 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
                 _logger.LogError($"Unable to open keyring database ({_path}). The system secret ({info.Id}) could not be retrieved or created.");
             }
         }
-        if (_connection is null)
+        if (_context is null)
         {
             _logger.LogError($"Keyring database ({_path}) connection is unavailable. Changes will not be saved to disk.");
             return;
         }
-        using var createTableCommand = _connection.CreateCommand();
-        createTableCommand.CommandText = "CREATE TABLE IF NOT EXISTS credentials (name TEXT, uri TEXT, username TEXT, password TEXT)";
-        createTableCommand.ExecuteNonQuery();
-        using var selectAllCommand = _connection.CreateCommand();
-        selectAllCommand.CommandText = "SELECT * FROM credentials";
-        using var reader = selectAllCommand.ExecuteReader();
-        while (reader.Read())
-        {
-            _credentials.Add(new Credential(reader.GetString(0), reader.GetString(2), reader.GetString(3), new Uri(reader.GetString(1))));
-        }
+        _credentials.AddRange(_context.Credentials.AsNoTracking().ToList());
         _logger.LogInformation($"Loaded {_credentials.Count} credentials from keyring.");
     }
 
@@ -114,7 +111,7 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
     /// <summary>
     /// Whether the keyring is currently saving to disk.
     /// </summary>
-    public bool IsSavingToDisk => _connection is not null;
+    public bool IsSavingToDisk => _context is not null;
 
     /// <summary>
     /// The list of credentials in the keyring.
@@ -135,18 +132,13 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
             return false;
         }
         _credentials.Add(credential);
-        if (_connection is null)
+        if (_context is null)
         {
             _logger.LogError($"Unable to persist keyring credential ({credential.Name}) to disk as the database connection is unavailable.");
             return false;
         }
-        await using var insertCommand = _connection.CreateCommand();
-        insertCommand.CommandText = "INSERT INTO credentials (name, uri, username, password) VALUES ($name, $uri, $username, $password)";
-        insertCommand.Parameters.AddWithValue("$name", credential.Name);
-        insertCommand.Parameters.AddWithValue("$uri", credential.Url.ToString());
-        insertCommand.Parameters.AddWithValue("$username", credential.Username);
-        insertCommand.Parameters.AddWithValue("$password", credential.Password);
-        var result = await insertCommand.ExecuteNonQueryAsync() > 0;
+        _context.Credentials.Add(credential);
+        var result = await _context.SaveChangesAsync() > 0;
         if (result)
         {
             _logger.LogInformation($"Added keyring credential ({credential.Name}) successfully.");
@@ -155,13 +147,15 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         {
             _logger.LogError($"Failed to add keyring credential ({credential.Name}) to database.");
         }
+        // Detach so the in-memory list and the EF change tracker don't diverge
+        _context.Entry(credential).State = EntityState.Detached;
         return result;
     }
 
     /// <summary>
     /// Destroys the keyring and all its credentials.
     /// </summary>
-    /// <returns>True if the keyring was successfully added, else false</returns>
+    /// <returns>True if the keyring was successfully destroyed, else false</returns>
     public async Task<bool> DestroyAsync()
     {
         _logger.LogInformation($"Destroying keyring database ({_path}).");
@@ -195,15 +189,13 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
             return false;
         }
         _credentials.RemoveAt(credentialIndex);
-        if (_connection is null)
+        if (_context is null)
         {
             _logger.LogError($"Unable to remove keyring credential ({credential.Name}) from disk as the database connection is unavailable.");
             return false;
         }
-        await using var deleteCommand = _connection.CreateCommand();
-        deleteCommand.CommandText = "DELETE FROM credentials WHERE name = $name";
-        deleteCommand.Parameters.AddWithValue("$name", credential.Name);
-        var result = await deleteCommand.ExecuteNonQueryAsync() > 0;
+        _context.Credentials.Remove(credential);
+        var result = await _context.SaveChangesAsync() > 0;
         if (result)
         {
             _logger.LogInformation($"Removed keyring credential ({credential.Name}) successfully.");
@@ -230,18 +222,13 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
             return false;
         }
         _credentials[credentialIndex] = credential;
-        if (_connection is null)
+        if (_context is null)
         {
             _logger.LogError($"Unable to update keyring credential ({credential.Name}) on disk as the database connection is unavailable.");
             return false;
         }
-        await using var updateCommand = _connection.CreateCommand();
-        updateCommand.CommandText = "UPDATE credentials SET uri = $uri, username = $username, password = $password WHERE name = $name";
-        updateCommand.Parameters.AddWithValue("$name", credential.Name);
-        updateCommand.Parameters.AddWithValue("$uri", credential.Url.ToString());
-        updateCommand.Parameters.AddWithValue("$username", credential.Username);
-        updateCommand.Parameters.AddWithValue("$password", credential.Password);
-        var result = await updateCommand.ExecuteNonQueryAsync() > 0;
+        _context.Credentials.Update(credential);
+        var result = await _context.SaveChangesAsync() > 0;
         if (result)
         {
             _logger.LogInformation($"Updated keyring credential ({credential.Name}) successfully.");
@@ -250,6 +237,8 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         {
             _logger.LogError($"Failed to update keyring credential ({credential.Name}) in database.");
         }
+        // Detach so the in-memory list and the EF change tracker don't diverge
+        _context.Entry(credential).State = EntityState.Detached;
         return result;
     }
 
@@ -258,11 +247,11 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
     /// </summary>
     protected virtual async ValueTask DisposeAsyncCore()
     {
-        if (_connection is not null)
+        if (_context is not null)
         {
-            await _connection.DisposeAsync().ConfigureAwait(false);
+            await _context.DisposeAsync().ConfigureAwait(false);
         }
-        _connection = null;
+        _context = null;
     }
 
     /// <summary>
@@ -275,7 +264,7 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         {
             return;
         }
-        _connection?.Dispose();
-        _connection = null;
+        _context?.Dispose();
+        _context = null;
     }
 }
