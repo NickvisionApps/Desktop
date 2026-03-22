@@ -67,8 +67,7 @@ internal static partial class WindowsSecretHelpers
                 {
                     return null;
                 }
-                var blob = new ReadOnlySpan<byte>(cred->CredentialBlob, (int)cred->CredentialBlobSize);
-                return Encoding.Unicode.GetString(blob);
+                return Encoding.Unicode.GetString(new ReadOnlySpan<byte>(cred->CredentialBlob, (int)cred->CredentialBlobSize));
             }
         }
         finally
@@ -118,10 +117,22 @@ internal static partial class WindowsSecretHelpers
         }
         finally
         {
-            if (credPtr != IntPtr.Zero) Marshal.FreeHGlobal(credPtr);
-            if (blobPtr != IntPtr.Zero) Marshal.FreeHGlobal(blobPtr);
-            if (userNamePtr != IntPtr.Zero) Marshal.FreeHGlobal(userNamePtr);
-            if (targetNamePtr != IntPtr.Zero) Marshal.FreeHGlobal(targetNamePtr);
+            if (credPtr != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(credPtr);
+            }
+            if (blobPtr != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(blobPtr);
+            }
+            if (userNamePtr != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(userNamePtr);
+            }
+            if (targetNamePtr != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(targetNamePtr);
+            }
         }
     }
 

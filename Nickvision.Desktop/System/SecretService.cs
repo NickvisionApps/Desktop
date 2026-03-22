@@ -312,13 +312,13 @@ public class SecretService : ISecretService
             _logger.LogError($"Unable to update system secret ({secret.Name}) as it is empty.");
             return false;
         }
+        if (await GetAsync(secret.Name) is null)
+        {
+            _logger.LogError($"Unable to update system secret ({secret.Name}) as it does not exist.");
+            return false;
+        }
         if (OperatingSystem.IsWindows())
         {
-            if (await GetAsync(secret.Name) is null)
-            {
-                _logger.LogError($"Unable to update system secret ({secret.Name}) as it does not exist.");
-                return false;
-            }
             var (res, errorCode) = await Task.Run(() => WindowsSecretHelpers.WriteCredential(secret.Name, secret.Value));
             if (res)
             {
