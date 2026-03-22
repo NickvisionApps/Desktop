@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.Helpers;
 using Nickvision.Desktop.Network;
-using Octokit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,7 +25,6 @@ public class UpdaterService : IDisposable, IUpdaterService
 {
     private readonly ILogger<UpdaterService> _logger;
     private readonly SHA256 _hasher;
-    private readonly GitHubClient _githubClient;
     private readonly HttpClient _httpClient;
     private readonly string _owner;
     private readonly string _name;
@@ -51,7 +49,6 @@ public class UpdaterService : IDisposable, IUpdaterService
         }
         _httpClient = httpClientFactory.CreateClient();
         _httpClient.DefaultRequestHeaders.UserAgent.Add(new global::System.Net.Http.Headers.ProductInfoHeaderValue("NickvisionDesktop", "1.0"));
-        _githubClient = new GitHubClient(new ProductHeaderValue("Nickvision.Desktop"));
         try
         {
             var fields = appInfo.SourceRepository.ToString().Split("/");
@@ -87,7 +84,6 @@ public class UpdaterService : IDisposable, IUpdaterService
         _name = name;
         _httpClient = httpClient;
         _httpClient.DefaultRequestHeaders.UserAgent.Add(new global::System.Net.Http.Headers.ProductInfoHeaderValue("NickvisionDesktop", "1.0"));
-        _githubClient = new GitHubClient(new ProductHeaderValue("Nickvision.Desktop"));
         _cacheReleasesPath = Path.Combine(UserDirectories.Cache, $"{_owner}-{_name}-releases.json");
     }
 
@@ -315,24 +311,10 @@ public class UpdaterService : IDisposable, IUpdaterService
             if (releases.Count == 0)
             {
                 _logger.LogInformation($"No releases found in cache, fetching from GitHub API...");
-                var octokitReleases = await _githubClient.Repository.Release.GetAll(_owner, _name);
-                var mappedReleases = octokitReleases.Select(r => new GitHubRelease
-                {
-                    TagName = r.TagName,
-                    Prerelease = r.Prerelease,
-                    Draft = r.Draft,
-                    Assets = r.Assets?.Select(a => new GitHubReleaseAsset
-                    {
-                        Url = a.Url,
-                        Name = a.Name,
-                        Size = a.Size,
-                        BrowserDownloadUrl = a.BrowserDownloadUrl
-                    }).ToList() ?? new List<GitHubReleaseAsset>()
-                }).ToList();
-                var json = JsonSerializer.Serialize(mappedReleases, GitHubJsonContext.Default.ListGitHubRelease);
+                releases = await _httpClient.GetFromJsonAsync($"https://api.github.com/repos/{_owner}/{_name}/releases", GitHubJsonContext.Default.ListGitHubRelease) ?? [];
+                var json = JsonSerializer.Serialize(releases, GitHubJsonContext.Default.ListGitHubRelease);
                 await File.WriteAllTextAsync(_cacheReleasesPath, json);
                 File.SetLastWriteTimeUtc(_cacheReleasesPath, DateTime.UtcNow);
-                releases = mappedReleases;
                 _logger.LogInformation($"Fetched {releases.Count} releases from GitHub API and saved to cache.");
             }
             return releases;
