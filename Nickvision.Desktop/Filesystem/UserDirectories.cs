@@ -1,19 +1,17 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.Shell;
 
 namespace Nickvision.Desktop.Filesystem;
 
 /// <summary>
 /// A helper class for getting user directories cross-platform.
 /// </summary>
-public static partial class UserDirectories
+public static class UserDirectories
 {
-    private static readonly Guid _folderidDownloads = new Guid("374DE290-123F-4565-9164-39C4925E467B");
-
-    [LibraryImport("shell32.dll")]
-    private static partial int SHGetKnownFolderPath(in Guid rfid, uint dwFlags, nint hToken, out nint ppszPath);
-
     /// <summary>
     /// The user's home directory.
     /// </summary>
@@ -223,15 +221,20 @@ public static partial class UserDirectories
             var res = string.Empty;
             if (OperatingSystem.IsWindows())
             {
-                nint ptr = nint.Zero;
-                if (SHGetKnownFolderPath(in _folderidDownloads, 0, nint.Zero, out ptr) == 0)
+                unsafe
                 {
-                    res = Marshal.PtrToStringUni(ptr) ?? Path.Combine(Home, "Downloads");
-                    Marshal.FreeCoTaskMem(ptr);
-                }
-                else
-                {
-                    res = Path.Combine(Home, "Downloads");
+#pragma warning disable CA1416
+                    var hr = PInvoke.SHGetKnownFolderPath(PInvoke.FOLDERID_Downloads, (KNOWN_FOLDER_FLAG)0, null, out var pszPath);
+#pragma warning restore CA1416
+                    if (hr.Succeeded)
+                    {
+                        res = pszPath.ToString();
+                        Marshal.FreeCoTaskMem(new IntPtr(pszPath.Value));
+                    }
+                    else
+                    {
+                        res = Path.Combine(Home, "Downloads");
+                    }
                 }
             }
             else if (OperatingSystem.IsMacOS())
