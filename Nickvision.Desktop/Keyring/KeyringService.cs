@@ -40,7 +40,7 @@ public class KeyringService : IAsyncDisposable, IDisposable, IKeyringService
         _logger.LogInformation($"Opening keyring database ({_path}).");
         if (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsLinux())
         {
-            var secret = secretService.Get(info.Id) ?? secretService.Create(info.Id);
+            var secret = Task.Run(() => secretService.GetAsync(info.Id)).GetAwaiter().GetResult() ?? Task.Run(() => secretService.CreateAsync(info.Id)).GetAwaiter().GetResult();
             if (secret is not null)
             {
                 _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{_path}'")

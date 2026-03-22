@@ -312,8 +312,7 @@ public class UpdaterService : IDisposable, IUpdaterService
             {
                 _logger.LogInformation($"No releases found in cache, fetching from GitHub API...");
                 releases = await _httpClient.GetFromJsonAsync($"https://api.github.com/repos/{_owner}/{_name}/releases", GitHubJsonContext.Default.ListGitHubRelease) ?? [];
-                var json = JsonSerializer.Serialize(releases, GitHubJsonContext.Default.ListGitHubRelease);
-                await File.WriteAllTextAsync(_cacheReleasesPath, json);
+                await File.WriteAllTextAsync(_cacheReleasesPath, JsonSerializer.Serialize(releases, GitHubJsonContext.Default.ListGitHubRelease));
                 File.SetLastWriteTimeUtc(_cacheReleasesPath, DateTime.UtcNow);
                 _logger.LogInformation($"Fetched {releases.Count} releases from GitHub API and saved to cache.");
             }

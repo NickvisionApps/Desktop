@@ -28,6 +28,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Ace4896.DBus.Services.Secrets" Version="1.4.0" />
 		<PackageReference Include="GetText.NET" Version="10.0.1" />
 		<PackageReference Include="Markdig" Version="1.1.1" />
 		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.5" />

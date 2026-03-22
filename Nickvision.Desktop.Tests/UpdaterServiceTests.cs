@@ -102,7 +102,21 @@ public class UpdaterServiceTests
     }
 
     [TestMethod]
-    public async Task Check006_WindowsUpdate()
+    public async Task Case006_Deno()
+    {
+        if (Environment.GetEnvironmentVariable("CI") == "true")
+        {
+            Assert.Inconclusive("Update service is not supported in CI environments");
+        }
+        Assert.IsNotNull(_client);
+        var updateService = new UpdaterService(new MockLogger<UpdaterService>(), "denoland", "deno", _client);
+        var stable = await updateService.GetLatestStableVersionAsync();
+        Assert.IsNotNull(stable);
+        Assert.IsTrue(stable >= new AppVersion("2.7.7"));
+    }
+
+    [TestMethod]
+    public async Task Check007_WindowsUpdate()
     {
         if (!OperatingSystem.IsWindows())
         {
