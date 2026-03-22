@@ -54,4 +54,12 @@
 	  </None>
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0-windows10.0.19041.0'">
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
+	</ItemGroup>
+
 </Project>
