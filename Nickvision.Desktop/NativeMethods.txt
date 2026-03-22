@@ -11,3 +11,7 @@ QueryInformationJobObject
 CloseHandle
 JOBOBJECT_EXTENDED_LIMIT_INFORMATION
 JOB_OBJECT_LIMIT
+CredRead
+CredWrite
+CredDelete
+CredFree
