@@ -42,7 +42,6 @@
 		<PackageReference Include="Tmds.DBus" Version="0.91.0" />
 		<PackageReference Include="Vanara.PInvoke.Kernel32" Version="5.0.1" />
 		<PackageReference Include="Vanara.PInvoke.PowrProf" Version="5.0.1" />
-		<PackageReference Include="Vanara.PInvoke.Security" Version="5.0.1" />
 		<PackageReference Include="Vanara.PInvoke.Shell32" Version="5.0.1" />
 	</ItemGroup>
 

@@ -7,15 +7,13 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using Vanara.InteropServices;
-using Vanara.PInvoke;
 
 namespace Nickvision.Desktop.System;
 
 /// <summary>
 /// A service for managing secrets using the system's secret storage.
 /// </summary>
-public class SecretService : ISecretService
+public partial class SecretService : ISecretService
 {
     private readonly ILogger<SecretService> _logger;
 
@@ -48,29 +46,56 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
-            var res = await Task.Run(() => AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
+            var blob = Encoding.Unicode.GetBytes(secret.Value);
+            var targetNamePtr = IntPtr.Zero;
+            var userNamePtr = IntPtr.Zero;
+            var blobPtr = IntPtr.Zero;
+            var credPtr = IntPtr.Zero;
+            try
             {
-                AttributeCount = 0,
-                Attributes = nint.Zero,
-                Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
-                Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
-                TargetName = new StrPtrAuto(secret.Name),
-                UserName = new StrPtrAuto("default"),
-                CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
-                CredentialBlob = stringPtr
-            },
-                0));
-            Marshal.FreeHGlobal(stringPtr);
-            if (res)
-            {
-                _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
+                targetNamePtr = Marshal.StringToHGlobalUni(secret.Name);
+                userNamePtr = Marshal.StringToHGlobalUni("default");
+                blobPtr = Marshal.AllocHGlobal(blob.Length);
+                Marshal.Copy(blob, 0, blobPtr, blob.Length);
+                unsafe
+                {
+                    credPtr = Marshal.AllocHGlobal(sizeof(CREDENTIAL_WIN32));
+                    var cred = (CREDENTIAL_WIN32*)credPtr;
+                    cred->Flags = 0;
+                    cred->Type = _credTypeGeneric;
+                    cred->TargetName = (char*)targetNamePtr;
+                    cred->Comment = null;
+                    cred->LastWritten = 0;
+                    cred->CredentialBlobSize = (uint)blob.Length;
+                    cred->CredentialBlob = (byte*)blobPtr;
+                    cred->Persist = _credPersistLocalMachine;
+                    cred->AttributeCount = 0;
+                    cred->Attributes = null;
+                    cred->TargetAlias = null;
+                    cred->UserName = (char*)userNamePtr;
+                }
+                var (res, errorCode) = await Task.Run(() =>
+                {
+                    var r = CredWriteNative(credPtr, 0);
+                    return (r, r ? 0 : Marshal.GetLastWin32Error());
+                });
+                if (res)
+                {
+                    _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
+                }
+                else
+                {
+                    _logger.LogError($"Failed to add system secret ({secret.Name}): Win32 error {errorCode}");
+                }
+                return res;
             }
-            else
+            finally
             {
-                _logger.LogError($"Failed to add system secret ({secret.Name}): {Win32Error.GetLastError().GetException()}");
+                if (credPtr != IntPtr.Zero) Marshal.FreeHGlobal(credPtr);
+                if (blobPtr != IntPtr.Zero) Marshal.FreeHGlobal(blobPtr);
+                if (userNamePtr != IntPtr.Zero) Marshal.FreeHGlobal(userNamePtr);
+                if (targetNamePtr != IntPtr.Zero) Marshal.FreeHGlobal(targetNamePtr);
             }
-            return res;
         }
         else if (OperatingSystem.IsMacOS())
         {
@@ -170,14 +195,18 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var res = await Task.Run(() => AdvApi32.CredDelete(name, AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC));
+            var (res, errorCode) = await Task.Run(() =>
+            {
+                var r = CredDeleteNative(name, _credTypeGeneric, 0);
+                return (r, r ? 0 : Marshal.GetLastWin32Error());
+            });
             if (res)
             {
                 _logger.LogInformation($"Deleted system secret ({name}) successfully.");
             }
             else
             {
-                _logger.LogError($"Failed to delete system secret ({name}): {Win32Error.GetLastError().GetException()}");
+                _logger.LogError($"Failed to delete system secret ({name}): Win32 error {errorCode}");
             }
             return res;
         }
@@ -254,19 +283,37 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var credential = await Task.Run<AdvApi32.CREDENTIAL_MGD?>(() =>
+            var credentialPtr = await Task.Run(() =>
             {
-                if (AdvApi32.CredRead(name, AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC, out var c))
+                if (CredReadNative(name, _credTypeGeneric, 0, out var ptr))
                 {
-                    return c;
+                    return ptr;
                 }
-                return null;
+                return IntPtr.Zero;
             });
-            if (credential is null)
+            if (credentialPtr == IntPtr.Zero)
             {
                 _logger.LogInformation($"System secret ({name}) not found.");
+                return null;
             }
-            return credential?.CredentialBlob is not null ? new Secret(name, Encoding.Unicode.GetString(credential.Value.CredentialBlob)) : null;
+            try
+            {
+                unsafe
+                {
+                    var cred = (CREDENTIAL_WIN32*)credentialPtr;
+                    if (cred->CredentialBlob == null || cred->CredentialBlobSize == 0)
+                    {
+                        _logger.LogInformation($"System secret ({name}) not found.");
+                        return null;
+                    }
+                    var blob = new ReadOnlySpan<byte>(cred->CredentialBlob, (int)cred->CredentialBlobSize);
+                    return new Secret(name, Encoding.Unicode.GetString(blob));
+                }
+            }
+            finally
+            {
+                CredFreeNative(credentialPtr);
+            }
         }
         else if (OperatingSystem.IsMacOS())
         {
@@ -340,29 +387,56 @@ public class SecretService : ISecretService
                 _logger.LogError($"Unable to update system secret ({secret.Name}) as it does not exist.");
                 return false;
             }
-            var stringPtr = Marshal.StringToHGlobalUni(secret.Value);
-            var res = await Task.Run(() => AdvApi32.CredWrite(new AdvApi32.CREDENTIAL
+            var blob = Encoding.Unicode.GetBytes(secret.Value);
+            var targetNamePtr = IntPtr.Zero;
+            var userNamePtr = IntPtr.Zero;
+            var blobPtr = IntPtr.Zero;
+            var credPtr = IntPtr.Zero;
+            try
             {
-                AttributeCount = 0,
-                Attributes = nint.Zero,
-                Type = AdvApi32.CRED_TYPE.CRED_TYPE_GENERIC,
-                Persist = AdvApi32.CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
-                TargetName = new StrPtrAuto(secret.Name),
-                UserName = new StrPtrAuto("default"),
-                CredentialBlobSize = (uint)Encoding.Unicode.GetByteCount(secret.Value),
-                CredentialBlob = stringPtr
-            },
-                0));
-            Marshal.FreeHGlobal(stringPtr);
-            if (res)
-            {
-                _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
+                targetNamePtr = Marshal.StringToHGlobalUni(secret.Name);
+                userNamePtr = Marshal.StringToHGlobalUni("default");
+                blobPtr = Marshal.AllocHGlobal(blob.Length);
+                Marshal.Copy(blob, 0, blobPtr, blob.Length);
+                unsafe
+                {
+                    credPtr = Marshal.AllocHGlobal(sizeof(CREDENTIAL_WIN32));
+                    var cred = (CREDENTIAL_WIN32*)credPtr;
+                    cred->Flags = 0;
+                    cred->Type = _credTypeGeneric;
+                    cred->TargetName = (char*)targetNamePtr;
+                    cred->Comment = null;
+                    cred->LastWritten = 0;
+                    cred->CredentialBlobSize = (uint)blob.Length;
+                    cred->CredentialBlob = (byte*)blobPtr;
+                    cred->Persist = _credPersistLocalMachine;
+                    cred->AttributeCount = 0;
+                    cred->Attributes = null;
+                    cred->TargetAlias = null;
+                    cred->UserName = (char*)userNamePtr;
+                }
+                var (res, errorCode) = await Task.Run(() =>
+                {
+                    var r = CredWriteNative(credPtr, 0);
+                    return (r, r ? 0 : Marshal.GetLastWin32Error());
+                });
+                if (res)
+                {
+                    _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
+                }
+                else
+                {
+                    _logger.LogError($"Failed to update system secret ({secret.Name}): Win32 error {errorCode}");
+                }
+                return res;
             }
-            else
+            finally
             {
-                _logger.LogError($"Failed to update system secret ({secret.Name}): {Win32Error.GetLastError().GetException()}");
+                if (credPtr != IntPtr.Zero) Marshal.FreeHGlobal(credPtr);
+                if (blobPtr != IntPtr.Zero) Marshal.FreeHGlobal(blobPtr);
+                if (userNamePtr != IntPtr.Zero) Marshal.FreeHGlobal(userNamePtr);
+                if (targetNamePtr != IntPtr.Zero) Marshal.FreeHGlobal(targetNamePtr);
             }
-            return res;
         }
         else if (OperatingSystem.IsMacOS())
         {
@@ -421,4 +495,42 @@ public class SecretService : ISecretService
             return false;
         }
     }
+
+    /// <summary>
+    /// A NativeAOT-compatible representation of the Windows CREDENTIAL structure.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    private unsafe struct CREDENTIAL_WIN32
+    {
+        public uint Flags;
+        public uint Type;
+        public char* TargetName;
+        public char* Comment;
+        public ulong LastWritten; // FILETIME (two DWORDs, treated as opaque 64-bit value)
+        public uint CredentialBlobSize;
+        public byte* CredentialBlob;
+        public uint Persist;
+        public uint AttributeCount;
+        public void* Attributes;
+        public char* TargetAlias;
+        public char* UserName;
+    }
+
+    private const uint _credTypeGeneric = 1;        // CRED_TYPE_GENERIC
+    private const uint _credPersistLocalMachine = 2; // CRED_PERSIST_LOCAL_MACHINE
+
+    [LibraryImport("advapi32.dll", EntryPoint = "CredReadW", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool CredReadNative(string target, uint type, uint flags, out IntPtr credential);
+
+    [LibraryImport("advapi32.dll", EntryPoint = "CredWriteW", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool CredWriteNative(IntPtr credential, uint flags);
+
+    [LibraryImport("advapi32.dll", EntryPoint = "CredDeleteW", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool CredDeleteNative(string target, uint type, uint flags);
+
+    [LibraryImport("advapi32.dll", EntryPoint = "CredFree")]
+    private static partial void CredFreeNative(IntPtr buffer);
 }
