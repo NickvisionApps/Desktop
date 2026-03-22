@@ -1,5 +1,6 @@
 using DBus.Services.Secrets;
 using Microsoft.Extensions.Logging;
+using Nickvision.Desktop.Helpers;
 using Nickvision.Desktop.Keyring;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace Nickvision.Desktop.System;
 /// <summary>
 /// A service for managing secrets using the system's secret storage.
 /// </summary>
-public partial class SecretService : ISecretService
+public class SecretService : ISecretService
 {
     private readonly ILogger<SecretService> _logger;
 
@@ -59,16 +60,16 @@ public partial class SecretService : ISecretService
                 Marshal.Copy(blob, 0, blobPtr, blob.Length);
                 unsafe
                 {
-                    credPtr = Marshal.AllocHGlobal(sizeof(CREDENTIAL_WIN32));
-                    var cred = (CREDENTIAL_WIN32*)credPtr;
+                    credPtr = Marshal.AllocHGlobal(sizeof(WindowsSecretHelpers.CREDENTIAL_WIN32));
+                    var cred = (WindowsSecretHelpers.CREDENTIAL_WIN32*)credPtr;
                     cred->Flags = 0;
-                    cred->Type = _credTypeGeneric;
+                    cred->Type = WindowsSecretHelpers.CredTypeGeneric;
                     cred->TargetName = (char*)targetNamePtr;
                     cred->Comment = null;
                     cred->LastWritten = 0;
                     cred->CredentialBlobSize = (uint)blob.Length;
                     cred->CredentialBlob = (byte*)blobPtr;
-                    cred->Persist = _credPersistLocalMachine;
+                    cred->Persist = WindowsSecretHelpers.CredPersistLocalMachine;
                     cred->AttributeCount = 0;
                     cred->Attributes = null;
                     cred->TargetAlias = null;
@@ -76,7 +77,7 @@ public partial class SecretService : ISecretService
                 }
                 var (res, errorCode) = await Task.Run(() =>
                 {
-                    var r = CredWriteNative(credPtr, 0);
+                    var r = WindowsSecretHelpers.CredWriteNative(credPtr, 0);
                     return (r, r ? 0 : Marshal.GetLastWin32Error());
                 });
                 if (res)
@@ -197,7 +198,7 @@ public partial class SecretService : ISecretService
         {
             var (res, errorCode) = await Task.Run(() =>
             {
-                var r = CredDeleteNative(name, _credTypeGeneric, 0);
+                var r = WindowsSecretHelpers.CredDeleteNative(name, WindowsSecretHelpers.CredTypeGeneric, 0);
                 return (r, r ? 0 : Marshal.GetLastWin32Error());
             });
             if (res)
@@ -285,7 +286,7 @@ public partial class SecretService : ISecretService
         {
             var credentialPtr = await Task.Run(() =>
             {
-                if (CredReadNative(name, _credTypeGeneric, 0, out var ptr))
+                if (WindowsSecretHelpers.CredReadNative(name, WindowsSecretHelpers.CredTypeGeneric, 0, out var ptr))
                 {
                     return ptr;
                 }
@@ -300,7 +301,7 @@ public partial class SecretService : ISecretService
             {
                 unsafe
                 {
-                    var cred = (CREDENTIAL_WIN32*)credentialPtr;
+                    var cred = (WindowsSecretHelpers.CREDENTIAL_WIN32*)credentialPtr;
                     if (cred->CredentialBlob == null || cred->CredentialBlobSize == 0)
                     {
                         _logger.LogInformation($"System secret ({name}) not found.");
@@ -312,7 +313,7 @@ public partial class SecretService : ISecretService
             }
             finally
             {
-                CredFreeNative(credentialPtr);
+                WindowsSecretHelpers.CredFreeNative(credentialPtr);
             }
         }
         else if (OperatingSystem.IsMacOS())
@@ -400,16 +401,16 @@ public partial class SecretService : ISecretService
                 Marshal.Copy(blob, 0, blobPtr, blob.Length);
                 unsafe
                 {
-                    credPtr = Marshal.AllocHGlobal(sizeof(CREDENTIAL_WIN32));
-                    var cred = (CREDENTIAL_WIN32*)credPtr;
+                    credPtr = Marshal.AllocHGlobal(sizeof(WindowsSecretHelpers.CREDENTIAL_WIN32));
+                    var cred = (WindowsSecretHelpers.CREDENTIAL_WIN32*)credPtr;
                     cred->Flags = 0;
-                    cred->Type = _credTypeGeneric;
+                    cred->Type = WindowsSecretHelpers.CredTypeGeneric;
                     cred->TargetName = (char*)targetNamePtr;
                     cred->Comment = null;
                     cred->LastWritten = 0;
                     cred->CredentialBlobSize = (uint)blob.Length;
                     cred->CredentialBlob = (byte*)blobPtr;
-                    cred->Persist = _credPersistLocalMachine;
+                    cred->Persist = WindowsSecretHelpers.CredPersistLocalMachine;
                     cred->AttributeCount = 0;
                     cred->Attributes = null;
                     cred->TargetAlias = null;
@@ -417,7 +418,7 @@ public partial class SecretService : ISecretService
                 }
                 var (res, errorCode) = await Task.Run(() =>
                 {
-                    var r = CredWriteNative(credPtr, 0);
+                    var r = WindowsSecretHelpers.CredWriteNative(credPtr, 0);
                     return (r, r ? 0 : Marshal.GetLastWin32Error());
                 });
                 if (res)
@@ -496,41 +497,4 @@ public partial class SecretService : ISecretService
         }
     }
 
-    /// <summary>
-    /// A NativeAOT-compatible representation of the Windows CREDENTIAL structure.
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    private unsafe struct CREDENTIAL_WIN32
-    {
-        public uint Flags;
-        public uint Type;
-        public char* TargetName;
-        public char* Comment;
-        public ulong LastWritten; // FILETIME (two DWORDs, treated as opaque 64-bit value)
-        public uint CredentialBlobSize;
-        public byte* CredentialBlob;
-        public uint Persist;
-        public uint AttributeCount;
-        public void* Attributes;
-        public char* TargetAlias;
-        public char* UserName;
-    }
-
-    private const uint _credTypeGeneric = 1;        // CRED_TYPE_GENERIC
-    private const uint _credPersistLocalMachine = 2; // CRED_PERSIST_LOCAL_MACHINE
-
-    [LibraryImport("advapi32.dll", EntryPoint = "CredReadW", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool CredReadNative(string target, uint type, uint flags, out IntPtr credential);
-
-    [LibraryImport("advapi32.dll", EntryPoint = "CredWriteW", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool CredWriteNative(IntPtr credential, uint flags);
-
-    [LibraryImport("advapi32.dll", EntryPoint = "CredDeleteW", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool CredDeleteNative(string target, uint type, uint flags);
-
-    [LibraryImport("advapi32.dll", EntryPoint = "CredFree")]
-    private static partial void CredFreeNative(IntPtr buffer);
 }
