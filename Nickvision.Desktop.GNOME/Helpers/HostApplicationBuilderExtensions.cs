@@ -14,7 +14,6 @@ public static class HostApplicationBuilderExtensions
 {
     extension(IHostApplicationBuilder builder)
     {
-        [RequiresDynamicCode("Calls AddSingleton<T> which may use dynamic code generation.")]
         public IHostApplicationBuilder ConfigureAdw<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(bool handlesOpen = false, bool includeResources = true) where T : Adw.ApplicationWindow
         {
             if (!builder.Properties.TryGetValue("UserInterfaceHostingContext", out var obj) || obj is not AdwUserInterfaceContext context)
