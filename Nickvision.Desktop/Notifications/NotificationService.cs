@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Tmds.DBus;
+using Tmds.DBus.Protocol;
 
 namespace Nickvision.Desktop.Notifications;
 
@@ -16,9 +16,10 @@ public class NotificationService : IDisposable, INotificationService
 {
     private bool _disposed;
     private readonly AppInfo _appInfo;
-    private Connection? _dbus;
-    private INotifications? _freeDesktopNotifications;
-    private Dictionary<uint, IDisposable> _watchers;
+    private DBusConnection? _dbus;
+    private IDisposable? _actionWatcher;
+    private IDisposable? _closedWatcher;
+    private Dictionary<uint, string?> _watchers;
 
     /// <summary>
     /// The event for when app notifications are sent.
@@ -38,7 +39,7 @@ public class NotificationService : IDisposable, INotificationService
     {
         _disposed = false;
         _appInfo = appInfo;
-        _watchers = new Dictionary<uint, IDisposable>();
+        _watchers = new Dictionary<uint, string?>();
         OpenTranslatedText = "Open";
     }
 
@@ -105,20 +106,38 @@ public class NotificationService : IDisposable, INotificationService
         {
             if (_dbus is null)
             {
-                _dbus = new Connection(Address.Session);
+                var sessionAddress = DBusAddress.Session;
+                if (sessionAddress is null)
+                {
+                    return false;
+                }
+                _dbus = new DBusConnection(sessionAddress);
                 await _dbus.ConnectAsync();
             }
-            if (_freeDesktopNotifications is null)
+            if (_actionWatcher is null || _closedWatcher is null)
             {
                 try
                 {
-                    _freeDesktopNotifications = _dbus.CreateProxy<INotifications>("org.freedesktop.Notifications", "/org/freedesktop/Notifications");
-                    await _freeDesktopNotifications.WatchNotificationClosedAsync(((uint id, uint reason) e) =>
+                    _closedWatcher = await NotificationsProxy.WatchNotificationClosedAsync(_dbus, (e, args) =>
                     {
-                        if (_watchers.TryGetValue(e.id, out var watcher))
+                        // Only remove on clean closure (e == null); leave watchers intact on connection errors.
+                        if (e is null)
                         {
-                            watcher.Dispose();
-                            _watchers.Remove(e.id);
+                            _watchers.Remove(args.id);
+                        }
+                    });
+                    _actionWatcher = await NotificationsProxy.WatchActionInvokedAsync(_dbus, (e, args) =>
+                    {
+                        if (e is null && args.actionKey == "open"
+                            && _watchers.TryGetValue(args.id, out var param)
+                            && !string.IsNullOrEmpty(param))
+                        {
+                            using var _ = Process.Start(new ProcessStartInfo()
+                            {
+                                FileName = "xdg-open",
+                                Arguments = param,
+                                UseShellExecute = true
+                            });
                         }
                     });
                 }
@@ -129,20 +148,13 @@ public class NotificationService : IDisposable, INotificationService
             }
             try
             {
-                var actionWatcher = await _freeDesktopNotifications.WatchActionInvokedAsync(((uint id, string actionKey) e) =>
-                {
-                    if (e.actionKey == "open")
-                    {
-                        using var _ = Process.Start(new ProcessStartInfo()
-                        {
-                            FileName = "xdg-open",
-                            Arguments = notification.ActionParam,
-                            UseShellExecute = true
-                        });
-                    }
-                });
-                var id = await _freeDesktopNotifications.NotifyAsync(_appInfo.Id, 0, _appInfo.Id, notification.Title, notification.Message, notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam) ? ["open", OpenTranslatedText] : [], new Dictionary<string, object>(), -1);
-                _watchers[id] = actionWatcher;
+                var id = await NotificationsProxy.NotifyAsync(_dbus, _appInfo.Id, 0, _appInfo.Id,
+                    notification.Title, notification.Message,
+                    notification.Action == "open" && !string.IsNullOrEmpty(notification.ActionParam)
+                        ? ["open", OpenTranslatedText]
+                        : [],
+                    new Dictionary<string, VariantValue>(), -1);
+                _watchers[id] = notification.ActionParam;
                 return id > 0;
             }
             catch
@@ -165,9 +177,12 @@ public class NotificationService : IDisposable, INotificationService
         }
         if (OperatingSystem.IsLinux())
         {
+            _actionWatcher?.Dispose();
+            _closedWatcher?.Dispose();
             _dbus?.Dispose();
+            _actionWatcher = null;
+            _closedWatcher = null;
             _dbus = null;
-            _freeDesktopNotifications = null;
         }
         _disposed = true;
     }

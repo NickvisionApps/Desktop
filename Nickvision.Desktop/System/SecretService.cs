@@ -1,11 +1,9 @@
-using DBus.Services.Secrets;
 using Microsoft.Extensions.Logging;
 using Nickvision.Desktop.Helpers;
 using Nickvision.Desktop.Keyring;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.System;
@@ -85,18 +83,27 @@ public class SecretService : ISecretService
         }
         else if (OperatingSystem.IsLinux())
         {
-            var dbus = await DBus.Services.Secrets.SecretService.ConnectAsync(EncryptionType.Dh);
-            var collection = await dbus.GetDefaultCollectionAsync() ?? await dbus.CreateCollectionAsync("Default keyring", "default");
-            if (collection is null)
+            using var svc = await LinuxSecretService.ConnectAsync();
+            if (svc is null)
+            {
+                _logger.LogError($"Failed to add system secret ({secret.Name}): unable to connect to secrets service.");
+                return false;
+            }
+            var collPath = await svc.GetDefaultCollectionPathAsync();
+            if (string.IsNullOrEmpty(collPath) || collPath == "/")
+            {
+                collPath = await svc.CreateCollectionAsync("Default keyring", "default");
+            }
+            if (string.IsNullOrEmpty(collPath))
             {
                 _logger.LogError($"Failed to add system secret ({secret.Name}) as the keyring collection could not be accessed.");
                 return false;
             }
-            await collection.UnlockAsync();
-            var res = (await collection.CreateItemAsync(secret.Name, new Dictionary<string, string>()
-            {
-                { "application", secret.Name }
-            }, Encoding.UTF8.GetBytes(secret.Value), "text/plain; charset=utf8", false)) is not null;
+            await svc.UnlockAsync(collPath);
+            var itemPath = await svc.CreateItemAsync(collPath, secret.Name,
+                new Dictionary<string, string> { { "application", secret.Name } },
+                secret.Value);
+            var res = !string.IsNullOrEmpty(itemPath);
             if (res)
             {
                 _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
@@ -194,25 +201,32 @@ public class SecretService : ISecretService
         }
         else if (OperatingSystem.IsLinux())
         {
-            var dbus = await DBus.Services.Secrets.SecretService.ConnectAsync(EncryptionType.Dh);
-            var collection = await dbus.GetDefaultCollectionAsync() ?? await dbus.CreateCollectionAsync("Default keyring", "default");
-            if (collection is null)
+            using var svc = await LinuxSecretService.ConnectAsync();
+            if (svc is null)
+            {
+                _logger.LogError($"Failed to delete system secret ({name}): unable to connect to secrets service.");
+                return false;
+            }
+            var collPath = await svc.GetDefaultCollectionPathAsync();
+            if (string.IsNullOrEmpty(collPath) || collPath == "/")
+            {
+                collPath = await svc.CreateCollectionAsync("Default keyring", "default");
+            }
+            if (string.IsNullOrEmpty(collPath))
             {
                 _logger.LogError($"Failed to delete system secret ({name}) as the keyring collection could not be accessed.");
                 return false;
             }
-            await collection.UnlockAsync();
-            var items = await collection.SearchItemsAsync(new Dictionary<string, string>()
-            {
-                { "application", name }
-            });
+            await svc.UnlockAsync(collPath);
+            var items = await svc.SearchItemsAsync(collPath,
+                new Dictionary<string, string> { { "application", name } });
             if (items.Length == 0)
             {
                 _logger.LogWarning($"System secret ({name}) not found.");
             }
             else
             {
-                await items[0].DeleteAsync();
+                await svc.DeleteItemAsync(items[0]);
                 _logger.LogInformation($"Deleted system secret ({name}) successfully.");
             }
             return items.Length > 0;
@@ -273,24 +287,32 @@ public class SecretService : ISecretService
         }
         else if (OperatingSystem.IsLinux())
         {
-            var dbus = await DBus.Services.Secrets.SecretService.ConnectAsync(EncryptionType.Dh);
-            var collection = await dbus.GetDefaultCollectionAsync() ?? await dbus.CreateCollectionAsync("Default keyring", "default");
-            if (collection is null)
+            using var svc = await LinuxSecretService.ConnectAsync();
+            if (svc is null)
+            {
+                _logger.LogError($"Failed to get system secret ({name}): unable to connect to secrets service.");
+                return null;
+            }
+            var collPath = await svc.GetDefaultCollectionPathAsync();
+            if (string.IsNullOrEmpty(collPath) || collPath == "/")
+            {
+                collPath = await svc.CreateCollectionAsync("Default keyring", "default");
+            }
+            if (string.IsNullOrEmpty(collPath))
             {
                 _logger.LogError($"Failed to get system secret ({name}) as the keyring collection could not be accessed.");
                 return null;
             }
-            await collection.UnlockAsync();
-            var items = await collection.SearchItemsAsync(new Dictionary<string, string>()
-            {
-                { "application", name }
-            });
+            await svc.UnlockAsync(collPath);
+            var items = await svc.SearchItemsAsync(collPath,
+                new Dictionary<string, string> { { "application", name } });
             if (items.Length == 0)
             {
                 _logger.LogInformation($"System secret ({name}) not found.");
                 return null;
             }
-            return new Secret(name, Encoding.UTF8.GetString(await items[0].GetSecretAsync()));
+            var value = await svc.GetSecretAsync(items[0]);
+            return value is null ? null : new Secret(name, value);
         }
         else
         {
@@ -358,25 +380,32 @@ public class SecretService : ISecretService
         }
         else if (OperatingSystem.IsLinux())
         {
-            var dbus = await DBus.Services.Secrets.SecretService.ConnectAsync(EncryptionType.Dh);
-            var collection = await dbus.GetDefaultCollectionAsync() ?? await dbus.CreateCollectionAsync("Default keyring", "default");
-            if (collection is null)
+            using var svc = await LinuxSecretService.ConnectAsync();
+            if (svc is null)
+            {
+                _logger.LogError($"Failed to update system secret ({secret.Name}): unable to connect to secrets service.");
+                return false;
+            }
+            var collPath = await svc.GetDefaultCollectionPathAsync();
+            if (string.IsNullOrEmpty(collPath) || collPath == "/")
+            {
+                collPath = await svc.CreateCollectionAsync("Default keyring", "default");
+            }
+            if (string.IsNullOrEmpty(collPath))
             {
                 _logger.LogError($"Failed to update system secret ({secret.Name}) as the keyring collection could not be accessed.");
                 return false;
             }
-            await collection.UnlockAsync();
-            var items = await collection.SearchItemsAsync(new Dictionary<string, string>()
-            {
-                { "application", secret.Name }
-            });
+            await svc.UnlockAsync(collPath);
+            var items = await svc.SearchItemsAsync(collPath,
+                new Dictionary<string, string> { { "application", secret.Name } });
             if (items.Length == 0)
             {
                 _logger.LogError($"Failed to update system secret ({secret.Name}).");
             }
             else
             {
-                await items[0].SetSecret(Encoding.UTF8.GetBytes(secret.Value), "text/plain; charset=utf8");
+                await svc.SetSecretAsync(items[0], secret.Value);
                 _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
             }
             return items.Length > 0;
