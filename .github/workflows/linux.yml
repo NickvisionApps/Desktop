@@ -53,6 +53,43 @@ jobs:
         run: dotnet build ${{ env.TEST_PROJECT_NAME }} -c Release --no-restore
       - name: "Test"
         run: dotnet test ${{ env.TEST_PROJECT_NAME }} -c Release --no-build
+  build-nativeaot:
+    name: "Build NativeAOT Tests on Linux"
+    strategy:
+      matrix:
+        variant:
+          - arch: x64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-22.04-arm
+    runs-on: ${{ matrix.variant.runner }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: "Setup .NET"
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: "Unlock Keyring"
+        uses: t1m0thyj/unlock-keyring@v1
+      - name: "Setup Environment"
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get clean
+          sudo apt-get update
+          sudo apt-get install -y xdg-user-dirs xdg-user-dirs-gtk gettext tzdata locales libnotify-dev libsecret-tools notification-daemon xvfb clang zlib1g-dev
+          xdg-user-dirs-update
+          xdg-user-dirs-gtk-update
+          sudo locale-gen en_US.UTF-8
+          sudo update-locale LANG=en_US.UTF-8
+          xvfb-run /usr/lib/notification-daemon/notification-daemon --display=:99.0 -r &
+      - name: "Publish NativeAOT"
+        run: dotnet publish ${{ env.TEST_PROJECT_NAME }} -c Release -r linux-${{ matrix.variant.arch }} -p:PublishAot=true
+      - name: "Test NativeAOT"
+        run: ./${{ env.TEST_PROJECT_NAME }}/bin/Release/net10.0/linux-${{ matrix.variant.arch }}/publish/Nickvision.Desktop.Tests
   build-gnome:
     name: "Build GNOME on Linux"
     strategy:
