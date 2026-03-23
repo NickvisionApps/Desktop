@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Win32;
@@ -50,7 +49,29 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var (res, errorCode) = await Task.Run(() => WriteCredentialWindows(secret.Name, secret.Value));
+            unsafe (bool, int) WriteCredential()
+            {
+                var blob = Encoding.Unicode.GetBytes(secret.Value);
+                fixed (char* targetName = secret.Name)
+                fixed (char* userName = "default")
+                fixed (byte* blobPtr = blob)
+                {
+                    var cred = new CREDENTIALW
+                    {
+                        Type = CRED_TYPE.CRED_TYPE_GENERIC,
+                        TargetName = new PWSTR(targetName),
+                        CredentialBlobSize = (uint)blob.Length,
+                        CredentialBlob = blobPtr,
+                        Persist = CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
+                        UserName = new PWSTR(userName),
+                    };
+#pragma warning disable CA1416
+                    var r = PInvoke.CredWrite(in cred, 0);
+#pragma warning restore CA1416
+                    return (r, r ? 0 : Marshal.GetLastWin32Error());
+                }
+            }
+            var (res, errorCode) = await Task.Run(WriteCredential);
             if (res)
             {
                 _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
@@ -168,7 +189,13 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var (res, errorCode) = await Task.Run(() => DeleteCredentialWindows(name));
+            var (res, errorCode) = await Task.Run(() =>
+            {
+#pragma warning disable CA1416
+                var r = PInvoke.CredDelete(name, CRED_TYPE.CRED_TYPE_GENERIC);
+#pragma warning restore CA1416
+                return (r, r ? 0 : Marshal.GetLastWin32Error());
+            });
             if (res)
             {
                 _logger.LogInformation($"Deleted system secret ({name}) successfully.");
@@ -259,7 +286,30 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var value = await Task.Run(() => ReadCredentialWindows(name));
+            unsafe string? ReadCredential()
+            {
+#pragma warning disable CA1416
+                if (!PInvoke.CredRead(name, CRED_TYPE.CRED_TYPE_GENERIC, out var credential))
+#pragma warning restore CA1416
+                {
+                    return null;
+                }
+                try
+                {
+                    if (credential->CredentialBlob == null || credential->CredentialBlobSize == 0)
+                    {
+                        return null;
+                    }
+                    return Encoding.Unicode.GetString(new ReadOnlySpan<byte>(credential->CredentialBlob, (int)credential->CredentialBlobSize));
+                }
+                finally
+                {
+#pragma warning disable CA1416
+                    PInvoke.CredFree(credential);
+#pragma warning restore CA1416
+                }
+            }
+            var value = await Task.Run(ReadCredential);
             if (value is null)
             {
                 _logger.LogInformation($"System secret ({name}) not found.");
@@ -347,7 +397,29 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            var (res, errorCode) = await Task.Run(() => WriteCredentialWindows(secret.Name, secret.Value));
+            unsafe (bool, int) WriteCredential()
+            {
+                var blob = Encoding.Unicode.GetBytes(secret.Value);
+                fixed (char* targetName = secret.Name)
+                fixed (char* userName = "default")
+                fixed (byte* blobPtr = blob)
+                {
+                    var cred = new CREDENTIALW
+                    {
+                        Type = CRED_TYPE.CRED_TYPE_GENERIC,
+                        TargetName = new PWSTR(targetName),
+                        CredentialBlobSize = (uint)blob.Length,
+                        CredentialBlob = blobPtr,
+                        Persist = CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
+                        UserName = new PWSTR(userName),
+                    };
+#pragma warning disable CA1416
+                    var r = PInvoke.CredWrite(in cred, 0);
+#pragma warning restore CA1416
+                    return (r, r ? 0 : Marshal.GetLastWin32Error());
+                }
+            }
+            var (res, errorCode) = await Task.Run(WriteCredential);
             if (res)
             {
                 _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
@@ -421,71 +493,5 @@ public class SecretService : ISecretService
             _logger.LogError($"Unable to update system secret. The OS is unsupported.");
             return false;
         }
-    }
-
-    /// <summary>
-    /// Reads a generic credential from the Windows Credential Manager.
-    /// </summary>
-    /// <param name="name">The credential target name</param>
-    /// <returns>The credential value if found, else null</returns>
-    [SupportedOSPlatform("windows")]
-    private static unsafe string? ReadCredentialWindows(string name)
-    {
-        if (!PInvoke.CredRead(name, CRED_TYPE.CRED_TYPE_GENERIC, out var credential))
-        {
-            return null;
-        }
-        try
-        {
-            if (credential->CredentialBlob == null || credential->CredentialBlobSize == 0)
-            {
-                return null;
-            }
-            return Encoding.Unicode.GetString(new ReadOnlySpan<byte>(credential->CredentialBlob, (int)credential->CredentialBlobSize));
-        }
-        finally
-        {
-            PInvoke.CredFree(credential);
-        }
-    }
-
-    /// <summary>
-    /// Writes (creates or updates) a generic credential in the Windows Credential Manager.
-    /// </summary>
-    /// <param name="name">The credential target name</param>
-    /// <param name="value">The credential value to store</param>
-    /// <returns>A tuple of (success, Win32 error code). Error code is 0 on success.</returns>
-    [SupportedOSPlatform("windows")]
-    private static unsafe (bool Success, int ErrorCode) WriteCredentialWindows(string name, string value)
-    {
-        var blob = Encoding.Unicode.GetBytes(value);
-        fixed (char* targetName = name)
-        fixed (char* userName = "default")
-        fixed (byte* blobPtr = blob)
-        {
-            var cred = new CREDENTIALW
-            {
-                Type = CRED_TYPE.CRED_TYPE_GENERIC,
-                TargetName = new PWSTR(targetName),
-                CredentialBlobSize = (uint)blob.Length,
-                CredentialBlob = blobPtr,
-                Persist = CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
-                UserName = new PWSTR(userName),
-            };
-            var r = PInvoke.CredWrite(in cred, 0);
-            return (r, r ? 0 : Marshal.GetLastWin32Error());
-        }
-    }
-
-    /// <summary>
-    /// Deletes a generic credential from the Windows Credential Manager.
-    /// </summary>
-    /// <param name="name">The credential target name</param>
-    /// <returns>A tuple of (success, Win32 error code). Error code is 0 on success.</returns>
-    [SupportedOSPlatform("windows")]
-    private static (bool Success, int ErrorCode) DeleteCredentialWindows(string name)
-    {
-        var r = PInvoke.CredDelete(name, CRED_TYPE.CRED_TYPE_GENERIC);
-        return (r, r ? 0 : Marshal.GetLastWin32Error());
     }
 }
