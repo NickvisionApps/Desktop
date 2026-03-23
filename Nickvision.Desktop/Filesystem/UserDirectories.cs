@@ -223,12 +223,11 @@ public static class UserDirectories
                 unsafe
                 {
 #pragma warning disable CA1416
-                    var hr = PInvoke.SHGetKnownFolderPath(PInvoke.FOLDERID_Downloads, (KNOWN_FOLDER_FLAG)0, null, out var pszPath);
+                    if (PInvoke.SHGetKnownFolderPath(PInvoke.FOLDERID_Downloads, (KNOWN_FOLDER_FLAG)0, null, out var pszPath).Succeeded)
 #pragma warning restore CA1416
-                    if (hr.Succeeded)
                     {
                         res = pszPath.ToString();
-                        Marshal.FreeCoTaskMem(new IntPtr(pszPath.Value));
+                        Marshal.FreeCoTaskMem(new nint(pszPath.Value));
                     }
                     else
                     {

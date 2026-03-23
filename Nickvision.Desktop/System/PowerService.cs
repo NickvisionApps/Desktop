@@ -60,7 +60,7 @@ public class PowerService : IDisposable, IPowerService
         if (OperatingSystem.IsWindows())
         {
 #pragma warning disable CA1416
-            var result = PInvoke.SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS) != (EXECUTION_STATE)0;
+            var result = PInvoke.SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS) != 0;
 #pragma warning restore CA1416
             if (result)
             {
@@ -68,7 +68,7 @@ public class PowerService : IDisposable, IPowerService
             }
             else
             {
-                _logger.LogError($"Failed to allow system suspend: {new Win32Exception(Marshal.GetLastPInvokeError())}");
+                _logger.LogError($"Failed to allow system suspend: {new Win32Exception(Marshal.GetLastWin32Error())}");
             }
             return result;
         }

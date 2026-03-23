@@ -1,14 +1,12 @@
 using Microsoft.Win32.SafeHandles;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Runtime.Versioning;
 using Windows.Win32;
 using Windows.Win32.System.JobObjects;
 using Windows.Win32.System.Threading;
 
 namespace Nickvision.Desktop.Helpers;
 
-[SupportedOSPlatform("windows")]
 public static partial class WindowsProcessHelpers
 {
     private const int MaxJobProcessIds = 256;
