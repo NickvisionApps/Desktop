@@ -49,29 +49,34 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            unsafe (bool, int) WriteCredential()
+            var (res, errorCode) = await Task.Run<(bool, int)>(() =>
             {
-                var blob = Encoding.Unicode.GetBytes(secret.Value);
-                fixed (char* targetName = secret.Name)
-                fixed (char* userName = "default")
-                fixed (byte* blobPtr = blob)
+                unsafe
                 {
-                    var cred = new CREDENTIALW
+                    var blob = Encoding.Unicode.GetBytes(secret.Value);
+                    bool r;
+                    int code;
+                    fixed (char* targetName = secret.Name)
+                    fixed (char* userName = "default")
+                    fixed (byte* blobPtr = blob)
                     {
-                        Type = CRED_TYPE.CRED_TYPE_GENERIC,
-                        TargetName = new PWSTR(targetName),
-                        CredentialBlobSize = (uint)blob.Length,
-                        CredentialBlob = blobPtr,
-                        Persist = CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
-                        UserName = new PWSTR(userName),
-                    };
+                        var cred = new CREDENTIALW
+                        {
+                            Type = CRED_TYPE.CRED_TYPE_GENERIC,
+                            TargetName = new PWSTR(targetName),
+                            CredentialBlobSize = (uint)blob.Length,
+                            CredentialBlob = blobPtr,
+                            Persist = CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
+                            UserName = new PWSTR(userName),
+                        };
 #pragma warning disable CA1416
-                    var r = PInvoke.CredWrite(in cred, 0);
+                        r = PInvoke.CredWrite(in cred, 0);
 #pragma warning restore CA1416
-                    return (r, r ? 0 : Marshal.GetLastWin32Error());
+                        code = r ? 0 : Marshal.GetLastWin32Error();
+                    }
+                    return (r, code);
                 }
-            }
-            var (res, errorCode) = await Task.Run(WriteCredential);
+            });
             if (res)
             {
                 _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
@@ -286,30 +291,32 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            unsafe string? ReadCredential()
+            var value = await Task.Run<string?>(() =>
             {
+                unsafe
+                {
 #pragma warning disable CA1416
-                if (!PInvoke.CredRead(name, CRED_TYPE.CRED_TYPE_GENERIC, out var credential))
+                    if (!PInvoke.CredRead(name, CRED_TYPE.CRED_TYPE_GENERIC, out var credential))
 #pragma warning restore CA1416
-                {
-                    return null;
-                }
-                try
-                {
-                    if (credential->CredentialBlob == null || credential->CredentialBlobSize == 0)
                     {
                         return null;
                     }
-                    return Encoding.Unicode.GetString(new ReadOnlySpan<byte>(credential->CredentialBlob, (int)credential->CredentialBlobSize));
-                }
-                finally
-                {
+                    try
+                    {
+                        if (credential->CredentialBlob == null || credential->CredentialBlobSize == 0)
+                        {
+                            return null;
+                        }
+                        return Encoding.Unicode.GetString(new ReadOnlySpan<byte>(credential->CredentialBlob, (int)credential->CredentialBlobSize));
+                    }
+                    finally
+                    {
 #pragma warning disable CA1416
-                    PInvoke.CredFree(credential);
+                        PInvoke.CredFree(credential);
 #pragma warning restore CA1416
+                    }
                 }
-            }
-            var value = await Task.Run(ReadCredential);
+            });
             if (value is null)
             {
                 _logger.LogInformation($"System secret ({name}) not found.");
@@ -397,29 +404,34 @@ public class SecretService : ISecretService
         }
         if (OperatingSystem.IsWindows())
         {
-            unsafe (bool, int) WriteCredential()
+            var (res, errorCode) = await Task.Run<(bool, int)>(() =>
             {
-                var blob = Encoding.Unicode.GetBytes(secret.Value);
-                fixed (char* targetName = secret.Name)
-                fixed (char* userName = "default")
-                fixed (byte* blobPtr = blob)
+                unsafe
                 {
-                    var cred = new CREDENTIALW
+                    var blob = Encoding.Unicode.GetBytes(secret.Value);
+                    bool r;
+                    int code;
+                    fixed (char* targetName = secret.Name)
+                    fixed (char* userName = "default")
+                    fixed (byte* blobPtr = blob)
                     {
-                        Type = CRED_TYPE.CRED_TYPE_GENERIC,
-                        TargetName = new PWSTR(targetName),
-                        CredentialBlobSize = (uint)blob.Length,
-                        CredentialBlob = blobPtr,
-                        Persist = CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
-                        UserName = new PWSTR(userName),
-                    };
+                        var cred = new CREDENTIALW
+                        {
+                            Type = CRED_TYPE.CRED_TYPE_GENERIC,
+                            TargetName = new PWSTR(targetName),
+                            CredentialBlobSize = (uint)blob.Length,
+                            CredentialBlob = blobPtr,
+                            Persist = CRED_PERSIST.CRED_PERSIST_LOCAL_MACHINE,
+                            UserName = new PWSTR(userName),
+                        };
 #pragma warning disable CA1416
-                    var r = PInvoke.CredWrite(in cred, 0);
+                        r = PInvoke.CredWrite(in cred, 0);
 #pragma warning restore CA1416
-                    return (r, r ? 0 : Marshal.GetLastWin32Error());
+                        code = r ? 0 : Marshal.GetLastWin32Error();
+                    }
+                    return (r, code);
                 }
-            }
-            var (res, errorCode) = await Task.Run(WriteCredential);
+            });
             if (res)
             {
                 _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
