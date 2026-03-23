@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Nickvision.Desktop.FreeDesktop;
 using Nickvision.Desktop.Helpers;
 using Nickvision.Desktop.Keyring;
 using System;
@@ -83,7 +84,7 @@ public class SecretService : ISecretService
         }
         else if (OperatingSystem.IsLinux())
         {
-            using var svc = await LinuxSecretService.ConnectAsync();
+            using var svc = await SecretServiceProxy.ConnectAsync();
             if (svc is null)
             {
                 _logger.LogError($"Failed to add system secret ({secret.Name}): unable to connect to secrets service.");
@@ -201,7 +202,7 @@ public class SecretService : ISecretService
         }
         else if (OperatingSystem.IsLinux())
         {
-            using var svc = await LinuxSecretService.ConnectAsync();
+            using var svc = await SecretServiceProxy.ConnectAsync();
             if (svc is null)
             {
                 _logger.LogError($"Failed to delete system secret ({name}): unable to connect to secrets service.");
@@ -287,7 +288,7 @@ public class SecretService : ISecretService
         }
         else if (OperatingSystem.IsLinux())
         {
-            using var svc = await LinuxSecretService.ConnectAsync();
+            using var svc = await SecretServiceProxy.ConnectAsync();
             if (svc is null)
             {
                 _logger.LogError($"Failed to get system secret ({name}): unable to connect to secrets service.");
@@ -380,7 +381,7 @@ public class SecretService : ISecretService
         }
         else if (OperatingSystem.IsLinux())
         {
-            using var svc = await LinuxSecretService.ConnectAsync();
+            using var svc = await SecretServiceProxy.ConnectAsync();
             if (svc is null)
             {
                 _logger.LogError($"Failed to update system secret ({secret.Name}): unable to connect to secrets service.");

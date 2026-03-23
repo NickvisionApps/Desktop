@@ -4,13 +4,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Tmds.DBus.Protocol;
 
-namespace Nickvision.Desktop.Helpers;
+namespace Nickvision.Desktop.FreeDesktop;
 
 /// <summary>
-/// Internal helper for the org.freedesktop.secrets D-Bus interface (freedesktop Secret Service).
+/// Internal proxy for the org.freedesktop.secrets D-Bus interface (freedesktop Secret Service).
 /// Uses "plain" (unencrypted) session transport, which is safe for local D-Bus sockets.
 /// </summary>
-internal sealed class LinuxSecretService : IDisposable
+internal sealed class SecretServiceProxy : IDisposable
 {
     private const string SecretsBus = "org.freedesktop.secrets";
     private const string SecretsPath = "/org/freedesktop/secrets";
@@ -23,7 +23,7 @@ internal sealed class LinuxSecretService : IDisposable
     private readonly string _sessionPath;
     private bool _disposed;
 
-    private LinuxSecretService(DBusConnection connection, string sessionPath)
+    private SecretServiceProxy(DBusConnection connection, string sessionPath)
     {
         _connection = connection;
         _sessionPath = sessionPath;
@@ -33,8 +33,8 @@ internal sealed class LinuxSecretService : IDisposable
     /// <summary>
     /// Connects to the D-Bus session bus and opens a plain encryption session with the secrets service.
     /// </summary>
-    /// <returns>A connected LinuxSecretService, or null if the secrets service is unavailable</returns>
-    internal static async Task<LinuxSecretService?> ConnectAsync()
+    /// <returns>A connected SecretServiceProxy, or null if the secrets service is unavailable</returns>
+    internal static async Task<SecretServiceProxy?> ConnectAsync()
     {
         var sessionAddress = DBusAddress.Session;
         if (sessionAddress is null)
@@ -49,7 +49,7 @@ internal sealed class LinuxSecretService : IDisposable
             connection.Dispose();
             return null;
         }
-        return new LinuxSecretService(connection, sessionPath);
+        return new SecretServiceProxy(connection, sessionPath);
     }
 
     /// <summary>
@@ -292,7 +292,7 @@ internal sealed class LinuxSecretService : IDisposable
     }
 
     /// <summary>
-    /// Disposes the LinuxSecretService and its underlying D-Bus connection.
+    /// Disposes the SecretServiceProxy and its underlying D-Bus connection.
     /// </summary>
     public void Dispose()
     {
