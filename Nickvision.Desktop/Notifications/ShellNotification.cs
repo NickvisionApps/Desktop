@@ -19,6 +19,5 @@ public class ShellNotification : AppNotification
     public ShellNotification(string title, string message, NotificationSeverity severity) : base(message, severity)
     {
         Title = title;
-        Action = "shell";
     }
 }

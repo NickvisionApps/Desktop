@@ -22,6 +22,7 @@ public class NotificationServiceTests
         Assert.IsNotNull(_notificationService);
         _notificationService.Send(new ShellNotification("Test Notification", "This is a test notification body.", NotificationSeverity.Information)
         {
+            Action = "open",
             ActionParam = UserDirectories.Home
         });
     }
