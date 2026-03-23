@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Notifications;
 
@@ -14,20 +13,8 @@ public interface INotificationService
     event EventHandler<AppNotificationSentEventArgs>? AppNotificationSent;
 
     /// <summary>
-    /// The text "Open" translated
-    /// </summary>
-    public string OpenTranslatedText { get; set; }
-
-    /// <summary>
     /// Sends an app notification.
     /// </summary>
     /// <param name="notification">The AppNotification to send</param>
     void Send(AppNotification notification);
-
-    /// <summary>
-    /// Sends a shell notification.
-    /// </summary>
-    /// <param name="notification">The ShellNotification to send</param>
-    /// <returns>True if the shell notification was sent successfully, else false</returns>
-    Task<bool> SendAsync(ShellNotification notification);
 }
