@@ -13,7 +13,7 @@ namespace Nickvision.Desktop.WinUI.Helpers;
 
 public static partial class WindowExtensions
 {
-    private sealed class WindowMinimumSizeRegistration : IDisposable
+    private sealed unsafe class WindowMinimumSizeRegistration : IDisposable
     {
         private readonly HWND _hWnd;
         private readonly SUBCLASSPROC _proc;
@@ -93,11 +93,11 @@ public static partial class WindowExtensions
             }
         }
 
-        public IDisposable RegisterMinimumSizeProc(int minWidth, int minHeight)
+        public unsafe IDisposable RegisterMinimumSizeProc(int minWidth, int minHeight)
         {
             window.EnsureMinimumSize(minWidth, minHeight);
             var hwnd = window.Hwnd;
-            unsafe LRESULT MinimumSizeSubclassProc(HWND hWnd, uint uMsg, WPARAM wParam, LPARAM lParam, nuint uIdSubclass, nuint dwRefData)
+            var minimumSizeSubclassProc = (HWND hWnd, uint uMsg, WPARAM wParam, LPARAM lParam, nuint uIdSubclass, nuint dwRefData) =>
             {
                 if (uMsg == PInvoke.WM_GETMINMAXINFO)
                 {
@@ -105,13 +105,13 @@ public static partial class WindowExtensions
                     var dpi = PInvoke.GetDpiForWindow(hWnd);
                     var scale = dpi / 96.0;
                     var minMaxInfo = (MINMAXINFO*)lParam.Value;
-                    minMaxInfo->ptMinTrackSize.x = (int)(minWidth * scale);
-                    minMaxInfo->ptMinTrackSize.y = (int)(minHeight * scale);
+                    minMaxInfo->ptMinTrackSize.X = (int)(minWidth * scale);
+                    minMaxInfo->ptMinTrackSize.Y = (int)(minHeight * scale);
                     return (LRESULT)(nint)0;
                 }
                 return PInvoke.DefSubclassProc(hWnd, uMsg, wParam, lParam);
-            }
-            var proc = new SUBCLASSPROC(MinimumSizeSubclassProc);
+            };
+            var proc = new SUBCLASSPROC(minimumSizeSubclassProc);
             if (!PInvoke.SetWindowSubclass(hwnd, proc, 0, 0))
             {
                 throw new InvalidOperationException("Failed to install window subclass for minimum size enforcement.");
