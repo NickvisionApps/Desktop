@@ -79,15 +79,13 @@ public sealed class AppVersionTests
     }
 
     [TestMethod]
-    public void Case010_SameBase_StableLessThanPreview()
+    public void Case010_SameBase_StableGreaterThanPreview()
     {
-        // NOTE: This implementation uses ordinal string comparison on PreviewLabel,
-        // so an empty label ("") sorts before any non-empty label ("beta").
-        // This differs from SemVer, where stable (1.0.0) > prerelease (1.0.0-beta).
-        var stable = new AppVersion("1.0.0");    // PreviewLabel = ""
-        var preview = new AppVersion("1.0.0-beta");  // PreviewLabel = "beta"
-        Assert.IsTrue(stable < preview);
-        Assert.IsTrue(preview > stable);
+        // SemVer: a stable release has higher precedence than a pre-release with the same base version.
+        var stable = new AppVersion("1.0.0");
+        var preview = new AppVersion("1.0.0-beta");
+        Assert.IsTrue(stable > preview);
+        Assert.IsTrue(preview < stable);
     }
 
     [TestMethod]

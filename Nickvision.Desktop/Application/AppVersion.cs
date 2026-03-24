@@ -58,7 +58,7 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
         }
         else if (pv1?.BaseVersion == pv2?.BaseVersion)
         {
-            return string.Compare(pv1?.PreviewLabel, pv2?.PreviewLabel, StringComparison.Ordinal) < 0;
+            return ComparePreviewLabels(pv1?.PreviewLabel, pv2?.PreviewLabel) < 0;
         }
         return false;
     }
@@ -81,7 +81,7 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
         }
         if (pv1.BaseVersion == pv2?.BaseVersion)
         {
-            return string.Compare(pv1.PreviewLabel, pv2?.PreviewLabel, StringComparison.Ordinal) > 0;
+            return ComparePreviewLabels(pv1.PreviewLabel, pv2?.PreviewLabel) > 0;
         }
         return false;
     }
@@ -99,6 +99,30 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
     public static bool operator !=(AppVersion? pv1, AppVersion? pv2) => !(pv1 == pv2);
 
     public static bool operator !=(AppVersion? pv, Version? v) => !(pv == v);
+
+    /// <summary>
+    /// Compares two PreviewLabel strings using SemVer rules:
+    /// a stable release (empty label) is greater than any pre-release.
+    /// Two non-empty labels are compared with ordinal string comparison.
+    /// </summary>
+    private static int ComparePreviewLabels(string? label1, string? label2)
+    {
+        var empty1 = string.IsNullOrEmpty(label1);
+        var empty2 = string.IsNullOrEmpty(label2);
+        if (empty1 && empty2)
+        {
+            return 0;
+        }
+        if (empty1)
+        {
+            return 1;  // stable > prerelease per SemVer
+        }
+        if (empty2)
+        {
+            return -1; // prerelease < stable per SemVer
+        }
+        return string.Compare(label1, label2, StringComparison.Ordinal);
+    }
 
     public int CompareTo(AppVersion? other)
     {
