@@ -215,16 +215,23 @@ internal sealed class SecretServiceProxy : IDisposable
             writer.WriteObjectPath(_sessionPath);
             buffer = writer.CreateMessage();
         }
-        return await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
+        try
         {
-            var reader = m.GetBodyReader();
-            reader.AlignStruct();
-            reader.ReadObjectPath(); // session (ignored)
-            reader.ReadArrayOfByte(); // parameters (ignored for plain)
-            var valueBytes = reader.ReadArrayOfByte();
-            reader.ReadString(); // content type (ignored)
-            return Encoding.UTF8.GetString(valueBytes);
-        }, null);
+            return await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
+            {
+                var reader = m.GetBodyReader();
+                reader.AlignStruct();
+                reader.ReadObjectPath(); // session (ignored)
+                reader.ReadArrayOfByte(); // parameters (ignored for plain)
+                var valueBytes = reader.ReadArrayOfByte();
+                reader.ReadString(); // content type (ignored)
+                return Encoding.UTF8.GetString(valueBytes);
+            }, null);
+        }
+        catch (DBusErrorReplyException e) when (e.ErrorName == "org.freedesktop.Secret.Error.IsLocked")
+        {
+            return null;
+        }
     }
 
     /// <summary>
