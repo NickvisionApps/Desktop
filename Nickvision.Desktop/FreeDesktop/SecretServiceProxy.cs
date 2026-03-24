@@ -278,10 +278,14 @@ internal sealed class SecretServiceProxy : IDisposable
                 return Encoding.UTF8.GetString(valueBytes);
             }, null);
         }
-        catch (DBusErrorReplyException e) when (e.ErrorName == "org.freedesktop.Secret.Error.IsLocked")
+        catch (DBusErrorReplyException e)
         {
-            return null;
+            if(e.ErrorName == "org.freedesktop.Secret.Error.IsLocked")
+            {
+                return null;
+            }
         }
+        return null;
     }
 
     /// <summary>
