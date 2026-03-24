@@ -12,7 +12,6 @@ public static class HostApplicationBuilderExtensions
 {
     extension(IHostApplicationBuilder builder)
     {
-        [RequiresDynamicCode("Calls AddSingleton<T> which may use dynamic code generation.")]
         public IHostApplicationBuilder ConfigureWinUI<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>() where T : Microsoft.UI.Xaml.Application
         {
             if (!builder.Properties.TryGetValue("UserInterfaceHostingContext", out var obj) || obj is not WinUIUserInterfaceContext context)

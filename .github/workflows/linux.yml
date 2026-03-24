@@ -41,7 +41,7 @@ jobs:
           sudo rm -rf /var/lib/apt/lists/*
           sudo apt-get clean
           sudo apt-get update
-          sudo apt-get install -y xdg-user-dirs xdg-user-dirs-gtk gettext tzdata locales libnotify-dev libsecret-tools notification-daemon xvfb
+          sudo apt-get install -y xdg-user-dirs xdg-user-dirs-gtk gettext tzdata locales libnotify-dev libsecret-tools notification-daemon xvfb clang zlib1g-dev
           xdg-user-dirs-update
           xdg-user-dirs-gtk-update
           sudo locale-gen en_US.UTF-8
@@ -52,7 +52,9 @@ jobs:
       - name: "Build"
         run: dotnet build ${{ env.TEST_PROJECT_NAME }} -c Release --no-restore
       - name: "Test"
-        run: dotnet test ${{ env.TEST_PROJECT_NAME }} -c Release --no-build
+        run: dotnet ${{ env.TEST_PROJECT_NAME }}/bin/Release/net10.0/Nickvision.Desktop.Tests.dll
+      - name: "Publish NativeAOT"
+        run: dotnet publish ${{ env.TEST_PROJECT_NAME }} -c Release -r linux-${{ matrix.variant.arch }} -p:PublishAot=true
   build-gnome:
     name: "Build GNOME on Linux"
     strategy:

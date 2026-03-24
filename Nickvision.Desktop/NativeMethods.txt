@@ -1,0 +1,17 @@
+FOLDERID_Downloads
+SHGetKnownFolderPath
+SetThreadExecutionState
+CreateJobObject
+SetInformationJobObject
+AssignProcessToJobObject
+OpenThread
+SuspendThread
+ResumeThread
+QueryInformationJobObject
+CloseHandle
+JOBOBJECT_EXTENDED_LIMIT_INFORMATION
+JOB_OBJECT_LIMIT
+CredRead
+CredWrite
+CredDelete
+CredFree

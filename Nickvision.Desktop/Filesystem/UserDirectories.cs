@@ -1,6 +1,8 @@
 using System;
 using System.IO;
-using Vanara.PInvoke;
+using System.Runtime.InteropServices;
+using Windows.Win32;
+using Windows.Win32.UI.Shell;
 
 namespace Nickvision.Desktop.Filesystem;
 
@@ -218,9 +220,19 @@ public static class UserDirectories
             var res = string.Empty;
             if (OperatingSystem.IsWindows())
             {
-                if (Shell32.SHGetKnownFolderPath(Shell32.KNOWNFOLDERID.FOLDERID_Downloads.Guid(), 0, nint.Zero, out res) != HRESULT.S_OK)
+                unsafe
                 {
-                    res = Path.Combine(Home, "Downloads");
+#pragma warning disable CA1416
+                    if (PInvoke.SHGetKnownFolderPath(PInvoke.FOLDERID_Downloads, (KNOWN_FOLDER_FLAG)0, null, out var pszPath).Succeeded)
+#pragma warning restore CA1416
+                    {
+                        res = pszPath.ToString();
+                        Marshal.FreeCoTaskMem(new nint(pszPath.Value));
+                    }
+                    else
+                    {
+                        res = Path.Combine(Home, "Downloads");
+                    }
                 }
             }
             else if (OperatingSystem.IsMacOS())

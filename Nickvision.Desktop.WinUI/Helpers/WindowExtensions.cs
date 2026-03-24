@@ -1,22 +1,24 @@
-﻿using Microsoft.UI.Windowing;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Nickvision.Desktop.Application;
 using System;
-using Vanara.PInvoke;
 using Windows.Graphics;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 using WinRT.Interop;
 
 namespace Nickvision.Desktop.WinUI.Helpers;
 
-public static class WindowExtensions
+public static partial class WindowExtensions
 {
     extension(Window window)
     {
-        public HWND Hwnd => WindowNative.GetWindowHandle(window);
+        public HWND Hwnd => (HWND)WindowNative.GetWindowHandle(window);
 
         public WindowGeometry Geometry
         {
-            get => new WindowGeometry(window.AppWindow.Size.Width, window.AppWindow.Size.Height, User32.IsZoomed(window.Hwnd), window.AppWindow.Position.X, window.AppWindow.Position.Y);
+            get => new WindowGeometry(window.AppWindow.Size.Width, window.AppWindow.Size.Height, PInvoke.IsZoomed(window.Hwnd), window.AppWindow.Position.X, window.AppWindow.Position.Y);
 
             set
             {
@@ -27,7 +29,7 @@ public static class WindowExtensions
                         Width = 900,
                         Height = 700
                     });
-                    User32.ShowWindow(window.Hwnd, ShowWindowCommand.SW_SHOWMAXIMIZED);
+                    PInvoke.ShowWindow(window.Hwnd, SHOW_WINDOW_CMD.SW_SHOWMAXIMIZED);
                 }
                 else
                 {

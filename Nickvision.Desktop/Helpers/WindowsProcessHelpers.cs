@@ -1,31 +1,39 @@
-﻿using System.Collections.Concurrent;
+using Microsoft.Win32.SafeHandles;
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using Vanara.PInvoke;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.JobObjects;
+using Windows.Win32.System.Threading;
 
 namespace Nickvision.Desktop.Helpers;
 
 public static partial class WindowsProcessHelpers
 {
-    private static readonly ConcurrentDictionary<int, Kernel32.SafeHJOB> _jobObjects;
+    private const int MaxJobProcessIds = 256;
+
+    private static readonly ConcurrentDictionary<int, SafeFileHandle> _jobObjects;
 
     static WindowsProcessHelpers()
     {
-        _jobObjects = new ConcurrentDictionary<int, Kernel32.SafeHJOB>();
+        _jobObjects = new ConcurrentDictionary<int, SafeFileHandle>();
     }
 
-    public static void SetAsParentProcess(Process p)
+    public static unsafe void SetAsParentProcess(Process p)
     {
         var pid = p.Id;
-        var job = Kernel32.CreateJobObject(null, null);
-        var info = new Kernel32.JOBOBJECT_EXTENDED_LIMIT_INFORMATION
+#pragma warning disable CA1416
+        var job = PInvoke.CreateJobObject(null, (string?)null);
+        var info = new JOBOBJECT_EXTENDED_LIMIT_INFORMATION
         {
-            BasicLimitInformation = new Kernel32.JOBOBJECT_BASIC_LIMIT_INFORMATION
+            BasicLimitInformation = new JOBOBJECT_BASIC_LIMIT_INFORMATION
             {
-                LimitFlags = Kernel32.JOBOBJECT_LIMIT_FLAGS.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE | Kernel32.JOBOBJECT_LIMIT_FLAGS.JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION
+                LimitFlags = JOB_OBJECT_LIMIT.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE | JOB_OBJECT_LIMIT.JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION
             }
         };
-        Kernel32.SetInformationJobObject(job, Kernel32.JOBOBJECTINFOCLASS.JobObjectExtendedLimitInformation, info);
-        Kernel32.AssignProcessToJobObject(job, p.Handle);
+        PInvoke.SetInformationJobObject(new HANDLE(job.DangerousGetHandle()), JOBOBJECTINFOCLASS.JobObjectExtendedLimitInformation, &info, (uint)sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
+        PInvoke.AssignProcessToJobObject(job, new SafeFileHandle(p.Handle, ownsHandle: false));
+#pragma warning restore CA1416
         _jobObjects[pid] = job;
         p.Exited += (_, e) =>
         {
@@ -40,15 +48,17 @@ public static partial class WindowsProcessHelpers
         {
             try
             {
-                using var proc = Process.GetProcessById((int)id.ToUInt32());
+                using var proc = Process.GetProcessById((int)(uint)id);
                 foreach (ProcessThread thread in proc.Threads)
                 {
-                    using var handle = Kernel32.OpenThread(ACCESS_MASK.FromEnum(Kernel32.ThreadAccess.THREAD_SUSPEND_RESUME), false, (uint)thread.Id);
+#pragma warning disable CA1416
+                    using var handle = PInvoke.OpenThread_SafeHandle(THREAD_ACCESS_RIGHTS.THREAD_SUSPEND_RESUME, false, (uint)thread.Id);
                     if (handle.IsInvalid)
                     {
                         continue;
                     }
-                    Kernel32.SuspendThread(handle);
+                    PInvoke.SuspendThread(handle);
+#pragma warning restore CA1416
                 }
             }
             catch { }
@@ -61,27 +71,47 @@ public static partial class WindowsProcessHelpers
         {
             try
             {
-                using var proc = Process.GetProcessById((int)id.ToUInt32());
+                using var proc = Process.GetProcessById((int)(uint)id);
                 foreach (ProcessThread thread in proc.Threads)
                 {
-                    using var handle = Kernel32.OpenThread(ACCESS_MASK.FromEnum(Kernel32.ThreadAccess.THREAD_SUSPEND_RESUME), false, (uint)thread.Id);
+#pragma warning disable CA1416
+                    using var handle = PInvoke.OpenThread_SafeHandle(THREAD_ACCESS_RIGHTS.THREAD_SUSPEND_RESUME, false, (uint)thread.Id);
                     if (handle.IsInvalid)
                     {
                         continue;
                     }
-                    Kernel32.ResumeThread(handle);
+                    PInvoke.ResumeThread(handle);
+#pragma warning restore CA1416
                 }
             }
             catch { }
         }
     }
 
-    private static nuint[] GetJobProcessIds(Process p)
+    private static unsafe nuint[] GetJobProcessIds(Process p)
     {
         if (!_jobObjects.TryGetValue(p.Id, out var job))
         {
             return [];
         }
-        return Kernel32.QueryInformationJobObject<Kernel32.JOBOBJECT_BASIC_PROCESS_ID_LIST>(job, Kernel32.JOBOBJECTINFOCLASS.JobObjectBasicProcessIdList).ProcessIdList;
+        var bufferSize = 2 * sizeof(uint) + MaxJobProcessIds * sizeof(nuint);
+        var buffer = new byte[bufferSize];
+        fixed (byte* pBuffer = buffer)
+        {
+#pragma warning disable CA1416
+            if (!PInvoke.QueryInformationJobObject(new HANDLE(job.DangerousGetHandle()), JOBOBJECTINFOCLASS.JobObjectBasicProcessIdList, pBuffer, (uint)bufferSize, null))
+#pragma warning restore CA1416
+            {
+                return [];
+            }
+            var count = *(uint*)(pBuffer + sizeof(uint));
+            var result = new nuint[count];
+            var ids = (nuint*)(pBuffer + 2 * sizeof(uint));
+            for (var i = 0; i < count; i++)
+            {
+                result[i] = ids[i];
+            }
+            return result;
+        }
     }
 }

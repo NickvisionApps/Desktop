@@ -1,10 +1,13 @@
 using Microsoft.Extensions.Logging;
 using Nickvision.Desktop.FreeDesktop;
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Tmds.DBus;
-using Vanara.PInvoke;
+using Tmds.DBus.Protocol;
+using Windows.Win32;
+using Windows.Win32.System.Power;
 
 namespace Nickvision.Desktop.System;
 
@@ -15,8 +18,7 @@ public class PowerService : IDisposable, IPowerService
 {
     private readonly ILogger<PowerService> _logger;
     private bool _disposed;
-    private Connection? _dbus;
-    private IScreenSaver? _freeDesktopScreenSaver;
+    private DBusConnection? _dbus;
     private uint _inhibitCookie;
     private Process? _preventSuspendProcess;
 
@@ -57,25 +59,27 @@ public class PowerService : IDisposable, IPowerService
         _logger.LogInformation("Allowing system suspend...");
         if (OperatingSystem.IsWindows())
         {
-            var result = Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS) != 0;
+#pragma warning disable CA1416
+            var result = PInvoke.SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS) != 0;
+#pragma warning restore CA1416
             if (result)
             {
                 _logger.LogInformation("Allowed system suspend.");
             }
             else
             {
-                _logger.LogError($"Failed to allow system suspend: {Win32Error.GetLastError().GetException()}");
+                _logger.LogError($"Failed to allow system suspend: {new Win32Exception(Marshal.GetLastWin32Error())}");
             }
             return result;
         }
         else if (OperatingSystem.IsLinux())
         {
-            if (_inhibitCookie == 0 || _freeDesktopScreenSaver is null)
+            if (_inhibitCookie == 0 || _dbus is null)
             {
                 _logger.LogWarning("System suspend already allowed.");
                 return false;
             }
-            await _freeDesktopScreenSaver.UnInhibitAsync(_inhibitCookie);
+            await ScreenSaverProxy.UnInhibitAsync(_dbus, _inhibitCookie);
             _inhibitCookie = 0;
             _logger.LogInformation("Allowed system suspend.");
             return true;
@@ -109,14 +113,16 @@ public class PowerService : IDisposable, IPowerService
         _logger.LogInformation("Preventing system suspend...");
         if (OperatingSystem.IsWindows())
         {
-            var result = Kernel32.SetThreadExecutionState(Kernel32.EXECUTION_STATE.ES_CONTINUOUS | Kernel32.EXECUTION_STATE.ES_SYSTEM_REQUIRED) != 0;
+#pragma warning disable CA1416
+            var result = PInvoke.SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_SYSTEM_REQUIRED) != (EXECUTION_STATE)0;
+#pragma warning restore CA1416
             if (result)
             {
                 _logger.LogInformation("Prevented system suspend.");
             }
             else
             {
-                _logger.LogError($"Failed to prevent system suspend: {Win32Error.GetLastError().GetException()}");
+                _logger.LogError($"Failed to prevent system suspend: {new Win32Exception(Marshal.GetLastPInvokeError())}");
             }
             return result;
         }
@@ -124,20 +130,14 @@ public class PowerService : IDisposable, IPowerService
         {
             if (_dbus is null)
             {
-                _dbus = new Connection(Address.Session);
-                await _dbus.ConnectAsync();
-            }
-            if (_freeDesktopScreenSaver is null)
-            {
-                try
+                var sessionAddress = DBusAddress.Session;
+                if (sessionAddress is null)
                 {
-                    _freeDesktopScreenSaver = _dbus.CreateProxy<IScreenSaver>("org.freedesktop.ScreenSaver", "/org/freedesktop/ScreenSaver");
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError($"Failed to create FreeDesktop ScreenSaver proxy: {e}");
+                    _logger.LogError("Failed to prevent system suspend: DBUS_SESSION_BUS_ADDRESS is not set.");
                     return false;
                 }
+                _dbus = new DBusConnection(sessionAddress);
+                await _dbus.ConnectAsync();
             }
             if (_inhibitCookie != 0)
             {
@@ -146,7 +146,7 @@ public class PowerService : IDisposable, IPowerService
             }
             try
             {
-                _inhibitCookie = await _freeDesktopScreenSaver.InhibitAsync("Nickvision Desktop", "Preventing suspend");
+                _inhibitCookie = await ScreenSaverProxy.InhibitAsync(_dbus, "Nickvision Desktop", "Preventing suspend");
             }
             catch (Exception e)
             {
