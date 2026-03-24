@@ -13,6 +13,20 @@ namespace Nickvision.Desktop.WinUI.Helpers;
 
 public static partial class WindowExtensions
 {
+    private sealed class WindowMinimumSizeRegistration : IDisposable
+    {
+        private readonly HWND _hWnd;
+        private readonly SUBCLASSPROC _proc;
+
+        public WindowMinimumSizeRegistration(HWND hWnd, SUBCLASSPROC proc)
+        {
+            _hWnd = hWnd;
+            _proc = proc;
+        }
+
+        public void Dispose() => PInvoke.RemoveWindowSubclass(_hWnd, _proc, 0);
+    }
+
     extension(Window window)
     {
         public HWND Hwnd => (HWND)WindowNative.GetWindowHandle(window);
@@ -79,10 +93,30 @@ public static partial class WindowExtensions
             }
         }
 
-        public bool SetWindowSubclass(SUBCLASSPROC subclassProc) =>
-            PInvoke.SetWindowSubclass(window.Hwnd, subclassProc, 0, 0);
-
-        public bool RemoveWindowSubclass(SUBCLASSPROC subclassProc) =>
-            PInvoke.RemoveWindowSubclass(window.Hwnd, subclassProc, 0);
+        public IDisposable RegisterMinimumSizeProc(int minWidth, int minHeight)
+        {
+            window.EnsureMinimumSize(minWidth, minHeight);
+            var hwnd = window.Hwnd;
+            unsafe LRESULT MinimumSizeSubclassProc(HWND hWnd, uint uMsg, WPARAM wParam, LPARAM lParam, nuint uIdSubclass, nuint dwRefData)
+            {
+                if (uMsg == PInvoke.WM_GETMINMAXINFO)
+                {
+                    PInvoke.DefSubclassProc(hWnd, uMsg, wParam, lParam);
+                    var dpi = PInvoke.GetDpiForWindow(hWnd);
+                    var scale = dpi / 96.0;
+                    var minMaxInfo = (MINMAXINFO*)lParam.Value;
+                    minMaxInfo->ptMinTrackSize.x = (int)(minWidth * scale);
+                    minMaxInfo->ptMinTrackSize.y = (int)(minHeight * scale);
+                    return (LRESULT)(nint)0;
+                }
+                return PInvoke.DefSubclassProc(hWnd, uMsg, wParam, lParam);
+            }
+            var proc = new SUBCLASSPROC(MinimumSizeSubclassProc);
+            if (!PInvoke.SetWindowSubclass(hwnd, proc, 0, 0))
+            {
+                throw new InvalidOperationException("Failed to install window subclass for minimum size enforcement.");
+            }
+            return new WindowMinimumSizeRegistration(hwnd, proc);
+        }
     }
 }
