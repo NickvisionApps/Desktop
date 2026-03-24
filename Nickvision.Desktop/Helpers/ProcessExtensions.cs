@@ -23,7 +23,6 @@ public static partial class ProcessExtensions
             }
         }
 
-
         public void Suspend()
         {
             if (OperatingSystem.IsWindows())

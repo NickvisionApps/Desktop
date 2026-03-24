@@ -132,8 +132,7 @@ internal sealed class SecretServiceProxy : IDisposable
     /// <param name="value">The secret value</param>
     /// <param name="replace">Whether to replace an existing item with the same attributes</param>
     /// <returns>The object path of the created item, or null on failure</returns>
-    internal async Task<string?> CreateItemAsync(string collectionPath, string label,
-        Dictionary<string, string> attributes, string value, bool replace = false)
+    internal async Task<string?> CreateItemAsync(string collectionPath, string label, Dictionary<string, string> attributes, string value, bool replace = false)
     {
         var attrDict = new Dict<string, string>();
         foreach (var kv in attributes)
