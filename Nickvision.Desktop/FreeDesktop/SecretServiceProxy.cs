@@ -101,10 +101,11 @@ internal sealed class SecretServiceProxy : IDisposable
     }
 
     /// <summary>
-    /// Unlocks the given object (collection or item path).
+    /// Unlocks the given object (collection or item path), prompting the user if required.
     /// </summary>
     /// <param name="objectPath">The D-Bus object path to unlock</param>
-    internal async Task UnlockAsync(string objectPath)
+    /// <returns>True if unlocked successfully, false if the user dismissed the prompt</returns>
+    internal async Task<bool> UnlockAsync(string objectPath)
     {
         MessageBuffer buffer;
         {
@@ -113,14 +114,57 @@ internal sealed class SecretServiceProxy : IDisposable
             writer.WriteArray(new ObjectPath[] { objectPath });
             buffer = writer.CreateMessage();
         }
-        await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
+        var promptPath = await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
         {
             var reader = m.GetBodyReader();
             reader.AlignStruct();
-            reader.ReadArrayOfObjectPath(); // unlocked (ignored)
-            reader.ReadObjectPath(); // prompt (ignored)
-            return true;
+            reader.ReadArrayOfObjectPath(); // already-unlocked list (not reliable for items that need prompting)
+            return reader.ReadObjectPathAsString(); // prompt path, or "/" if no prompt is needed
         }, null);
+        if (string.IsNullOrEmpty(promptPath) || promptPath == "/")
+        {
+            // Object was already unlocked, no user prompt required
+            return true;
+        }
+        return await PromptAsync(promptPath);
+    }
+
+    /// <summary>
+    /// Invokes a Secret Service prompt and waits for the user to complete or dismiss it.
+    /// </summary>
+    /// <param name="promptPath">The D-Bus object path of the prompt</param>
+    /// <returns>True if the user completed the prompt, false if dismissed</returns>
+    private async Task<bool> PromptAsync(string promptPath)
+    {
+        var tcs = new TaskCompletionSource<bool>();
+        using var subscription = await _connection.WatchSignalAsync(
+            SecretsBus, promptPath, "org.freedesktop.Secret.Prompt", "Completed",
+            static (Message m, object? _) =>
+            {
+                var reader = m.GetBodyReader();
+                return reader.ReadBool(); // dismissed
+            },
+            (Exception? ex, bool dismissed) =>
+            {
+                if (ex is not null)
+                {
+                    tcs.TrySetException(ex);
+                }
+                else
+                {
+                    tcs.TrySetResult(!dismissed);
+                }
+            },
+            null, /* emitOnCapturedContext */ false, ObserverFlags.None);
+        MessageBuffer buffer;
+        {
+            using var writer = _connection.GetMessageWriter();
+            writer.WriteMethodCallHeader(SecretsBus, promptPath, "org.freedesktop.Secret.Prompt", "Prompt", "s", MessageFlags.None);
+            writer.WriteString(""); // no parent window-id
+            buffer = writer.CreateMessage();
+        }
+        await _connection.CallMethodAsync(buffer);
+        return await tcs.Task;
     }
 
     /// <summary>

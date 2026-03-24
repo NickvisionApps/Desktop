@@ -374,12 +374,12 @@ public class SecretService : ISecretService
                 _logger.LogInformation($"System secret ({name}) not found.");
                 return null;
             }
-            await svc.UnlockAsync(items[0]);
-            var value = await svc.GetSecretAsync(items[0]);
-            if (value is null)
+            if (!await svc.UnlockAsync(items[0]))
             {
-                _logger.LogError($"Failed to get system secret ({name}): the item could not be unlocked.");
+                _logger.LogError($"Failed to get system secret ({name}): the user dismissed the unlock prompt.");
+                return null;
             }
+            var value = await svc.GetSecretAsync(items[0]);
             return value is null ? null : new Secret(name, value);
         }
         else
@@ -498,9 +498,13 @@ public class SecretService : ISecretService
             {
                 _logger.LogError($"Failed to update system secret ({secret.Name}).");
             }
+            else if (!await svc.UnlockAsync(items[0]))
+            {
+                _logger.LogError($"Failed to update system secret ({secret.Name}): the user dismissed the unlock prompt.");
+                return false;
+            }
             else
             {
-                await svc.UnlockAsync(items[0]);
                 await svc.SetSecretAsync(items[0], secret.Value);
                 _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
             }
