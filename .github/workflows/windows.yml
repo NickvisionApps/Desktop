@@ -41,9 +41,6 @@ jobs:
         run: dotnet ${{ env.TEST_PROJECT_NAME }}\bin\Release\net10.0\Nickvision.Desktop.Tests.dll
       - name: "Publish NativeAOT"
         run: dotnet publish ${{ env.TEST_PROJECT_NAME }} -c Release -r win-${{ matrix.variant.arch }} -p:PublishAot=true
-      - name: "Test NativeAOT"
-        continue-on-error: true
-        run: ${{ env.TEST_PROJECT_NAME }}\bin\Release\net10.0\win-${{ matrix.variant.arch }}\publish\Nickvision.Desktop.Tests.exe
   build-winui:
     name: "Build WinUI on Windows"
     strategy:
