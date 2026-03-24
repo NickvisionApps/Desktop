@@ -132,9 +132,7 @@ public class SecretService : ISecretService
                 return false;
             }
             await svc.UnlockAsync(collPath);
-            var itemPath = await svc.CreateItemAsync(collPath, secret.Name,
-                new Dictionary<string, string> { { "application", secret.Name } },
-                secret.Value);
+            var itemPath = await svc.CreateItemAsync(collPath, secret.Name, new Dictionary<string, string> { { "application", secret.Name } }, secret.Value);
             var res = !string.IsNullOrEmpty(itemPath);
             if (res)
             {
