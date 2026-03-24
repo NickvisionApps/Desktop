@@ -132,9 +132,7 @@ public class SecretService : ISecretService
                 return false;
             }
             await svc.UnlockAsync(collPath);
-            var itemPath = await svc.CreateItemAsync(collPath, secret.Name,
-                new Dictionary<string, string> { { "application", secret.Name } },
-                secret.Value);
+            var itemPath = await svc.CreateItemAsync(collPath, secret.Name, new Dictionary<string, string> { { "application", secret.Name } }, secret.Value);
             var res = !string.IsNullOrEmpty(itemPath);
             if (res)
             {
@@ -245,29 +243,21 @@ public class SecretService : ISecretService
                 _logger.LogError($"Failed to delete system secret ({name}): unable to connect to secrets service.");
                 return false;
             }
-            var collPath = await svc.GetDefaultCollectionPathAsync();
-            if (string.IsNullOrEmpty(collPath) || collPath == "/")
-            {
-                collPath = await svc.CreateCollectionAsync("Default keyring", "default");
-            }
-            if (string.IsNullOrEmpty(collPath))
-            {
-                _logger.LogError($"Failed to delete system secret ({name}) as the keyring collection could not be accessed.");
-                return false;
-            }
-            await svc.UnlockAsync(collPath);
-            var items = await svc.SearchItemsAsync(collPath,
-                new Dictionary<string, string> { { "application", name } });
-            if (items.Length == 0)
+            var (unlocked, locked) = await svc.SearchItemsAsync(new Dictionary<string, string> { { "application", name } });
+            var itemPath = unlocked.Length > 0 ? unlocked[0] : locked.Length > 0 ? locked[0] : null;
+            if (itemPath is null)
             {
                 _logger.LogWarning($"System secret ({name}) not found.");
+                return false;
             }
-            else
+            if (locked.Length > 0 && !await svc.UnlockAsync(itemPath))
             {
-                await svc.DeleteItemAsync(items[0]);
-                _logger.LogInformation($"Deleted system secret ({name}) successfully.");
+                _logger.LogError($"Failed to delete system secret ({name}): the user dismissed the unlock prompt.");
+                return false;
             }
-            return items.Length > 0;
+            await svc.DeleteItemAsync(itemPath);
+            _logger.LogInformation($"Deleted system secret ({name}) successfully.");
+            return true;
         }
         else
         {
@@ -356,25 +346,27 @@ public class SecretService : ISecretService
                 _logger.LogError($"Failed to get system secret ({name}): unable to connect to secrets service.");
                 return null;
             }
-            var collPath = await svc.GetDefaultCollectionPathAsync();
-            if (string.IsNullOrEmpty(collPath) || collPath == "/")
+            var (unlocked, locked) = await svc.SearchItemsAsync(new Dictionary<string, string> { { "application", name } });
+            string? itemPath = null;
+            if (unlocked.Length > 0)
             {
-                collPath = await svc.CreateCollectionAsync("Default keyring", "default");
+                itemPath = unlocked[0];
             }
-            if (string.IsNullOrEmpty(collPath))
+            else if (locked.Length > 0)
             {
-                _logger.LogError($"Failed to get system secret ({name}) as the keyring collection could not be accessed.");
-                return null;
+                if (!await svc.UnlockAsync(locked[0]))
+                {
+                    _logger.LogError($"Failed to get system secret ({name}): the user dismissed the unlock prompt.");
+                    return null;
+                }
+                itemPath = locked[0];
             }
-            await svc.UnlockAsync(collPath);
-            var items = await svc.SearchItemsAsync(collPath,
-                new Dictionary<string, string> { { "application", name } });
-            if (items.Length == 0)
+            if (itemPath is null)
             {
                 _logger.LogInformation($"System secret ({name}) not found.");
                 return null;
             }
-            var value = await svc.GetSecretAsync(items[0]);
+            var value = await svc.GetSecretAsync(itemPath);
             return value is null ? null : new Secret(name, value);
         }
         else
@@ -476,29 +468,29 @@ public class SecretService : ISecretService
                 _logger.LogError($"Failed to update system secret ({secret.Name}): unable to connect to secrets service.");
                 return false;
             }
-            var collPath = await svc.GetDefaultCollectionPathAsync();
-            if (string.IsNullOrEmpty(collPath) || collPath == "/")
+            var (unlocked, locked) = await svc.SearchItemsAsync(new Dictionary<string, string> { { "application", secret.Name } });
+            string? itemPath = null;
+            if (unlocked.Length > 0)
             {
-                collPath = await svc.CreateCollectionAsync("Default keyring", "default");
+                itemPath = unlocked[0];
             }
-            if (string.IsNullOrEmpty(collPath))
+            else if (locked.Length > 0)
             {
-                _logger.LogError($"Failed to update system secret ({secret.Name}) as the keyring collection could not be accessed.");
-                return false;
+                if (!await svc.UnlockAsync(locked[0]))
+                {
+                    _logger.LogError($"Failed to update system secret ({secret.Name}): the user dismissed the unlock prompt.");
+                    return false;
+                }
+                itemPath = locked[0];
             }
-            await svc.UnlockAsync(collPath);
-            var items = await svc.SearchItemsAsync(collPath,
-                new Dictionary<string, string> { { "application", secret.Name } });
-            if (items.Length == 0)
+            if (itemPath is null)
             {
                 _logger.LogError($"Failed to update system secret ({secret.Name}).");
+                return false;
             }
-            else
-            {
-                await svc.SetSecretAsync(items[0], secret.Value);
-                _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
-            }
-            return items.Length > 0;
+            await svc.SetSecretAsync(itemPath, secret.Value);
+            _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
+            return true;
         }
         else
         {
