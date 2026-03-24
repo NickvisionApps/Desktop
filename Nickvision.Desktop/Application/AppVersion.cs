@@ -100,11 +100,6 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
 
     public static bool operator !=(AppVersion? pv, Version? v) => !(pv == v);
 
-    /// <summary>
-    /// Compares two PreviewLabel strings using SemVer rules:
-    /// a stable release (empty label) is greater than any pre-release.
-    /// Two non-empty labels are compared with ordinal string comparison.
-    /// </summary>
     private static int ComparePreviewLabels(string? label1, string? label2)
     {
         var empty1 = string.IsNullOrEmpty(label1);
@@ -115,11 +110,11 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
         }
         if (empty1)
         {
-            return 1;  // stable > prerelease per SemVer
+            return 1;
         }
         if (empty2)
         {
-            return -1; // prerelease < stable per SemVer
+            return -1;
         }
         return string.Compare(label1, label2, StringComparison.Ordinal);
     }

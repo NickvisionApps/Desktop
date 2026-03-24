@@ -81,7 +81,6 @@ public sealed class AppVersionTests
     [TestMethod]
     public void Case010_SameBase_StableGreaterThanPreview()
     {
-        // SemVer: a stable release has higher precedence than a pre-release with the same base version.
         var stable = new AppVersion("1.0.0");
         var preview = new AppVersion("1.0.0-beta");
         Assert.IsTrue(stable > preview);

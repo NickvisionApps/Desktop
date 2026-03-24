@@ -11,11 +11,8 @@ public sealed class TaskExtensionsTests
     [TestMethod]
     public async Task Case001_FireAndForget_DoesNotThrowOnException()
     {
-        // If FireAndForget does not swallow the exception, it would surface as an
-        // unhandled exception on the SynchronizationContext and crash the runner.
         var faulted = Task.FromException(new InvalidOperationException("should be swallowed"));
         faulted.FireAndForget();
-        // Give the async void time to complete
         await Task.Delay(150);
     }
 

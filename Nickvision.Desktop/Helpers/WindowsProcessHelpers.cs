@@ -2,6 +2,7 @@ using Microsoft.Win32.SafeHandles;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Windows.Win32;
+using Windows.Win32.Foundation;
 using Windows.Win32.System.JobObjects;
 using Windows.Win32.System.Threading;
 
@@ -30,7 +31,7 @@ public static partial class WindowsProcessHelpers
                 LimitFlags = JOB_OBJECT_LIMIT.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE | JOB_OBJECT_LIMIT.JOB_OBJECT_LIMIT_DIE_ON_UNHANDLED_EXCEPTION
             }
         };
-        PInvoke.SetInformationJobObject(job, JOBOBJECTINFOCLASS.JobObjectExtendedLimitInformation, &info, (uint)sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
+        PInvoke.SetInformationJobObject(new HANDLE(job.DangerousGetHandle()), JOBOBJECTINFOCLASS.JobObjectExtendedLimitInformation, &info, (uint)sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION));
         PInvoke.AssignProcessToJobObject(job, new SafeFileHandle(p.Handle, ownsHandle: false));
 #pragma warning restore CA1416
         _jobObjects[pid] = job;
@@ -98,7 +99,7 @@ public static partial class WindowsProcessHelpers
         fixed (byte* pBuffer = buffer)
         {
 #pragma warning disable CA1416
-            if (!PInvoke.QueryInformationJobObject(job, JOBOBJECTINFOCLASS.JobObjectBasicProcessIdList, pBuffer, (uint)bufferSize, null))
+            if (!PInvoke.QueryInformationJobObject(new HANDLE(job.DangerousGetHandle()), JOBOBJECTINFOCLASS.JobObjectBasicProcessIdList, pBuffer, (uint)bufferSize, null))
 #pragma warning restore CA1416
             {
                 return [];
