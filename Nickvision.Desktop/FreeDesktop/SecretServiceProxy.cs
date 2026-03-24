@@ -211,17 +211,16 @@ internal sealed class SecretServiceProxy : IDisposable
     }
 
     /// <summary>
-    /// Searches for items in the specified collection that match the given attributes.
+    /// Searches for items across all collections that match the given attributes.
     /// </summary>
-    /// <param name="collectionPath">The collection object path</param>
     /// <param name="attributes">Attributes to match</param>
-    /// <returns>An array of matching item object paths</returns>
-    internal async Task<string[]> SearchItemsAsync(string collectionPath, Dictionary<string, string> attributes)
+    /// <returns>A tuple of unlocked and locked item object paths</returns>
+    internal async Task<(string[] Unlocked, string[] Locked)> SearchItemsAsync(Dictionary<string, string> attributes)
     {
         MessageBuffer buffer;
         {
             using var writer = _connection.GetMessageWriter();
-            writer.WriteMethodCallHeader(SecretsBus, collectionPath, CollectionInterface, "SearchItems", "a{ss}", MessageFlags.None);
+            writer.WriteMethodCallHeader(SecretsBus, SecretsPath, ServiceInterface, "SearchItems", "a{ss}", MessageFlags.None);
             var dictStart = writer.WriteDictionaryStart();
             foreach (var kv in attributes)
             {
@@ -235,13 +234,20 @@ internal sealed class SecretServiceProxy : IDisposable
         return await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
         {
             var reader = m.GetBodyReader();
-            var paths = reader.ReadArrayOfObjectPath();
-            var result = new string[paths.Length];
-            for (var i = 0; i < paths.Length; i++)
+            reader.AlignStruct();
+            var unlockedPaths = reader.ReadArrayOfObjectPath();
+            var lockedPaths = reader.ReadArrayOfObjectPath();
+            var unlocked = new string[unlockedPaths.Length];
+            var locked = new string[lockedPaths.Length];
+            for (var i = 0; i < unlockedPaths.Length; i++)
             {
-                result[i] = paths[i].ToString();
+                unlocked[i] = unlockedPaths[i].ToString();
             }
-            return result;
+            for (var i = 0; i < lockedPaths.Length; i++)
+            {
+                locked[i] = lockedPaths[i].ToString();
+            }
+            return (unlocked, locked);
         }, null);
     }
 
