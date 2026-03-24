@@ -5,6 +5,7 @@ using System;
 using Windows.Graphics;
 using Windows.Win32;
 using Windows.Win32.Foundation;
+using Windows.Win32.UI.Shell;
 using Windows.Win32.UI.WindowsAndMessaging;
 using WinRT.Interop;
 
@@ -62,5 +63,26 @@ public static partial class WindowExtensions
             return Math.Max(0, Math.Min(windowRect.X + windowRect.Width, workArea.X + workArea.Width) - Math.Max(windowRect.X, workArea.X)) >= 100 &&
                 Math.Max(0, Math.Min(windowRect.Y + windowRect.Height, workArea.Y + workArea.Height) - Math.Max(windowRect.Y, workArea.Y)) >= 100;
         }
+
+        public void EnsureMinimumSize(int minWidth, int minHeight)
+        {
+            var dpi = PInvoke.GetDpiForWindow(window.Hwnd);
+            var scale = dpi / 96.0;
+            var scaledMinWidth = (int)(minWidth * scale);
+            var scaledMinHeight = (int)(minHeight * scale);
+            var size = window.AppWindow.Size;
+            if (size.Width < scaledMinWidth || size.Height < scaledMinHeight)
+            {
+                window.AppWindow.Resize(new SizeInt32(
+                    Math.Max(size.Width, scaledMinWidth),
+                    Math.Max(size.Height, scaledMinHeight)));
+            }
+        }
+
+        public bool SetWindowSubclass(SUBCLASSPROC subclassProc) =>
+            PInvoke.SetWindowSubclass(window.Hwnd, subclassProc, 0, 0);
+
+        public bool RemoveWindowSubclass(SUBCLASSPROC subclassProc) =>
+            PInvoke.RemoveWindowSubclass(window.Hwnd, subclassProc, 0);
     }
 }

@@ -1,2 +1,8 @@
 IsZoomed
 ShowWindow
+SetWindowSubclass
+RemoveWindowSubclass
+DefSubclassProc
+GetDpiForWindow
+WM_GETMINMAXINFO
+MINMAXINFO
