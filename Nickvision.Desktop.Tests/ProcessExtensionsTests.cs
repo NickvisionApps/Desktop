@@ -28,6 +28,8 @@ public sealed class ProcessExtensionsTests
         }
         _process = Process.Start(startInfo);
         Assert.IsNotNull(_process);
+        Assert.IsTrue(_process.Id > 0);
+        Assert.IsFalse(_process.HasExited);
     }
 
     [TestMethod]
@@ -35,6 +37,7 @@ public sealed class ProcessExtensionsTests
     {
         Assert.IsNotNull(_process);
         _process.SetAsParentProcess();
+        Assert.IsFalse(_process.HasExited);
     }
 
     [TestMethod]
@@ -42,6 +45,7 @@ public sealed class ProcessExtensionsTests
     {
         Assert.IsNotNull(_process);
         _process.Suspend();
+        Assert.IsFalse(_process.HasExited);
     }
 
     [TestMethod]
@@ -49,6 +53,7 @@ public sealed class ProcessExtensionsTests
     {
         Assert.IsNotNull(_process);
         _process.Resume();
+        Assert.IsFalse(_process.HasExited);
     }
 
     [TestMethod]
