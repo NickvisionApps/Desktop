@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.System;
+using Nickvision.Desktop.System;
 using System.IO;
 using System.Linq;
 using Environment = Nickvision.Desktop.System.Environment;

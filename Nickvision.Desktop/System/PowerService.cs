@@ -11,9 +11,6 @@ using Windows.Win32.System.Power;
 
 namespace Nickvision.Desktop.System;
 
-/// <summary>
-/// A server for managing power options.
-/// </summary>
 public class PowerService : IDisposable, IPowerService
 {
     private readonly ILogger<PowerService> _logger;
@@ -22,10 +19,6 @@ public class PowerService : IDisposable, IPowerService
     private uint _inhibitCookie;
     private Process? _preventSuspendProcess;
 
-    /// <summary>
-    /// Constructs a PowerService.
-    /// </summary>
-    /// <param name="logger">Logger for the service</param>
     public PowerService(ILogger<PowerService> logger)
     {
         _logger = logger;
@@ -33,27 +26,17 @@ public class PowerService : IDisposable, IPowerService
         _inhibitCookie = 0;
     }
 
-    /// <summary>
-    /// Finalizes a PowerService.
-    /// </summary>
     ~PowerService()
     {
         Dispose(false);
     }
 
-    /// <summary>
-    /// Disposes a PowerService.
-    /// </summary>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    /// Allows the system to suspend.
-    /// </summary>
-    /// <returns>True if the action was applied successfully, else false</returns>
     public async Task<bool> AllowSuspendAsync()
     {
         _logger.LogInformation("Allowing system suspend...");
@@ -104,10 +87,6 @@ public class PowerService : IDisposable, IPowerService
         }
     }
 
-    /// <summary>
-    /// Prevents the system from suspending.
-    /// </summary>
-    /// <returns>True if the action was applied successfully, else false</returns>
     public async Task<bool> PreventSuspendAsync()
     {
         _logger.LogInformation("Preventing system suspend...");
@@ -189,10 +168,6 @@ public class PowerService : IDisposable, IPowerService
         }
     }
 
-    /// <summary>
-    /// Disposes a PowerService.
-    /// </summary>
-    /// <param name="disposing">Whether to dispose managed resources</param>
     private void Dispose(bool disposing)
     {
         if (_disposed)

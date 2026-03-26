@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.Globalization;
+using Nickvision.Desktop.Globalization;
 using System;
 using System.IO;
 using System.Linq;

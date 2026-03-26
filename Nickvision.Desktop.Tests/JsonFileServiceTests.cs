@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.Application;
+using Nickvision.Desktop.Application;
 using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.Tests.Mocks;
 using System.IO;

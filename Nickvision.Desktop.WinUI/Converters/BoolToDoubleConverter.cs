@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Data;
 using System;
 
 namespace Nickvision.Desktop.WinUI.Converters;

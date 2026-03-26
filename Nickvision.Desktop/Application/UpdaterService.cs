@@ -18,9 +18,6 @@ using FileMode = System.IO.FileMode;
 
 namespace Nickvision.Desktop.Application;
 
-/// <summary>
-/// A service for updating an application via GitHub releases.
-/// </summary>
 public class UpdaterService : IDisposable, IUpdaterService
 {
     private readonly ILogger<UpdaterService> _logger;
@@ -30,13 +27,6 @@ public class UpdaterService : IDisposable, IUpdaterService
     private readonly string _name;
     private readonly string _cacheReleasesPath;
 
-    /// <summary>
-    /// Constructs an UpdaterService.
-    /// </summary>
-    /// <param name="logger">Logger for the service</param>
-    /// <param name="appInfo">The AppInfo object for the app</param>
-    /// <param name="httpClient">The HttpClient for the app</param>
-    /// <exception cref="ArgumentException">Thrown if the AppInfo.SourceRepository is missing or ill-formated</exception>
     [ActivatorUtilitiesConstructor]
     public UpdaterService(ILogger<UpdaterService> logger, AppInfo appInfo, IHttpClientFactory httpClientFactory)
     {
@@ -64,14 +54,6 @@ public class UpdaterService : IDisposable, IUpdaterService
         Directory.CreateDirectory(Path.GetDirectoryName(_cacheReleasesPath)!);
     }
 
-    /// <summary>
-    /// Constructs an UpdaterService.
-    /// </summary>
-    /// <param name="logger">Logger for the service</param>
-    /// <param name="owner">The repository owner</param>
-    /// <param name="name">The repository name</param>
-    /// <param name="httpClient">The HttpClient for the app</param>
-    /// <exception cref="ArgumentException">Thrown if the Owner and/or Name are empty</exception>
     public UpdaterService(ILogger<UpdaterService> logger, string owner, string name, HttpClient httpClient)
     {
         if (string.IsNullOrEmpty(owner) || string.IsNullOrEmpty(name))
@@ -87,32 +69,17 @@ public class UpdaterService : IDisposable, IUpdaterService
         _cacheReleasesPath = Path.Combine(UserDirectories.Cache, $"{_owner}-{_name}-releases.json");
     }
 
-    /// <summary>
-    /// Destructs an UpdaterService. 
-    /// </summary>
     ~UpdaterService()
     {
         Dispose(false);
     }
 
-    /// <summary>
-    /// Frees resources used by the UpdaterService.
-    /// </summary>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
-    /// <summary>
-    /// Downloads an asset from a released version.
-    /// </summary>
-    /// <param name="version">The released version</param>
-    /// <param name="path">The path of where to download the asset to</param>
-    /// <param name="assertName">The name of the asset to download</param>
-    /// <param name="exactMatch">Whether the asset name should match exactly to the asset to download</param>
-    /// <param name="progress">An optional progress reporter</param>
-    /// <returns></returns>
     public async Task<bool> DownloadReleaseAssetAsync(AppVersion version, string path, string assertName, bool exactMatch = true, IProgress<DownloadProgress>? progress = null)
     {
         _logger.LogInformation($"Starting download of asset ({assertName}{(exactMatch ? string.Empty : "*")}) for {_owner}/{_name} version {version}...");
@@ -190,10 +157,6 @@ public class UpdaterService : IDisposable, IUpdaterService
         return false;
     }
 
-    /// <summary>
-    /// Gets the latest preview version available.
-    /// </summary>
-    /// <returns>The latest preview version or null if unavailable</returns>
     public async Task<AppVersion?> GetLatestPreviewVersionAsync()
     {
         var releases = await GetReleasesAsync();
@@ -208,10 +171,6 @@ public class UpdaterService : IDisposable, IUpdaterService
         return null;
     }
 
-    /// <summary>
-    /// Gets the latest stable version available.
-    /// </summary>
-    /// <returns>The latest stable version or null if unavailable</returns>
     public async Task<AppVersion?> GetLatestStableVersionAsync()
     {
         var releases = await GetReleasesAsync();
@@ -226,12 +185,6 @@ public class UpdaterService : IDisposable, IUpdaterService
         return null;
     }
 
-    /// <summary>
-    /// Downloads and runs the updated Windows installer of the given released version.
-    /// </summary>
-    /// <param name="version">The released version</param>
-    /// <param name="progress">An optional progress reporter</param>
-    /// <returns>True if the update was downloaded and ran successfully, else false</returns>
     public async Task<bool> WindowsApplicationUpdateAsync(AppVersion version, IProgress<DownloadProgress>? progress = null)
     {
         _logger.LogInformation($"Starting Windows application update for {_owner}/{_name} version {version}...");

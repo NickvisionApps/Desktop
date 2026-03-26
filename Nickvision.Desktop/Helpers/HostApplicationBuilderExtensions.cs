@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Nickvision.Desktop.Application;
@@ -26,6 +26,7 @@ public static class HostApplicationBuilderExtensions
             }
             builder.Services.AddHttpClient();
             builder.Services.AddSingleton<IArgumentsService>(new ArgumentsService(args));
+            builder.Services.AddSingleton<IDatabaseService, DatabaseService>();
             builder.Services.AddSingleton<IJsonFileService, JsonFileService>();
             builder.Services.AddSingleton<IKeyringService, KeyringService>();
             builder.Services.AddSingleton<INotificationService, NotificationService>();

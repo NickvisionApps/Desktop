@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.Keyring;
+using Nickvision.Desktop.Keyring;
 using System;
 
 namespace Nickvision.Desktop.Tests;

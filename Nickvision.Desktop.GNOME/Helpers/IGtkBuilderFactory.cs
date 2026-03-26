@@ -1,4 +1,4 @@
-﻿namespace Nickvision.Desktop.GNOME.Helpers;
+namespace Nickvision.Desktop.GNOME.Helpers;
 
 public interface IGtkBuilderFactory
 {

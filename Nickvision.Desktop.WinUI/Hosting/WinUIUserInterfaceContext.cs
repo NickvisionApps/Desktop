@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Dispatching;
+using Microsoft.UI.Dispatching;
 using Nickvision.Desktop.Hosting;
 
 namespace Nickvision.Desktop.WinUI.Hosting;
