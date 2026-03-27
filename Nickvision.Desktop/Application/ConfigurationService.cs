@@ -52,6 +52,45 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
         GC.SuppressFinalize(this);
     }
 
+    public Dictionary<string, string> GetAllRaw()
+    {
+        _logger.LogInformation("Getting all raw configuration properties...");
+        var dict = new Dictionary<string, string>();
+        EnsureTable();
+        using var command = _databaseService.SelectAllFromTable(TableName);
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            try
+            {
+                dict[reader.GetString(0)] = reader.GetString(1);
+            }
+            catch { }
+        }
+        _logger.LogInformation($"Found ({dict.Count}) raw configuration properties in database.");
+        return dict;
+    }
+
+    public async Task<Dictionary<string, string>> GetAllRawAsync()
+    {
+        _logger.LogInformation("Getting all raw configuration properties...");
+        await EnsureTableAsync();
+        var dict = new Dictionary<string, string>();
+        await using var command = await _databaseService.SelectAllFromTableAsync(TableName);
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            try
+            {
+                dict[reader.GetString(0)] = reader.GetString(1);
+                _logger.LogInformation($"Found raw configuration property ({reader.GetString(0)}) in database with value ({reader.GetString(1)}).");
+            }
+            catch { }
+        }
+        _logger.LogInformation($"Found ({dict.Count}) raw configuration properties in database.");
+        return dict;
+    }
+
     public bool GetBool(string name, bool defaultValue = false)
     {
         _logger.LogInformation($"Getting boolean configuration property ({name})...");
@@ -297,7 +336,6 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
         _transaction?.Commit();
         _transaction?.Dispose();
         _transaction = null;
-        EnsureTable();
     }
 
     public async Task SaveAsync()
@@ -308,7 +346,6 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
             await _transaction.DisposeAsync().ConfigureAwait(false);
             _transaction = null;
         }
-        await EnsureTableAsync();
     }
 
     public void Set(string name, bool value)

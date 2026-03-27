@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 
@@ -8,6 +9,8 @@ public interface IConfigurationService
 {
     event EventHandler<ConfigurationSavedEventArgs>? Saved;
 
+    Dictionary<string, string> GetAllRaw();
+    Task<Dictionary<string, string>> GetAllRawAsync();
     bool GetBool(string name, bool defaultValue = false);
     Task<bool> GetBoolAsync(string name, bool defaultValue = false);
     double GetDouble(string name, double defaultValue = 0.0);
