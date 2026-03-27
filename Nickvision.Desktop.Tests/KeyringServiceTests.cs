@@ -19,8 +19,10 @@ public sealed class KeyringServiceTests
     [TestMethod]
     public void Case001_Init()
     {
-        _databaseService = new DatabaseService(new MockLogger<DatabaseService>(), new AppInfo("org.nickvision.desktop.test", "Nickvision.Desktop.Test", "Test"), new SecretService(new MockLogger<SecretService>()));
-        _keyringService = new KeyringService(new MockLogger<KeyringService>(), _databaseService);
+        var appInfo = new AppInfo("org.nickvision.desktop.test.keyring", "Nickvision.Desktop.Test.Keyring", "Keyring Test");
+        var secretService = new SecretService(new MockLogger<SecretService>());
+        _databaseService = new DatabaseService(new MockLogger<DatabaseService>(), appInfo, secretService);
+        _keyringService = new KeyringService(new MockLogger<KeyringService>(), appInfo, _databaseService, secretService);
         Assert.IsNotNull(_databaseService);
         Assert.IsNotNull(_keyringService);
     }
@@ -62,7 +64,7 @@ public sealed class KeyringServiceTests
     [TestMethod]
     public async Task Case006_Cleanup()
     {
-        var path = Path.Combine(UserDirectories.Config, "Nickvision.Desktop.Test", "app.db");
+        var path = Path.Combine(UserDirectories.Config, "Nickvision.Desktop.Test.Keyring", "app.db");
         Assert.IsNotNull(_databaseService);
         Assert.IsNotNull(_keyringService);
         await _databaseService.DisposeAsync();
