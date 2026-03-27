@@ -28,16 +28,32 @@ public sealed class KeyringServiceTests
     }
 
     [TestMethod]
-    public async Task Case002_Add()
+    public async Task Case002_Get()
+    {
+        Assert.IsNotNull(_keyringService);
+        Assert.AreEqual(0, (await _keyringService.GetAllCredentialAsync()).Count);
+    }
+
+    [TestMethod]
+    public async Task Case003_Add()
     {
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(await _keyringService.AddCredentialAsync(new Credential("YouTube", "abc", "123", new Uri("https://www.youtube.com"))));
         Assert.IsNotNull((await _keyringService.GetAllCredentialAsync()).FirstOrDefault(c => c.Name == "YouTube"));
         Assert.IsFalse(await _keyringService.AddCredentialAsync(new Credential("YouTube", "abc", "123", new Uri("https://www.youtube.com"))));
+        Assert.IsTrue(await _keyringService.AddCredentialAsync(new Credential("YouTube 2", "def", "456", new Uri("https://www.youtube.com"))));
+        Assert.IsTrue(await _keyringService.AddCredentialAsync(new Credential("YouTube 3", "ghi", "789", new Uri("https://www.youtube.com"))));
     }
 
     [TestMethod]
-    public async Task Case004_Update()
+    public async Task Case004_Get()
+    {
+        Assert.IsNotNull(_keyringService);
+        Assert.AreEqual(3, (await _keyringService.GetAllCredentialAsync()).Count);
+    }
+
+    [TestMethod]
+    public async Task Case005_Update()
     {
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(await _keyringService.AddCredentialAsync(new Credential("Google", "x@gmail.com", "asdfgh123!", new Uri("https://www.google.com"))));
@@ -51,7 +67,7 @@ public sealed class KeyringServiceTests
     }
 
     [TestMethod]
-    public async Task Case005_Remove()
+    public async Task Case006_Remove()
     {
         Assert.IsNotNull(_keyringService);
         Assert.IsTrue(await _keyringService.AddCredentialAsync(new Credential("Example", "user1", "pass1", new Uri("https://www.example.com"))));
@@ -62,7 +78,7 @@ public sealed class KeyringServiceTests
     }
 
     [TestMethod]
-    public async Task Case006_Cleanup()
+    public async Task Case007_Cleanup()
     {
         var path = Path.Combine(UserDirectories.Config, "Nickvision.Desktop.Test.Keyring", "app.db");
         Assert.IsNotNull(_databaseService);

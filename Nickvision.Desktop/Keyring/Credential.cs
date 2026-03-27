@@ -3,7 +3,7 @@ using System;
 
 namespace Nickvision.Desktop.Keyring;
 
-public class Credential
+public class Credential : IEquatable<Credential>
 {
     public string Name { get; set; }
 
@@ -20,4 +20,10 @@ public class Credential
         Password = password;
         Url = url ?? Uri.Empty;
     }
+
+    public override bool Equals(object? obj) => obj is Credential credential && Equals(credential);
+
+    public bool Equals(Credential? other) => other is not null && Name == other.Name;
+
+    public override int GetHashCode() => Name.GetHashCode();
 }

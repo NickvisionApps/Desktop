@@ -7,6 +7,6 @@ public interface IKeyringService
 {
     Task<bool> AddCredentialAsync(Credential credential);
     Task<bool> DeleteCredentialAsync(Credential credential);
-    Task<IEnumerable<Credential>> GetAllCredentialAsync();
+    Task<IReadOnlyList<Credential>> GetAllCredentialAsync();
     Task<bool> UpdateCredentialAsync(Credential credential);
 }

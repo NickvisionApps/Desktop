@@ -6,6 +6,7 @@ using Nickvision.Desktop.System;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Keyring;
@@ -18,6 +19,7 @@ public class KeyringService : IKeyringService
     private readonly AppInfo _appInfo;
     private readonly IDatabaseService _databaseService;
     private readonly ISecretService _secretService;
+    private readonly List<Credential> _credentials;
     private bool _tableEnsured;
 
     static KeyringService()
@@ -31,6 +33,7 @@ public class KeyringService : IKeyringService
         _appInfo = appInfo;
         _databaseService = databaseService;
         _secretService = secretService;
+        _credentials = [];
         _tableEnsured = false;
     }
 
@@ -38,7 +41,7 @@ public class KeyringService : IKeyringService
     {
         await EnsureTableAsync();
         _logger.LogInformation($"Adding keyring credential ({credential.Name})...");
-        if (await _databaseService.ContainsInTableAsync(TableName, "name", credential.Name))
+        if (_credentials.Any(c => c.Name == credential.Name))
         {
             _logger.LogError($"Unable to add keyring credential ({credential.Name}) as it already exists.");
             return false;
@@ -52,6 +55,7 @@ public class KeyringService : IKeyringService
         });
         if (result)
         {
+            _credentials.Add(credential);
             _logger.LogInformation($"Added keyring credential ({credential.Name}) successfully.");
         }
         else
@@ -68,6 +72,7 @@ public class KeyringService : IKeyringService
         var result = await _databaseService.DeleteFromTableAsync(TableName, "name", credential.Name);
         if (result)
         {
+            _credentials.Remove(credential);
             _logger.LogInformation($"Removed keyring credential ({credential.Name}) successfully.");
         }
         else
@@ -77,23 +82,17 @@ public class KeyringService : IKeyringService
         return result;
     }
 
-    public async Task<IEnumerable<Credential>> GetAllCredentialAsync()
+    public async Task<IReadOnlyList<Credential>> GetAllCredentialAsync()
     {
         await EnsureTableAsync();
-        var credentials = new List<Credential>();
-        await using var command = await _databaseService.SelectAllFromTableAsync(TableName);
-        await using var reader = await command.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            credentials.Add(new Credential(reader.GetString(0), reader.GetString(2), reader.GetString(3), new Uri(reader.GetString(1))));
-        }
-        return credentials;
+        return _credentials;
     }
 
     public async Task<bool> UpdateCredentialAsync(Credential credential)
     {
         _logger.LogInformation($"Updating keyring credential ({credential.Name})...");
-        if (!await _databaseService.ContainsInTableAsync(TableName, "name", credential.Name))
+        var index = _credentials.IndexOf(credential);
+        if (index == -1)
         {
             _logger.LogError($"Unable to update keyring credential ({credential.Name}) as it does not exist.");
             return false;
@@ -106,6 +105,7 @@ public class KeyringService : IKeyringService
         });
         if (result)
         {
+            _credentials[index] = credential;
             _logger.LogInformation($"Updated keyring credential ({credential.Name}) successfully.");
         }
         else
@@ -123,6 +123,12 @@ public class KeyringService : IKeyringService
         }
         await _databaseService.EnsureTableExistsAsync(TableName, "name TEXT PRIMARY KEY, uri TEXT, username TEXT, password TEXT");
         _tableEnsured = true;
+        await using var commandAll = await _databaseService.SelectAllFromTableAsync(TableName);
+        await using var readerAll = await commandAll.ExecuteReaderAsync();
+        while (await readerAll.ReadAsync())
+        {
+            _credentials.Add(new Credential(readerAll.GetString(0), readerAll.GetString(2), readerAll.GetString(3), new Uri(readerAll.GetString(1))));
+        }
         var ring2Path = Path.Combine(UserDirectories.Config, "Nickvision", "Keyring", $"{_appInfo.Id}.ring2");
         if(File.Exists(ring2Path))
         {
