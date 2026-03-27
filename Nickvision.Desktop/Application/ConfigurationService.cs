@@ -296,6 +296,7 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
     {
         _transaction?.Commit();
         _transaction?.Dispose();
+        _transaction = null;
         EnsureTable();
     }
 
@@ -305,6 +306,7 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
         {
             await _transaction.CommitAsync();
             await _transaction.DisposeAsync().ConfigureAwait(false);
+            _transaction = null;
         }
         await EnsureTableAsync();
     }
@@ -435,7 +437,7 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
         Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, value, value.GetType()));
     }
 
-    public async void SetAsync<T>(string name, T value, JsonTypeInfo<T> info) where T : notnull
+    public async Task SetAsync<T>(string name, T value, JsonTypeInfo<T> info) where T : notnull
     {
         _logger.LogInformation($"Setting object configuration property ({name}) to value ({value})...");
         _cache[name] = value;
@@ -495,7 +497,7 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
             }
             return;
         }
-        await _databaseService.EnsureTableExistsAsync(TableName, "name TEXT, value TEXT");
+        await _databaseService.EnsureTableExistsAsync(TableName, "name TEXT PRIMARY KEY, value TEXT");
         _transaction = await _databaseService.CreateTransationAsync();
         _tableEnsured = true;
     }

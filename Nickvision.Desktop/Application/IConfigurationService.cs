@@ -29,5 +29,5 @@ public interface IConfigurationService
     Task SetAsync(string name, double value);
     Task SetAsync(string name, int value);
     Task SetAsync(string name, string value);
-    void SetAsync<T>(string name, T value, JsonTypeInfo<T> info) where T : notnull;
+    Task SetAsync<T>(string name, T value, JsonTypeInfo<T> info) where T : notnull;
 }
