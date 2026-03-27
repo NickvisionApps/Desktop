@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
 using Nickvision.Desktop.Keyring;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Application;
 
-public class ConfigurationService : IConfigurationService
+public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDisposable
 {
     private static readonly string TableName;
 
@@ -16,6 +17,7 @@ public class ConfigurationService : IConfigurationService
     private readonly IDatabaseService _databaseService;
     private readonly Dictionary<string, object> _cache;
     private bool _tableEnsured;
+    private SqliteTransaction? _transaction;
 
     public event EventHandler<ConfigurationSavedEventArgs>? Saved;
 
@@ -30,6 +32,25 @@ public class ConfigurationService : IConfigurationService
         _databaseService = databaseService;
         _cache = new Dictionary<string, object>();
         _tableEnsured = false;
+        _transaction = null;
+    }
+
+    ~ConfigurationService()
+    {
+        Dispose(false);
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await DisposeAsyncCore().ConfigureAwait(false);
+        Dispose(false);
+        GC.SuppressFinalize(this);
     }
 
     public bool GetBool(string name, bool defaultValue = false)
@@ -48,7 +69,7 @@ public class ConfigurationService : IConfigurationService
         {
             try
             {
-                _cache[name] = bool.Parse(reader.GetString(0));
+                _cache[name] = bool.Parse(reader.GetString(1));
             }
             catch { }
         }
@@ -72,7 +93,7 @@ public class ConfigurationService : IConfigurationService
         {
             try
             {
-                _cache[name] = bool.Parse(reader.GetString(0));
+                _cache[name] = bool.Parse(reader.GetString(1));
             }
             catch { }
         }
@@ -96,7 +117,7 @@ public class ConfigurationService : IConfigurationService
         {
             try
             {
-                _cache[name] = double.Parse(reader.GetString(0));
+                _cache[name] = double.Parse(reader.GetString(1));
             }
             catch { }
         }
@@ -120,7 +141,7 @@ public class ConfigurationService : IConfigurationService
         {
             try
             {
-                _cache[name] = double.Parse(reader.GetString(0));
+                _cache[name] = double.Parse(reader.GetString(1));
             }
             catch { }
         }
@@ -144,7 +165,7 @@ public class ConfigurationService : IConfigurationService
         {
             try
             {
-                _cache[name] = int.Parse(reader.GetString(0));
+                _cache[name] = int.Parse(reader.GetString(1));
             }
             catch { }
         }
@@ -168,7 +189,7 @@ public class ConfigurationService : IConfigurationService
         {
             try
             {
-                _cache[name] = int.Parse(reader.GetString(0));
+                _cache[name] = int.Parse(reader.GetString(1));
             }
             catch { }
         }
@@ -192,7 +213,7 @@ public class ConfigurationService : IConfigurationService
         {
             try
             {
-                _cache[name] = JsonSerializer.Deserialize(reader.GetString(0), info)!;
+                _cache[name] = JsonSerializer.Deserialize(reader.GetString(1), info)!;
             }
             catch { }
         }
@@ -216,7 +237,7 @@ public class ConfigurationService : IConfigurationService
         {
             try
             {
-                _cache[name] = JsonSerializer.Deserialize(reader.GetString(0), info)!;
+                _cache[name] = JsonSerializer.Deserialize(reader.GetString(1), info)!;
             }
             catch { }
         }
@@ -240,7 +261,7 @@ public class ConfigurationService : IConfigurationService
         {
             try
             {
-                _cache[name] = reader.GetString(0);
+                _cache[name] = reader.GetString(1);
             }
             catch { }
         }
@@ -264,12 +285,29 @@ public class ConfigurationService : IConfigurationService
         {
             try
             {
-                _cache[name] = reader.GetString(0);
+                _cache[name] = reader.GetString(1);
             }
             catch { }
         }
         _logger.LogInformation($"Value ({_cache[name]}) found for configuration property ({name}) in database.");
         return (string)_cache[name];
+    }
+
+    public void Save()
+    {
+        _transaction?.Commit();
+        _transaction?.Dispose();
+        EnsureTable();
+    }
+
+    public async Task SaveAsync()
+    {
+        if(_transaction is not null)
+        {
+            await _transaction.CommitAsync();
+            await _transaction.DisposeAsync().ConfigureAwait(false);
+        }
+        await EnsureTableAsync();
     }
 
     public void Set(string name, bool value)
@@ -412,13 +450,39 @@ public class ConfigurationService : IConfigurationService
         Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, value, value.GetType()));
     }
 
+    protected virtual async ValueTask DisposeAsyncCore()
+    {
+        if (_transaction is not null)
+        {
+            await _transaction.CommitAsync();
+            await _transaction.DisposeAsync().ConfigureAwait(false);
+        }
+        _transaction = null;
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!disposing)
+        {
+            return;
+        }
+        _transaction?.Commit();
+        _transaction?.Dispose();
+        _transaction = null;
+    }
+
     private void EnsureTable()
     {
         if (_tableEnsured)
         {
+            if(_transaction is null)
+            {
+                _transaction = _databaseService.CreateTransation();
+            }
             return;
         }
         _databaseService.EnsureTableExists(TableName, "name TEXT PRIMARY KEY, value TEXT");
+        _transaction = _databaseService.CreateTransation();
         _tableEnsured = true;
     }
 
@@ -426,9 +490,14 @@ public class ConfigurationService : IConfigurationService
     {
         if (_tableEnsured)
         {
+            if(_transaction is null)
+            {
+                _transaction = await _databaseService.CreateTransationAsync();
+            }
             return;
         }
         await _databaseService.EnsureTableExistsAsync(TableName, "name TEXT, value TEXT");
+        _transaction = await _databaseService.CreateTransationAsync();
         _tableEnsured = true;
     }
 }

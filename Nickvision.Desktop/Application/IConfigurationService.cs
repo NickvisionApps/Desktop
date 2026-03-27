@@ -18,6 +18,8 @@ public interface IConfigurationService
     Task<T> GetObjectAsync<T>(string name, T defaultValue, JsonTypeInfo<T> info) where T : notnull;
     string GetString(string name, string defaultValue = "");
     Task<string> GetStringAsync(string name, string defaultValue = "");
+    void Save();
+    Task SaveAsync();
     void Set(string name, bool value);
     void Set(string name, double value);
     void Set(string name, int value);

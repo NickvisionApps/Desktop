@@ -155,6 +155,28 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         GC.SuppressFinalize(this);
     }
 
+    public bool DropTable(string tableName)
+    {
+        EnsureDatabase();
+        _logger.LogInformation($"Dropping table ({tableName})...");
+        using var command = _connection!.CreateCommand();
+        command.CommandText = $"DROP TABLE IF EXISTS {tableName}";
+        command.ExecuteNonQuery();
+        _logger.LogInformation($"Dropped table ({tableName}).");
+        return true;
+    }
+
+    public async Task<bool> DropTableAsync(string tableName)
+    {
+        await EnsureDatabaseAsync();
+        _logger.LogInformation($"Dropping table ({tableName})...");
+        await using var command = _connection!.CreateCommand();
+        command.CommandText = $"DROP TABLE IF EXISTS {tableName}";
+        await command.ExecuteNonQueryAsync();
+        _logger.LogInformation($"Dropped table ({tableName}).");
+        return true;
+    }
+
     public bool EnsureTableExists(string tableName, string layout)
     {
         EnsureDatabase();

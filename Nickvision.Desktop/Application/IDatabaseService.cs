@@ -15,6 +15,8 @@ public interface IDatabaseService
     Task<SqliteTransaction> CreateTransationAsync();
     bool DeleteFromTable(string tableName, string columnName, string matchingValue);
     Task<bool> DeleteFromTableAsync(string tableName, string columnName, string matchingValue);
+    bool DropTable(string tableName);
+    Task<bool> DropTableAsync(string tableName);
     bool EnsureTableExists(string tableName, string layout);
     Task<bool> EnsureTableExistsAsync(string tableName, string layout);
     bool InsertIntoTable(string tableName, Dictionary<string, object> data);
