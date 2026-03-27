@@ -1,10 +1,13 @@
-﻿using System.Text.Json.Serialization.Metadata;
+﻿using System;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Application;
 
 public interface IConfigurationService
 {
+    event EventHandler<ConfigurationSavedEventArgs>? Saved;
+
     bool GetBool(string name, bool defaultValue = false);
     Task<bool> GetBoolAsync(string name, bool defaultValue = false);
     double GetDouble(string name, double defaultValue = 0.0);
