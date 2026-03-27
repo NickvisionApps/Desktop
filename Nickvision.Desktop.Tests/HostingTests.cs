@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nickvision.Desktop.Application;
-using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.Globalization;
 using Nickvision.Desktop.Helpers;
 using Nickvision.Desktop.Keyring;
@@ -44,7 +43,8 @@ public sealed class HostingTests
         Assert.IsNotNull(host);
         Assert.IsNotNull(host.Services.GetRequiredService<AppInfo>());
         Assert.IsNotNull(host.Services.GetRequiredService<IArgumentsService>());
-        Assert.IsNotNull(host.Services.GetRequiredService<IJsonFileService>());
+        Assert.IsNotNull(host.Services.GetRequiredService<IConfigurationService>());
+        Assert.IsNotNull(host.Services.GetRequiredService<IDatabaseService>());
         Assert.IsNotNull(host.Services.GetRequiredService<IKeyringService>());
         Assert.IsNotNull(host.Services.GetRequiredService<INotificationService>());
         Assert.IsNotNull(host.Services.GetRequiredService<IPowerService>());

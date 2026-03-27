@@ -37,8 +37,8 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         EnsureDatabase();
         _logger.LogInformation($"Checking if {tableName} contains value in column ({columnName})...");
         using var command = _connection!.CreateCommand();
-        command.CommandText = $"SELECT COUNT(*) FROM {tableName} WHERE {columnName} = $param";
-        command.Parameters.AddWithValue("$param", matchingValue);
+        command.CommandText = $"SELECT COUNT(*) FROM {tableName} WHERE {columnName} = $matchingValueParam";
+        command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
         using var reader = command.ExecuteReader();
         var result = false;
         while (reader.Read())
@@ -65,8 +65,8 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         await EnsureDatabaseAsync();
         _logger.LogInformation($"Checking if {tableName} contains value in column ({columnName})...");
         await using var command = _connection!.CreateCommand();
-        command.CommandText = $"SELECT COUNT(*) FROM {tableName} WHERE {columnName} = $param";
-        command.Parameters.AddWithValue("$param", matchingValue);
+        command.CommandText = $"SELECT COUNT(*) FROM {tableName} WHERE {columnName} = $matchingValueParam";
+        command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
         await using var reader = await command.ExecuteReaderAsync();
         var result = false;
         while (await reader.ReadAsync())
@@ -107,8 +107,8 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         EnsureDatabase();
         _logger.LogInformation($"Deleting row from {tableName}...");
         using var command = _connection!.CreateCommand();
-        command.CommandText = $"DELETE FROM {tableName} WHERE {columnName} = $param";
-        command.Parameters.AddWithValue("$param", matchingValue);
+        command.CommandText = $"DELETE FROM {tableName} WHERE {columnName} = $matchingValueParam";
+        command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
         var result = command.ExecuteNonQuery() > 0;
         if (result)
         {
@@ -127,8 +127,8 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         await EnsureDatabaseAsync();
         _logger.LogInformation($"Deleting row from {tableName}...");
         await using var command = _connection!.CreateCommand();
-        command.CommandText = $"DELETE FROM {tableName} WHERE {columnName} = $param";
-        command.Parameters.AddWithValue("$param", matchingValue);
+        command.CommandText = $"DELETE FROM {tableName} WHERE {columnName} = $matchingValueParam";
+        command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
         var result = await command.ExecuteNonQueryAsync() > 0;
         if (result)
         {
@@ -292,8 +292,8 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         EnsureDatabase();
         _logger.LogInformation($"Selecting data from table {tableName} with matching column ({columnName})...");
         var command = _connection!.CreateCommand();
-        command.CommandText = $"SELECT * FROM {tableName} WHERE {columnName} = $param";
-        command.Parameters.AddWithValue("$param", matchingValue);
+        command.CommandText = $"SELECT * FROM {tableName} WHERE {columnName} = $matchingValueParam";
+        command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
         _logger.LogInformation($"Selected data from table {tableName} with matching column ({columnName}).");
         return command;
     }
@@ -303,8 +303,8 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         await EnsureDatabaseAsync();
         _logger.LogInformation($"Selecting data from table {tableName} with matching column ({columnName})...");
         var command = _connection!.CreateCommand();
-        command.CommandText = $"SELECT * FROM {tableName} WHERE {columnName} = $param";
-        command.Parameters.AddWithValue("$param", matchingValue);
+        command.CommandText = $"SELECT * FROM {tableName} WHERE {columnName} = $matchingValueParam";
+        command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
         _logger.LogInformation($"Selected data from table {tableName} with matching column ({columnName}).");
         return command;
     }
@@ -334,7 +334,8 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         EnsureDatabase();
         _logger.LogInformation($"Updating data in {tableName}...");
         using var command = _connection!.CreateCommand();
-        command.CommandText = $"UPDATE {tableName} SET {string.Join(", ", newData.Keys.Select(k => $"{k} = ${k}"))}";
+        command.CommandText = $"UPDATE {tableName} SET {string.Join(", ", newData.Keys.Select(k => $"{k} = ${k}"))} WHERE {columnName} = $matchingValueParam";
+        command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
         foreach (var pair in newData)
         {
             command.Parameters.AddWithValue($"${pair.Key}", pair.Value);
@@ -356,7 +357,8 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         await EnsureDatabaseAsync();
         _logger.LogInformation($"Updating data in {tableName}...");
         await using var command = _connection!.CreateCommand();
-        command.CommandText = $"UPDATE {tableName} SET {string.Join(", ", newData.Keys.Select(k => $"{k} = ${k}"))}";
+        command.CommandText = $"UPDATE {tableName} SET {string.Join(", ", newData.Keys.Select(k => $"{k} = ${k}"))} WHERE {columnName} = $matchingValueParam";
+        command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
         foreach (var pair in newData)
         {
             command.Parameters.AddWithValue($"${pair.Key}", pair.Value);

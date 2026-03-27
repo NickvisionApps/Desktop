@@ -1,6 +1,5 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
-using Nickvision.Desktop.Keyring;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -13,7 +12,7 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
 {
     private static readonly string TableName;
 
-    private readonly ILogger<KeyringService> _logger;
+    private readonly ILogger<ConfigurationService> _logger;
     private readonly IDatabaseService _databaseService;
     private readonly Dictionary<string, object> _cache;
     private bool _tableEnsured;
@@ -26,7 +25,7 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
         TableName = "configuration";
     }
 
-    public ConfigurationService(ILogger<KeyringService> logger, IDatabaseService databaseService)
+    public ConfigurationService(ILogger<ConfigurationService> logger, IDatabaseService databaseService)
     {
         _logger = logger;
         _databaseService = databaseService;
@@ -302,7 +301,7 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
 
     public async Task SaveAsync()
     {
-        if(_transaction is not null)
+        if (_transaction is not null)
         {
             await _transaction.CommitAsync();
             await _transaction.DisposeAsync().ConfigureAwait(false);
@@ -475,7 +474,7 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
     {
         if (_tableEnsured)
         {
-            if(_transaction is null)
+            if (_transaction is null)
             {
                 _transaction = _databaseService.CreateTransation();
             }
@@ -490,7 +489,7 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
     {
         if (_tableEnsured)
         {
-            if(_transaction is null)
+            if (_transaction is null)
             {
                 _transaction = await _databaseService.CreateTransationAsync();
             }
