@@ -173,7 +173,38 @@ public class ConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task Case011_Cleanup()
+    public async Task Case011_ImportFromJsonFileAsync()
+    {
+        Assert.IsNotNull(_configurationService);
+        var path = Path.GetTempFileName();
+        await File.WriteAllTextAsync(path, """
+        {
+          "importBool": false,
+          "importInt": 123,
+          "importString": "hello",
+          "importObject": {
+            "Test": "fromImport"
+          }
+        }
+        """);
+        try
+        {
+            var imported = await _configurationService.ImportFromJsonFileAsync(path);
+            Assert.AreEqual(4, imported);
+            Assert.AreEqual(false, await _configurationService.GetBoolAsync("importBool", true));
+            Assert.AreEqual(123, await _configurationService.GetIntAsync("importInt", 0));
+            Assert.AreEqual("hello", await _configurationService.GetStringAsync("importString", ""));
+            var importedObject = await _configurationService.GetObjectAsync("importObject", new TestObj("default"), TestJsonContext.Default.TestObj);
+            Assert.AreEqual("fromImport", importedObject.Test);
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [TestMethod]
+    public async Task Case012_Cleanup()
     {
         var path = Path.Combine(UserDirectories.Config, "Nickvision.Desktop.Test.Config", "app.db");
         Assert.IsNotNull(_databaseService);

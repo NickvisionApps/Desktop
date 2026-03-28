@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
@@ -329,6 +330,26 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
         }
         _logger.LogInformation($"Value ({_cache[name]}) found for configuration property ({name}) in database.");
         return (string)_cache[name];
+    }
+
+    public async Task<int> ImportFromJsonFileAsync(string path)
+    {
+        if (!File.Exists(path))
+        {
+            return -1;
+        }
+        _logger.LogInformation($"Importing configuration properties from JSON file ({path})...");
+        using var json = JsonDocument.Parse(await File.ReadAllTextAsync(path));
+        var imported = 0;
+        foreach (var property in json.RootElement.EnumerateObject())
+        {
+            await SetAsync(property.Name, property.Value.GetRawText().Trim('"'));
+            _logger.LogInformation($"Found and imported configuration property ({property.Name}) in JSON file ({path}).");
+            imported++;
+        }
+        await SaveAsync();
+        _logger.LogInformation($"Imported {imported} configuration properties from JSON file ({path}).");
+        return imported;
     }
 
     public void Save()
