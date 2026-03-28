@@ -130,11 +130,11 @@ public class KeyringService : IKeyringService
             _credentials.Add(new Credential(readerAll.GetString(0), readerAll.GetString(2), readerAll.GetString(3), new Uri(readerAll.GetString(1))));
         }
         var ring2Path = Path.Combine(UserDirectories.Config, "Nickvision", "Keyring", $"{_appInfo.Id}.ring2");
-        if(File.Exists(ring2Path))
+        if (File.Exists(ring2Path))
         {
             _logger.LogInformation($"Found old keyring ring2 file ({ring2Path}), migrating credentials...");
             var secret = await _secretService.GetAsync(_appInfo.Id);
-            if(secret is null)
+            if (secret is null)
             {
                 _logger.LogError($"Unable to migrate old keyring ring2 file ({ring2Path}) as no secret were found for the app.");
                 File.Delete(ring2Path);
