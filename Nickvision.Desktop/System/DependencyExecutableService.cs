@@ -3,9 +3,11 @@ using Nickvision.Desktop.Application;
 using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.Network;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.System;
@@ -95,6 +97,28 @@ public abstract class DependencyExecutableService : IDependencyExecutableService
             }
         }
         return res;
+    }
+
+    public virtual async Task<ProcessResult> ExecuteAsync(IReadOnlyList<string> arguments, CancellationToken cancellationToken = default)
+    {
+        using var proc = new Process()
+        {
+            EnableRaisingEvents = true,
+            StartInfo = new ProcessStartInfo(ExecutablePath, arguments)
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            }
+        };
+        proc.Start();
+        var outputTask = proc.StandardOutput.ReadToEndAsync(cancellationToken);
+        var errorTask = proc.StandardError.ReadToEndAsync(cancellationToken);
+        await proc.WaitForExitAsync(cancellationToken);
+        var output = await outputTask;
+        var error = await errorTask;
+        return new ProcessResult(proc.ExitCode, output, error);
     }
 
     public virtual async Task<AppVersion?> GetExecutableVersionAsync(string versionArgument = "--version")
