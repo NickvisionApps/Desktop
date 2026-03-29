@@ -242,7 +242,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public bool InsertIntoTable(string tableName, Dictionary<string, object> data)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Insering data into {tableName}...");
+        _logger.LogInformation($"Inserting data into {tableName}...");
         using var command = _connection!.CreateCommand();
         command.CommandText = $"INSERT INTO {tableName} ({string.Join(", ", data.Keys)}) VALUES ({string.Join(", ", data.Keys.Select(k => $"${k}"))})";
         foreach (var pair in data)
@@ -264,7 +264,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public async Task<bool> InsertIntoTableAsync(string tableName, Dictionary<string, object> data)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Insering data into {tableName}...");
+        _logger.LogInformation($"Inserting data into {tableName}...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = $"INSERT INTO {tableName} ({string.Join(", ", data.Keys)}) VALUES ({string.Join(", ", data.Keys.Select(k => $"${k}"))})";
         foreach (var pair in data)
@@ -308,7 +308,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public async Task<bool> ReplaceIntoTableAsync(string tableName, Dictionary<string, object> data)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Insering data into {tableName}...");
+        _logger.LogInformation($"Inserting data into {tableName}...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = $"INSERT OR REPLACE INTO {tableName} ({string.Join(", ", data.Keys)}) VALUES ({string.Join(", ", data.Keys.Select(k => $"${k}"))})";
         foreach (var pair in data)
