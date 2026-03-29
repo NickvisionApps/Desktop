@@ -46,7 +46,7 @@ public class KeyringService : IKeyringService
             _logger.LogError($"Unable to add keyring credential ({credential.Name}) as it already exists.");
             return false;
         }
-        var result = _databaseService.InsertIntoTable(TableName, new Dictionary<string, object>()
+        var result = await _databaseService.InsertIntoTableAsync(TableName, new Dictionary<string, object>()
         {
             { "name", credential.Name },
             { "uri", credential.Url.ToString() },
@@ -90,6 +90,7 @@ public class KeyringService : IKeyringService
 
     public async Task<bool> UpdateCredentialAsync(Credential credential)
     {
+        await EnsureTableAsync();
         _logger.LogInformation($"Updating keyring credential ({credential.Name})...");
         var index = _credentials.IndexOf(credential);
         if (index == -1)

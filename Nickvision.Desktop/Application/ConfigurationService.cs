@@ -336,14 +336,22 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
     {
         if (!File.Exists(path))
         {
-            return -1;
+            _logger.LogError($"Failed to import configuration properties from JSON file ({path}) because it does not exist.");
+            return 0;
         }
         _logger.LogInformation($"Importing configuration properties from JSON file ({path})...");
         using var json = JsonDocument.Parse(await File.ReadAllTextAsync(path));
         var imported = 0;
         foreach (var property in json.RootElement.EnumerateObject())
         {
-            await SetAsync(property.Name, property.Value.GetRawText().Trim('"'));
+            if (property.Value.ValueKind == JsonValueKind.String)
+            {
+                await SetAsync(property.Name, property.Value.GetString()!);
+            }
+            else
+            {
+                await SetAsync(property.Name, property.Value.GetRawText());
+            }
             _logger.LogInformation($"Found and imported configuration property ({property.Name}) in JSON file ({path}).");
             imported++;
         }
