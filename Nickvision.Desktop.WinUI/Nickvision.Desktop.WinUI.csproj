@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	
 	<PropertyGroup>
-		<TargetFrameworks>net9.0-windows10.0.19041.0;net10.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFrameworks>net10.0-windows10.0.19041.0</TargetFrameworks>
 		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>disable</ImplicitUsings>
@@ -12,7 +12,7 @@
 		<UseWinUI>true</UseWinUI>
 		<WinUISDKReferences>false</WinUISDKReferences>
 		<PackageId>Nickvision.Desktop.WinUI</PackageId>
-		<Version>2026.3.7</Version>
+		<Version>2026.4.0</Version>
 		<Company>Nickvision</Company>
 		<Authors>Nickvision</Authors>
 		<Description>A set of controls and helpers for WinUI based Nickvision apps.</Description>
@@ -33,7 +33,7 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7705" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260317003" />
-		<PackageReference Include="Nickvision.Desktop" Version="2026.3.10" />
+		<PackageReference Include="Nickvision.Desktop" Version="2026.4.0" />
 	</ItemGroup>
 	
 	<ItemGroup>
