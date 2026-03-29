@@ -9,24 +9,30 @@ public interface IDatabaseService
 {
     event EventHandler<PasswordRequiredEventArgs>? PasswordRequired;
 
-    bool ContainsInTable(string tableName, string columnName, string matchingValue);
-    Task<bool> ContainsInTableAsync(string tableName, string columnName, string matchingValue);
+    int CountInTable(string tableName);
+    Task<int> CountInTableAsync(string tableName);
+    bool ContainsInTable<T>(string tableName, string columnName, T matchingValue);
+    Task<bool> ContainsInTableAsync<T>(string tableName, string columnName, T matchingValue);
     SqliteTransaction CreateTransation();
     Task<SqliteTransaction> CreateTransationAsync();
-    bool DeleteFromTable(string tableName, string columnName, string matchingValue);
-    Task<bool> DeleteFromTableAsync(string tableName, string columnName, string matchingValue);
+    bool DeleteFromTable<T>(string tableName, string columnName, T matchingValue);
+    Task<bool> DeleteFromTableAsync<T>(string tableName, string columnName, T matchingValue);
     bool DropTable(string tableName);
     Task<bool> DropTableAsync(string tableName);
     bool EnsureTableExists(string tableName, string layout);
     Task<bool> EnsureTableExistsAsync(string tableName, string layout);
+    int ExecuteNonQuery(string sql, Dictionary<string, object>? parameters = null);
+    Task<int> ExecuteNonQueryAsync(string sql, Dictionary<string, object>? parameters = null);
     bool InsertIntoTable(string tableName, Dictionary<string, object> data);
     Task<bool> InsertIntoTableAsync(string tableName, Dictionary<string, object> data);
     bool ReplaceIntoTable(string tableName, Dictionary<string, object> data);
     Task<bool> ReplaceIntoTableAsync(string tableName, Dictionary<string, object> data);
-    SqliteCommand SelectFromTable(string tableName, string columnName, string matchingValue);
-    Task<SqliteCommand> SelectFromTableAsync(string tableName, string columnName, string matchingValue);
+    SqliteCommand SelectFromTable<T>(string tableName, string columnName, T matchingValue);
+    Task<SqliteCommand> SelectFromTableAsync<T>(string tableName, string columnName, T matchingValue);
     SqliteCommand SelectAllFromTable(string tableName);
     Task<SqliteCommand> SelectAllFromTableAsync(string tableName);
-    bool UpdateInTable(string tableName, string columnName, string matchingValue, Dictionary<string, object> newData);
-    Task<bool> UpdateInTableAsync(string tableName, string columnName, string matchingValue, Dictionary<string, object> newData);
+    bool TableExists(string tableName);
+    Task<bool> TableExistsAsync(string tableName);
+    bool UpdateInTable<T>(string tableName, string columnName, T matchingValue, Dictionary<string, object> newData);
+    Task<bool> UpdateInTableAsync<T>(string tableName, string columnName, T matchingValue, Dictionary<string, object> newData);
 }

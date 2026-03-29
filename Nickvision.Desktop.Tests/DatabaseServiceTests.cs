@@ -25,6 +25,8 @@ public class DatabaseServiceTests
     {
         Assert.IsNotNull(_databaseService);
         Assert.IsTrue(_databaseService.EnsureTableExists("test_table", "id TEXT PRIMARY KEY, name TEXT, age INTEGER"));
+        Assert.IsTrue(_databaseService.TableExists("test_table"));
+        Assert.IsFalse(_databaseService.TableExists("missing_table"));
         using var transaction = _databaseService.CreateTransation();
         Assert.IsNotNull(transaction);
         transaction.Commit();
@@ -92,6 +94,8 @@ public class DatabaseServiceTests
         Assert.IsNotNull(_databaseService);
         const string asyncTable = "test_table_async";
         Assert.IsTrue(await _databaseService.EnsureTableExistsAsync(asyncTable, "id TEXT PRIMARY KEY, name TEXT, age INTEGER"));
+        Assert.IsTrue(await _databaseService.TableExistsAsync(asyncTable));
+        Assert.IsFalse(await _databaseService.TableExistsAsync("missing_table_async"));
         await using (var transaction = await _databaseService.CreateTransationAsync())
         {
             Assert.IsNotNull(transaction);
@@ -147,7 +151,77 @@ public class DatabaseServiceTests
     }
 
     [TestMethod]
-    public async Task Case006_Cleanup()
+    public void Case006_CountAndExecuteNonQuery()
+    {
+        Assert.IsNotNull(_databaseService);
+        Assert.IsTrue(_databaseService.EnsureTableExists("test_count", "id TEXT PRIMARY KEY, val TEXT"));
+        Assert.AreEqual(1, _databaseService.ExecuteNonQuery("INSERT INTO test_count (id, val) VALUES ($id, $val)", new Dictionary<string, object>()
+        {
+            { "id", "c1" },
+            { "val", "v1" }
+        }));
+        Assert.AreEqual(1, _databaseService.CountInTable("test_count"));
+        Assert.IsTrue(_databaseService.DropTable("test_count"));
+    }
+
+    [TestMethod]
+    public void Case007_TypedContainsInTable()
+    {
+        Assert.IsNotNull(_databaseService);
+        Assert.IsTrue(_databaseService.EnsureTableExists("test_typed", "id TEXT PRIMARY KEY, age INTEGER, enabled INTEGER, name TEXT"));
+        Assert.IsTrue(_databaseService.InsertIntoTable("test_typed", new Dictionary<string, object>()
+        {
+            { "id", "typed1" },
+            { "age", 55 },
+            { "enabled", true },
+            { "name", "typed-name" }
+        }));
+        Assert.IsTrue(_databaseService.ContainsInTable("test_typed", "age", 55));
+        Assert.IsFalse(_databaseService.ContainsInTable("test_typed", "age", 56));
+        Assert.IsTrue(_databaseService.ContainsInTable("test_typed", "enabled", true));
+        Assert.IsFalse(_databaseService.ContainsInTable("test_typed", "enabled", false));
+        Assert.IsTrue(_databaseService.ContainsInTable("test_typed", "name", "typed-name"));
+        Assert.IsFalse(_databaseService.ContainsInTable("test_typed", "name", "typed-missing"));
+        Assert.IsTrue(_databaseService.DropTable("test_typed"));
+    }
+
+    [TestMethod]
+    public async Task Case008_CountAndExecuteNonQueryAsync()
+    {
+        Assert.IsNotNull(_databaseService);
+        Assert.IsTrue(await _databaseService.EnsureTableExistsAsync("test_count_async", "id TEXT PRIMARY KEY, val TEXT"));
+        Assert.AreEqual(1, await _databaseService.ExecuteNonQueryAsync("INSERT INTO test_count_async (id, val) VALUES ($id, $val)", new Dictionary<string, object>()
+        {
+            { "id", "ac1" },
+            { "val", "av1" }
+        }));
+        Assert.AreEqual(1, await _databaseService.CountInTableAsync("test_count_async"));
+        Assert.IsTrue(await _databaseService.DropTableAsync("test_count_async"));
+    }
+
+    [TestMethod]
+    public async Task Case009_TypedContainsInTableAsync()
+    {
+        Assert.IsNotNull(_databaseService);
+        Assert.IsTrue(await _databaseService.EnsureTableExistsAsync("test_typed_async", "id TEXT PRIMARY KEY, age INTEGER, enabled INTEGER, name TEXT"));
+        Assert.IsTrue(await _databaseService.InsertIntoTableAsync("test_typed_async", new Dictionary<string, object>()
+        {
+            { "id", "typedA" },
+            { "age", 77 },
+            { "enabled", false },
+            { "name", "typed-async-name" }
+        }));
+        Assert.IsTrue(await _databaseService.ContainsInTableAsync("test_typed_async", "age", 77));
+        Assert.IsFalse(await _databaseService.ContainsInTableAsync("test_typed_async", "age", 78));
+        Assert.IsTrue(await _databaseService.ContainsInTableAsync("test_typed_async", "enabled", false));
+        Assert.IsFalse(await _databaseService.ContainsInTableAsync("test_typed_async", "enabled", true));
+        Assert.IsTrue(await _databaseService.ContainsInTableAsync("test_typed_async", "name", "typed-async-name"));
+        Assert.IsFalse(await _databaseService.ContainsInTableAsync("test_typed_async", "name", "typed-async-missing"));
+        Assert.IsTrue(await _databaseService.DropTableAsync("test_typed_async"));
+    }
+
+    [TestMethod]
+    public async Task Case010_Cleanup()
     {
         var path = Path.Combine(UserDirectories.Config, "Nickvision.Desktop.Test.Database", "app.db");
         Assert.IsNotNull(_databaseService);
