@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.Filesystem;
+using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.Notifications;
 using System.Threading.Tasks;
 

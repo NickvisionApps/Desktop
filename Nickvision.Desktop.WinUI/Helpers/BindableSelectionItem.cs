@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.Application;
+using Nickvision.Desktop.Application;
 using System.ComponentModel;
 using WinRT;
 

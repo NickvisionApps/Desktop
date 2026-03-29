@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.Application;
+using Nickvision.Desktop.Application;
 
 namespace Nickvision.Desktop.GNOME.Helpers;
 

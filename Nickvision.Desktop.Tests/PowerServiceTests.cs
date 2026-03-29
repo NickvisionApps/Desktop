@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.System;
+using Nickvision.Desktop.System;
 using Nickvision.Desktop.Tests.Mocks;
 using System.Threading.Tasks;
 

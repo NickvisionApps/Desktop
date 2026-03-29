@@ -4,9 +4,6 @@ using System.Security.Cryptography;
 
 namespace Nickvision.Desktop.Keyring;
 
-/// <summary>
-/// A class for generating random passwords.
-/// </summary>
 public class PasswordGenerator
 {
     private static readonly List<char> NumericChars;
@@ -14,14 +11,8 @@ public class PasswordGenerator
     private static readonly List<char> LowerChars;
     private static readonly List<char> SpecialChars;
 
-    /// <summary>
-    /// The content type flags to include when generating a password.
-    /// </summary>
     public PasswordContent ContentFlags { get; set; }
 
-    /// <summary>
-    /// Constructs a static PasswordGenerator.
-    /// </summary>
     static PasswordGenerator()
     {
         NumericChars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -30,21 +21,11 @@ public class PasswordGenerator
         SpecialChars = ['!', '#', '$', '%', '&', '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'];
     }
 
-    /// <summary>
-    /// Constructs a PasswordGenerator.
-    /// </summary>
-    /// <param name="contentFlags">The content type flags to include when generating a password</param>
     public PasswordGenerator(PasswordContent contentFlags = PasswordContent.All)
     {
         ContentFlags = contentFlags;
     }
 
-    /// <summary>
-    /// Generates a random password.
-    /// </summary>
-    /// <param name="length">The length of the password to generate</param>
-    /// <returns>The new generated password</returns>
-    /// <exception cref="InvalidOperationException">Thrown if random generation fails</exception>
     public string Next(int length = 16)
     {
         var password = string.Empty;

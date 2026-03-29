@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json.Serialization;
 
 namespace Nickvision.Desktop.Application;
@@ -7,6 +7,12 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
 {
     public Version BaseVersion { get; init; }
     public string PreviewLabel { get; init; }
+
+    public AppVersion()
+    {
+        BaseVersion = new Version(0, 0, 0);
+        PreviewLabel = string.Empty;
+    }
 
     public AppVersion(string version)
     {

@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.Hosting;
+using Nickvision.Desktop.Hosting;
 
 namespace Nickvision.Desktop.GNOME.Hosting;
 

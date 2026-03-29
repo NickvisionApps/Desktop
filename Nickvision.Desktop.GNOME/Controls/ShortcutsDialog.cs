@@ -1,4 +1,4 @@
-﻿using Nickvision.Desktop.GNOME.Helpers;
+using Nickvision.Desktop.GNOME.Helpers;
 
 namespace Nickvision.Desktop.GNOME.Controls;
 

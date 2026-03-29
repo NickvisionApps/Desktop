@@ -1,4 +1,4 @@
-﻿namespace Nickvision.Desktop.Helpers;
+namespace Nickvision.Desktop.Helpers;
 
 internal class GitHubReleaseAsset
 {

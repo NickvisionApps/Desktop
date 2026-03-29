@@ -13,27 +13,15 @@ using Windows.Win32.Security.Credentials;
 
 namespace Nickvision.Desktop.System;
 
-/// <summary>
-/// A service for managing secrets using the system's secret storage.
-/// </summary>
 public class SecretService : ISecretService
 {
     private readonly ILogger<SecretService> _logger;
 
-    /// <summary>
-    /// Constructs a SecretService.
-    /// </summary>
-    /// <param name="logger">Logger for the service</param>
     public SecretService(ILogger<SecretService> logger)
     {
         _logger = logger;
     }
 
-    /// <summary>
-    /// Adds a secret asynchronously.
-    /// </summary>
-    /// <param name="secret">The secret to add</param>
-    /// <returns>True if the secret was added successfully, else false</returns>
     public async Task<bool> AddAsync(Secret secret)
     {
         _logger.LogInformation($"Adding system secret ({secret.Name}).");
@@ -151,11 +139,6 @@ public class SecretService : ISecretService
         }
     }
 
-    /// <summary>
-    /// Creates a secret asynchronously with a random but secure value.
-    /// </summary>
-    /// <param name="name">The name of the secret to create</param>
-    /// <returns>The created secret if successful, else null</returns>
     public async Task<Secret?> CreateAsync(string name)
     {
         _logger.LogInformation($"Creating system secret ({name}).");
@@ -177,11 +160,6 @@ public class SecretService : ISecretService
         return result;
     }
 
-    /// <summary>
-    /// Deletes a secret asynchronously.
-    /// </summary>
-    /// <param name="name">The name of the secret to delete</param>
-    /// <returns>True if the secret was deleted successfully, else false</returns>
     public async Task<bool> DeleteAsync(string name)
     {
         _logger.LogInformation($"Deleting system secret ({name}).");
@@ -266,11 +244,6 @@ public class SecretService : ISecretService
         }
     }
 
-    /// <summary>
-    /// Gets a secret asynchronously.
-    /// </summary>
-    /// <param name="name">The name of the secret to find</param>
-    /// <returns>The secret if found, else null</returns>
     public async Task<Secret?> GetAsync(string name)
     {
         _logger.LogInformation($"Getting system secret ({name}).");
@@ -376,11 +349,6 @@ public class SecretService : ISecretService
         }
     }
 
-    /// <summary>
-    /// Updates a secret asynchronously.
-    /// </summary>
-    /// <param name="secret">The secret to update</param>
-    /// <returns>True if the secret was updated successfully, else false</returns>
     public async Task<bool> UpdateAsync(Secret secret)
     {
         _logger.LogInformation($"Updating system secret ({secret.Name}).");

@@ -6,10 +6,6 @@ using Tmds.DBus.Protocol;
 
 namespace Nickvision.Desktop.FreeDesktop;
 
-/// <summary>
-/// Internal proxy for the org.freedesktop.secrets D-Bus interface (freedesktop Secret Service).
-/// Uses "plain" (unencrypted) session transport, which is safe for local D-Bus sockets.
-/// </summary>
 internal sealed class SecretServiceProxy : IDisposable
 {
     private const string SecretsBus = "org.freedesktop.secrets";
@@ -30,10 +26,6 @@ internal sealed class SecretServiceProxy : IDisposable
         _disposed = false;
     }
 
-    /// <summary>
-    /// Connects to the D-Bus session bus and opens a plain encryption session with the secrets service.
-    /// </summary>
-    /// <returns>A connected SecretServiceProxy, or null if the secrets service is unavailable</returns>
     internal static async Task<SecretServiceProxy?> ConnectAsync()
     {
         var sessionAddress = DBusAddress.Session;
@@ -52,9 +44,6 @@ internal sealed class SecretServiceProxy : IDisposable
         return new SecretServiceProxy(connection, sessionPath);
     }
 
-    /// <summary>
-    /// Gets the object path of the default collection, or null/slash if it does not exist.
-    /// </summary>
     internal async Task<string?> GetDefaultCollectionPathAsync()
     {
         MessageBuffer buffer;
@@ -71,12 +60,6 @@ internal sealed class SecretServiceProxy : IDisposable
         }, null);
     }
 
-    /// <summary>
-    /// Creates a collection with the given label and alias.
-    /// </summary>
-    /// <param name="label">The human-readable label of the collection</param>
-    /// <param name="alias">The alias (e.g. "default")</param>
-    /// <returns>The object path of the created collection, or null on failure</returns>
     internal async Task<string?> CreateCollectionAsync(string label, string alias)
     {
         MessageBuffer buffer;
@@ -100,11 +83,6 @@ internal sealed class SecretServiceProxy : IDisposable
         }, null);
     }
 
-    /// <summary>
-    /// Unlocks the given object (collection or item path), prompting the user if required.
-    /// </summary>
-    /// <param name="objectPath">The D-Bus object path to unlock</param>
-    /// <returns>True if unlocked successfully, false if the user dismissed the prompt</returns>
     internal async Task<bool> UnlockAsync(string objectPath)
     {
         MessageBuffer buffer;
@@ -129,11 +107,6 @@ internal sealed class SecretServiceProxy : IDisposable
         return await PromptAsync(promptPath);
     }
 
-    /// <summary>
-    /// Invokes a Secret Service prompt and waits for the user to complete or dismiss it.
-    /// </summary>
-    /// <param name="promptPath">The D-Bus object path of the prompt</param>
-    /// <returns>True if the user completed the prompt, false if dismissed</returns>
     private async Task<bool> PromptAsync(string promptPath)
     {
         var tcs = new TaskCompletionSource<bool>();
@@ -167,15 +140,6 @@ internal sealed class SecretServiceProxy : IDisposable
         return await tcs.Task;
     }
 
-    /// <summary>
-    /// Creates an item in the specified collection.
-    /// </summary>
-    /// <param name="collectionPath">The collection object path</param>
-    /// <param name="label">The label for the new item</param>
-    /// <param name="attributes">Lookup attributes for the item</param>
-    /// <param name="value">The secret value</param>
-    /// <param name="replace">Whether to replace an existing item with the same attributes</param>
-    /// <returns>The object path of the created item, or null on failure</returns>
     internal async Task<string?> CreateItemAsync(string collectionPath, string label, Dictionary<string, string> attributes, string value, bool replace = false)
     {
         var attrDict = new Dict<string, string>();
@@ -210,11 +174,6 @@ internal sealed class SecretServiceProxy : IDisposable
         }, null);
     }
 
-    /// <summary>
-    /// Searches for items across all collections that match the given attributes.
-    /// </summary>
-    /// <param name="attributes">Attributes to match</param>
-    /// <returns>A tuple of unlocked and locked item object paths</returns>
     internal async Task<(string[] Unlocked, string[] Locked)> SearchItemsAsync(Dictionary<string, string> attributes)
     {
         MessageBuffer buffer;
@@ -251,11 +210,6 @@ internal sealed class SecretServiceProxy : IDisposable
         }, null);
     }
 
-    /// <summary>
-    /// Gets the secret value of the specified item.
-    /// </summary>
-    /// <param name="itemPath">The item object path</param>
-    /// <returns>The secret value as a string, or null on failure</returns>
     internal async Task<string?> GetSecretAsync(string itemPath)
     {
         MessageBuffer buffer;
@@ -280,7 +234,7 @@ internal sealed class SecretServiceProxy : IDisposable
         }
         catch (DBusErrorReplyException e)
         {
-            if(e.ErrorName == "org.freedesktop.Secret.Error.IsLocked")
+            if (e.ErrorName == "org.freedesktop.Secret.Error.IsLocked")
             {
                 return null;
             }
@@ -288,11 +242,6 @@ internal sealed class SecretServiceProxy : IDisposable
         return null;
     }
 
-    /// <summary>
-    /// Sets the secret value of the specified item.
-    /// </summary>
-    /// <param name="itemPath">The item object path</param>
-    /// <param name="value">The new secret value</param>
     internal async Task SetSecretAsync(string itemPath, string value)
     {
         MessageBuffer buffer;
@@ -309,10 +258,6 @@ internal sealed class SecretServiceProxy : IDisposable
         await _connection.CallMethodAsync(buffer);
     }
 
-    /// <summary>
-    /// Deletes the specified item.
-    /// </summary>
-    /// <param name="itemPath">The item object path</param>
     internal async Task DeleteItemAsync(string itemPath)
     {
         MessageBuffer buffer;
@@ -329,9 +274,6 @@ internal sealed class SecretServiceProxy : IDisposable
         }, null);
     }
 
-    /// <summary>
-    /// Opens a "plain" encryption session with the secrets service.
-    /// </summary>
     private static async Task<string> OpenSessionAsync(DBusConnection connection)
     {
         MessageBuffer buffer;
@@ -351,9 +293,6 @@ internal sealed class SecretServiceProxy : IDisposable
         }, null);
     }
 
-    /// <summary>
-    /// Disposes the SecretServiceProxy and its underlying D-Bus connection.
-    /// </summary>
     public void Dispose()
     {
         if (!_disposed)

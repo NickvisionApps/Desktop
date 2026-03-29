@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls;
 using Nickvision.Desktop.Application;
 using System.Collections.Generic;
 using System.Linq;
