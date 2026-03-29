@@ -25,7 +25,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="GetText.NET" Version="10.0.1" />
-		<PackageReference Include="Markdig" Version="1.1.1" />
+		<PackageReference Include="Markdig" Version="1.1.2" />
 		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.5" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />

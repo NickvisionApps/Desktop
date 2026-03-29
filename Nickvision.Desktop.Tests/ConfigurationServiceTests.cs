@@ -12,6 +12,11 @@ public class TestObj
 {
     public string Test { get; set; }
 
+    public TestObj()
+    {
+        Test = "";
+    }
+
     public TestObj(string test)
     {
         Test = test;
@@ -41,25 +46,25 @@ public class ConfigurationServiceTests
     public async Task Case002_Get()
     {
         Assert.IsNotNull(_configurationService);
-        var val1 = _configurationService.GetBool("nonExistentBool", false);
+        var val1 = _configurationService.Get("nonExistentBool", false);
         Assert.AreEqual(false, val1);
-        var val2 = await _configurationService.GetBoolAsync("nonExistentBoolAsync", true);
+        var val2 = await _configurationService.GetAsync("nonExistentBoolAsync", true);
         Assert.AreEqual(true, val2);
-        var val3 = _configurationService.GetDouble("nonExistentDouble", 1.5);
+        var val3 = _configurationService.Get("nonExistentDouble", 1.5);
         Assert.AreEqual(1.5, val3);
-        var val4 = await _configurationService.GetDoubleAsync("nonExistentDoubleAsync", 2.5);
+        var val4 = await _configurationService.GetAsync("nonExistentDoubleAsync", 2.5);
         Assert.AreEqual(2.5, val4);
-        var val5 = _configurationService.GetInt("nonExistentInt", 42);
+        var val5 = _configurationService.Get("nonExistentInt", 42);
         Assert.AreEqual(42, val5);
-        var val6 = await _configurationService.GetIntAsync("nonExistentIntAsync", 84);
+        var val6 = await _configurationService.GetAsync("nonExistentIntAsync", 84);
         Assert.AreEqual(84, val6);
-        var val7 = _configurationService.GetString("nonExistentString", "default");
+        var val7 = _configurationService.Get("nonExistentString", "default");
         Assert.AreEqual("default", val7);
-        var val8 = await _configurationService.GetStringAsync("nonExistentStringAsync", "asyncDefault");
+        var val8 = await _configurationService.GetAsync("nonExistentStringAsync", "asyncDefault");
         Assert.AreEqual("asyncDefault", val8);
-        var val9 = _configurationService.GetObject("nonExistentObject", new TestObj("value"), TestJsonContext.Default.TestObj);
+        var val9 = _configurationService.Get("nonExistentObject", new TestObj("value"), TestJsonContext.Default.TestObj);
         Assert.AreEqual("value", val9.Test);
-        var val10 = await _configurationService.GetObjectAsync("nonExistentObjectAsync", new TestObj("asyncValue"), TestJsonContext.Default.TestObj);
+        var val10 = await _configurationService.GetAsync("nonExistentObjectAsync", new TestObj("asyncValue"), TestJsonContext.Default.TestObj);
         Assert.AreEqual("asyncValue", val10.Test);
     }
 
@@ -97,25 +102,25 @@ public class ConfigurationServiceTests
     public async Task Case006_Get()
     {
         Assert.IsNotNull(_configurationService);
-        var val1 = _configurationService.GetBool("nonExistentBool", false);
+        var val1 = _configurationService.Get("nonExistentBool", false);
         Assert.AreEqual(true, val1);
-        var val2 = await _configurationService.GetBoolAsync("nonExistentBoolAsync", true);
+        var val2 = await _configurationService.GetAsync("nonExistentBoolAsync", true);
         Assert.AreEqual(false, val2);
-        var val3 = _configurationService.GetDouble("nonExistentDouble", 1.5);
+        var val3 = _configurationService.Get("nonExistentDouble", 1.5);
         Assert.AreEqual(2.5, val3);
-        var val4 = await _configurationService.GetDoubleAsync("nonExistentDoubleAsync", 2.5);
+        var val4 = await _configurationService.GetAsync("nonExistentDoubleAsync", 2.5);
         Assert.AreEqual(1.5, val4);
-        var val5 = _configurationService.GetInt("nonExistentInt", 42);
+        var val5 = _configurationService.Get("nonExistentInt", 42);
         Assert.AreEqual(84, val5);
-        var val6 = await _configurationService.GetIntAsync("nonExistentIntAsync", 84);
+        var val6 = await _configurationService.GetAsync("nonExistentIntAsync", 84);
         Assert.AreEqual(42, val6);
-        var val7 = _configurationService.GetString("nonExistentString", "default");
+        var val7 = _configurationService.Get("nonExistentString", "default");
         Assert.AreEqual("default2", val7);
-        var val8 = await _configurationService.GetStringAsync("nonExistentStringAsync", "asyncDefault");
+        var val8 = await _configurationService.GetAsync("nonExistentStringAsync", "asyncDefault");
         Assert.AreEqual("asyncDefault2", val8);
-        var val9 = _configurationService.GetObject("nonExistentObject", new TestObj("value"), TestJsonContext.Default.TestObj);
+        var val9 = _configurationService.Get("nonExistentObject", new TestObj("value"), TestJsonContext.Default.TestObj);
         Assert.AreEqual("value2", val9.Test);
-        var val10 = await _configurationService.GetObjectAsync("nonExistentObjectAsync", new TestObj("asyncValue"), TestJsonContext.Default.TestObj);
+        var val10 = await _configurationService.GetAsync("nonExistentObjectAsync", new TestObj("asyncValue"), TestJsonContext.Default.TestObj);
         Assert.AreEqual("asyncValue2", val10.Test);
     }
 
@@ -143,25 +148,25 @@ public class ConfigurationServiceTests
     public async Task Case009_Get()
     {
         Assert.IsNotNull(_configurationService);
-        var val1 = _configurationService.GetBool("nonExistentBool", false);
+        var val1 = _configurationService.Get("nonExistentBool", false);
         Assert.AreEqual(true, val1);
-        var val2 = await _configurationService.GetBoolAsync("nonExistentBoolAsync", true);
+        var val2 = await _configurationService.GetAsync("nonExistentBoolAsync", true);
         Assert.AreEqual(false, val2);
-        var val3 = _configurationService.GetDouble("nonExistentDouble", 1.5);
+        var val3 = _configurationService.Get("nonExistentDouble", 1.5);
         Assert.AreEqual(2.5, val3);
-        var val4 = await _configurationService.GetDoubleAsync("nonExistentDoubleAsync", 2.5);
+        var val4 = await _configurationService.GetAsync("nonExistentDoubleAsync", 2.5);
         Assert.AreEqual(1.5, val4);
-        var val5 = _configurationService.GetInt("nonExistentInt", 42);
+        var val5 = _configurationService.Get("nonExistentInt", 42);
         Assert.AreEqual(84, val5);
-        var val6 = await _configurationService.GetIntAsync("nonExistentIntAsync", 84);
+        var val6 = await _configurationService.GetAsync("nonExistentIntAsync", 84);
         Assert.AreEqual(42, val6);
-        var val7 = _configurationService.GetString("nonExistentString", "default");
+        var val7 = _configurationService.Get("nonExistentString", "default");
         Assert.AreEqual("default2", val7);
-        var val8 = await _configurationService.GetStringAsync("nonExistentStringAsync", "asyncDefault");
+        var val8 = await _configurationService.GetAsync("nonExistentStringAsync", "asyncDefault");
         Assert.AreEqual("asyncDefault2", val8);
-        var val9 = _configurationService.GetObject("nonExistentObject", new TestObj("value"), TestJsonContext.Default.TestObj);
+        var val9 = _configurationService.Get("nonExistentObject", new TestObj("value"), TestJsonContext.Default.TestObj);
         Assert.AreEqual("value2", val9.Test);
-        var val10 = await _configurationService.GetObjectAsync("nonExistentObjectAsync", new TestObj("asyncValue"), TestJsonContext.Default.TestObj);
+        var val10 = await _configurationService.GetAsync("nonExistentObjectAsync", new TestObj("asyncValue"), TestJsonContext.Default.TestObj);
         Assert.AreEqual("asyncValue2", val10.Test);
     }
 
@@ -191,10 +196,10 @@ public class ConfigurationServiceTests
         {
             var imported = await _configurationService.ImportFromJsonFileAsync(path);
             Assert.AreEqual(4, imported);
-            Assert.AreEqual(false, await _configurationService.GetBoolAsync("importBool", true));
-            Assert.AreEqual(123, await _configurationService.GetIntAsync("importInt", 0));
-            Assert.AreEqual("hello", await _configurationService.GetStringAsync("importString", ""));
-            var importedObject = await _configurationService.GetObjectAsync("importObject", new TestObj("default"), TestJsonContext.Default.TestObj);
+            Assert.AreEqual(false, await _configurationService.GetAsync("importBool", true));
+            Assert.AreEqual(123, await _configurationService.GetAsync("importInt", 0));
+            Assert.AreEqual("hello", await _configurationService.GetAsync("importString", ""));
+            var importedObject = await _configurationService.GetAsync("importObject", new TestObj("default"), TestJsonContext.Default.TestObj);
             Assert.AreEqual("fromImport", importedObject.Test);
         }
         finally

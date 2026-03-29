@@ -25,7 +25,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="GirCore.Adw-1" Version="0.7.0" />
-		<PackageReference Include="Nickvision.Desktop" Version="2026.3.9" />
+		<PackageReference Include="Nickvision.Desktop" Version="2026.3.10" />
 	</ItemGroup>
 
 	<ItemGroup>
