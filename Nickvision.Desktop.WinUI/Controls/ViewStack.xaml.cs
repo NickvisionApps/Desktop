@@ -9,10 +9,13 @@ public sealed partial class ViewStack : UserControl
     public static readonly DependencyProperty PagesProperty = DependencyProperty.Register(nameof(Pages), typeof(ObservableCollection<UIElement>), typeof(ViewStack), new PropertyMetadata(null));
     public static readonly DependencyProperty SelectedIndexProperty = DependencyProperty.Register(nameof(SelectedIndex), typeof(int), typeof(ViewStack), new PropertyMetadata(0));
 
+    public int PreviousSelectedIndex { get; private set; }
+
     public ViewStack()
     {
         InitializeComponent();
         Pages = new ObservableCollection<UIElement>();
+        PreviousSelectedIndex = 0;
     }
 
     public ObservableCollection<UIElement> Pages
@@ -35,6 +38,7 @@ public sealed partial class ViewStack : UserControl
 
         set
         {
+            PreviousSelectedIndex = SelectedIndex;
             SetValue(SelectedIndexProperty, value);
             if (Pages.Count > 0 && value >= 0 && value < Pages.Count)
             {
