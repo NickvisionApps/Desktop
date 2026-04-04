@@ -32,6 +32,28 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         Dispose(false);
     }
 
+    public bool ClearTable(string tableName)
+    {
+        EnsureDatabase();
+        _logger.LogInformation($"Clearing table {tableName}...");
+        using var command = _connection!.CreateCommand();
+        command.CommandText = $"DELETE FROM {tableName}";
+        command.ExecuteNonQuery();
+        _logger.LogInformation($"Cleared table {tableName}.");
+        return true;
+    }
+
+    public async Task<bool> ClearTableAsync(string tableName)
+    {
+        await EnsureDatabaseAsync();
+        _logger.LogInformation($"Clearing table {tableName}...");
+        await using var command = _connection!.CreateCommand();
+        command.CommandText = $"DELETE FROM {tableName}";
+        await command.ExecuteNonQueryAsync();
+        _logger.LogInformation($"Cleared table {tableName}.");
+        return true;
+    }
+
     public int CountInTable(string tableName)
     {
         EnsureDatabase();

@@ -24,6 +24,8 @@ public abstract class DependencyExecutableService : IDependencyExecutableService
 
     public AppVersion BundledVersion { get; }
 
+    public virtual AppVersion InstalledVersion => _configurationService.Get($"installed_{_executableName}_appversion", BundledVersion, AppVersionJsonContext.Default.AppVersion);
+
     public DependencyExecutableService(ILogger logger, string executableName, AppVersion bundledVersion, string assetName, IConfigurationService configurationService, IUpdaterService updaterService)
     {
         _logger = logger;
@@ -45,7 +47,7 @@ public abstract class DependencyExecutableService : IDependencyExecutableService
             }
             _logger.LogInformation($"Searching for {_executableName} executable...");
             var configKey = $"installed_{_executableName}_appversion";
-            if (_configurationService.Get(configKey, new AppVersion(), AppVersionJsonContext.Default.AppVersion) > BundledVersion)
+            if (_configurationService.Get(configKey, BundledVersion, AppVersionJsonContext.Default.AppVersion) > BundledVersion)
             {
                 var local = Environment.FindDependency(_executableName, DependencySearchOption.Local);
                 if (!string.IsNullOrEmpty(local) && File.Exists(local))

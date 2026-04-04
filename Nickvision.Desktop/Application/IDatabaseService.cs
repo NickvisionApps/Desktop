@@ -9,6 +9,8 @@ public interface IDatabaseService
 {
     event EventHandler<PasswordRequiredEventArgs>? PasswordRequired;
 
+    bool ClearTable(string tableName);
+    Task<bool> ClearTableAsync(string tableName);
     int CountInTable(string tableName);
     Task<int> CountInTableAsync(string tableName);
     bool ContainsInTable<T>(string tableName, string columnName, T matchingValue);

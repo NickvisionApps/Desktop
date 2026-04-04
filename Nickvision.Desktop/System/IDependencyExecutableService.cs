@@ -11,6 +11,7 @@ public interface IDependencyExecutableService
 {
     AppVersion BundledVersion { get; }
     string ExecutablePath { get; }
+    AppVersion InstalledVersion { get; }
 
     Task<bool> DownloadUpdateAsync(AppVersion version, IProgress<DownloadProgress>? progress = null);
     Task<ProcessResult> ExecuteAsync(IReadOnlyList<string> arguments, CancellationToken cancellationToken = default);
