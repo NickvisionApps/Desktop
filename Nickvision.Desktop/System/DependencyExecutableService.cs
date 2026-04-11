@@ -80,7 +80,7 @@ public abstract class DependencyExecutableService : IDependencyExecutableService
             await _configurationService.SetAsync(configKey, version, AppVersionJsonContext.Default.AppVersion);
             if (isZip)
             {
-                await ZipFile.ExtractToDirectoryAsync(downloadPath, UserDirectories.LocalData);
+                await ZipFile.ExtractToDirectoryAsync(downloadPath, UserDirectories.LocalData, true);
                 File.Delete(downloadPath);
             }
             if (!OperatingSystem.IsWindows())
