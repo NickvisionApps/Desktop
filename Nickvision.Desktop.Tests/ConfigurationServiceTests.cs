@@ -8,6 +8,13 @@ using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Tests;
 
+public enum TestEnum
+{
+    One = 1,
+    Two = 2,
+    Three = 3
+}
+
 public class TestObj
 {
     public string Test { get; set; }
@@ -66,13 +73,18 @@ public class ConfigurationServiceTests
         Assert.AreEqual("value", val9.Test);
         var val10 = await _configurationService.GetAsync("nonExistentObjectAsync", new TestObj("asyncValue"), TestJsonContext.Default.TestObj);
         Assert.AreEqual("asyncValue", val10.Test);
+        var val11 = _configurationService.Get("nonExistentEnum", TestEnum.One);
+        Assert.AreEqual(TestEnum.One, val11);
+        var val12 = await _configurationService.GetAsync("nonExistentEnumAsync", TestEnum.Two);
+        Assert.AreEqual(TestEnum.Two, val12);
     }
 
     [TestMethod]
-    public void Case003_Save()
+    public void Case003_CreateTransation()
     {
         Assert.IsNotNull(_configurationService);
-        _configurationService.Save();
+        using var transaction = _configurationService.CreateTransation();
+        transaction.Commit();
     }
 
     [TestMethod]
@@ -89,13 +101,16 @@ public class ConfigurationServiceTests
         await _configurationService.SetAsync("nonExistentStringAsync", "asyncDefault2");
         _configurationService.Set("nonExistentObject", new TestObj("value2"), TestJsonContext.Default.TestObj);
         await _configurationService.SetAsync("nonExistentObjectAsync", new TestObj("asyncValue2"), TestJsonContext.Default.TestObj);
+        _configurationService.Set("nonExistentEnum", TestEnum.Three);
+        await _configurationService.SetAsync("nonExistentEnumAsync", TestEnum.One);
     }
 
     [TestMethod]
-    public async Task Case005_Save()
+    public async Task Case005_CreateTransationAsync()
     {
         Assert.IsNotNull(_configurationService);
-        await _configurationService.SaveAsync();
+        await using var transaction = await _configurationService.CreateTransationAsync();
+        await transaction.CommitAsync();
     }
 
     [TestMethod]
@@ -122,6 +137,10 @@ public class ConfigurationServiceTests
         Assert.AreEqual("value2", val9.Test);
         var val10 = await _configurationService.GetAsync("nonExistentObjectAsync", new TestObj("asyncValue"), TestJsonContext.Default.TestObj);
         Assert.AreEqual("asyncValue2", val10.Test);
+        var val11 = _configurationService.Get("nonExistentEnum", TestEnum.One);
+        Assert.AreEqual(TestEnum.Three, val11);
+        var val12 = await _configurationService.GetAsync("nonExistentEnumAsync", TestEnum.Two);
+        Assert.AreEqual(TestEnum.One, val12);
     }
 
     [TestMethod]
@@ -129,7 +148,6 @@ public class ConfigurationServiceTests
     {
         Assert.IsNotNull(_databaseService);
         Assert.IsNotNull(_configurationService);
-        await _configurationService.DisposeAsync();
         await _databaseService.DisposeAsync();
         _databaseService = null;
         _configurationService = null;
@@ -168,13 +186,17 @@ public class ConfigurationServiceTests
         Assert.AreEqual("value2", val9.Test);
         var val10 = await _configurationService.GetAsync("nonExistentObjectAsync", new TestObj("asyncValue"), TestJsonContext.Default.TestObj);
         Assert.AreEqual("asyncValue2", val10.Test);
+        var val11 = _configurationService.Get("nonExistentEnum", TestEnum.One);
+        Assert.AreEqual(TestEnum.Three, val11);
+        var val12 = await _configurationService.GetAsync("nonExistentEnumAsync", TestEnum.Two);
+        Assert.AreEqual(TestEnum.One, val12);
     }
 
     [TestMethod]
     public async Task Case010_GetAll()
     {
         Assert.IsNotNull(_configurationService);
-        Assert.AreEqual(10, (await _configurationService.GetAllRawAsync()).Count);
+        Assert.AreEqual(12, (await _configurationService.GetAllRawAsync()).Count);
     }
 
     [TestMethod]
@@ -214,7 +236,6 @@ public class ConfigurationServiceTests
         var path = Path.Combine(UserDirectories.Config, "Nickvision.Desktop.Test.Config", "app.db");
         Assert.IsNotNull(_databaseService);
         Assert.IsNotNull(_configurationService);
-        await _configurationService.DisposeAsync();
         await _databaseService.DisposeAsync();
         File.Delete(path);
         Directory.Delete(Path.GetDirectoryName(path)!);

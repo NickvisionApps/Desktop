@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Nickvision.Desktop.Application;
 
-public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDisposable
+public class ConfigurationService : IConfigurationService
 {
     private static readonly string TableName;
 
@@ -17,7 +17,6 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
     private readonly IDatabaseService _databaseService;
     private readonly Dictionary<string, object> _cache;
     private bool _tableEnsured;
-    private SqliteTransaction? _transaction;
 
     public event EventHandler<ConfigurationSavedEventArgs>? Saved;
 
@@ -32,25 +31,18 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
         _databaseService = databaseService;
         _cache = new Dictionary<string, object>();
         _tableEnsured = false;
-        _transaction = null;
     }
 
-    ~ConfigurationService()
+    public SqliteTransaction CreateTransation()
     {
-        Dispose(false);
+        EnsureTable();
+        return _databaseService.CreateTransation();
     }
 
-    public void Dispose()
+    public async Task<SqliteTransaction> CreateTransationAsync()
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await DisposeAsyncCore().ConfigureAwait(false);
-        Dispose(false);
-        GC.SuppressFinalize(this);
+        await EnsureTableAsync();
+        return await _databaseService.CreateTransationAsync();
     }
 
     public Dictionary<string, string> GetAllRaw()
@@ -114,7 +106,8 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
                     var type when type == typeof(double) => double.Parse(reader.GetString(1)),
                     var type when type == typeof(int) => int.Parse(reader.GetString(1)),
                     var type when type == typeof(string) => reader.GetString(1),
-                    _ => throw new NotSupportedException($"Generic Get<{typeof(T).Name}> is only supported for bool, double, int, and string. Use Get<T>(..., JsonTypeInfo<T>) for object values.")
+                    var type when type.IsEnum => Enum.ToObject(typeof(T), int.Parse(reader.GetString(1))),
+                    _ => throw new NotSupportedException($"Generic Get<{typeof(T).Name}> is only supported for bool, double, int, string, and enum types. Use Get<T>(..., JsonTypeInfo<T>) for object values.")
                 };
             }
             catch { }
@@ -169,7 +162,8 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
                     var type when type == typeof(double) => double.Parse(reader.GetString(1)),
                     var type when type == typeof(int) => int.Parse(reader.GetString(1)),
                     var type when type == typeof(string) => reader.GetString(1),
-                    _ => throw new NotSupportedException($"Generic GetAsync<{typeof(T).Name}> is only supported for bool, double, int, and string. Use GetAsync<T>(..., JsonTypeInfo<T>) for object values.")
+                    var type when type.IsEnum => Enum.ToObject(typeof(T), int.Parse(reader.GetString(1))),
+                    _ => throw new NotSupportedException($"Generic GetAsync<{typeof(T).Name}> is only supported for bool, double, int, string, and enum types. Use GetAsync<T>(..., JsonTypeInfo<T>) for object values.")
                 };
             }
             catch { }
@@ -211,6 +205,7 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
         }
         _logger.LogInformation($"Importing configuration properties from JSON file ({path})...");
         using var json = JsonDocument.Parse(await File.ReadAllTextAsync(path));
+        await using var transaction = await CreateTransationAsync();
         var imported = 0;
         foreach (var property in json.RootElement.EnumerateObject())
         {
@@ -225,26 +220,9 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
             _logger.LogInformation($"Found and imported configuration property ({property.Name}) in JSON file ({path}).");
             imported++;
         }
-        await SaveAsync();
+        await transaction.CommitAsync();
         _logger.LogInformation($"Imported {imported} configuration properties from JSON file ({path}).");
         return imported;
-    }
-
-    public void Save()
-    {
-        _transaction?.Commit();
-        _transaction?.Dispose();
-        _transaction = null;
-    }
-
-    public async Task SaveAsync()
-    {
-        if (_transaction is not null)
-        {
-            await _transaction.CommitAsync();
-            await _transaction.DisposeAsync().ConfigureAwait(false);
-            _transaction = null;
-        }
     }
 
     public void Set<T>(string name, T value) where T : notnull
@@ -293,8 +271,18 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
                 _logger.LogInformation($"Value ({s}) set for configuration property ({name}).");
                 Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, s, s.GetType()));
                 return;
+            case T t when typeof(T).IsEnum:
+                _logger.LogInformation($"Setting integer configuration property ({name}) to value ({Convert.ToInt32(t)})...");
+                _databaseService.ReplaceIntoTable(TableName, new Dictionary<string, object>()
+                {
+                    { "name", name },
+                    { "value", Convert.ToInt32(t).ToString() }
+                });
+                _logger.LogInformation($"Value ({Convert.ToInt32(t)}) set for configuration property ({name}).");
+                Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, t, t.GetType()));
+                return;
             default:
-                throw new NotSupportedException($"Generic Set<{typeof(T).Name}> is only supported for bool, double, int, and string. Use Set<T>(..., JsonTypeInfo<T>) for object values.");
+                throw new NotSupportedException($"Generic Set<{typeof(T).Name}> is only supported for bool, double, int, string, and enum types. Use Set<T>(..., JsonTypeInfo<T>) for object values.");
         }
     }
 
@@ -344,8 +332,18 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
                 _logger.LogInformation($"Value ({s}) set for configuration property ({name}).");
                 Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, s, s.GetType()));
                 return;
+            case T t when typeof(T).IsEnum:
+                _logger.LogInformation($"Setting integer configuration property ({name}) to value ({Convert.ToInt32(t)})...");
+                await _databaseService.ReplaceIntoTableAsync(TableName, new Dictionary<string, object>()
+                {
+                    { "name", name },
+                    { "value", Convert.ToInt32(t).ToString() }
+                });
+                _logger.LogInformation($"Value ({Convert.ToInt32(t)}) set for configuration property ({name}).");
+                Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, t, t.GetType()));
+                return;
             default:
-                throw new NotSupportedException($"Generic SetAsync<{typeof(T).Name}> is only supported for bool, double, int, and string. Use SetAsync<T>(..., JsonTypeInfo<T>) for object values.");
+                throw new NotSupportedException($"Generic SetAsync<{typeof(T).Name}> is only supported for bool, double, int, string, and enum types. Use SetAsync<T>(..., JsonTypeInfo<T>) for object values.");
         }
     }
 
@@ -377,39 +375,13 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
         Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, value, value.GetType()));
     }
 
-    protected virtual async ValueTask DisposeAsyncCore()
-    {
-        if (_transaction is not null)
-        {
-            await _transaction.CommitAsync();
-            await _transaction.DisposeAsync().ConfigureAwait(false);
-        }
-        _transaction = null;
-    }
-
-    private void Dispose(bool disposing)
-    {
-        if (!disposing)
-        {
-            return;
-        }
-        _transaction?.Commit();
-        _transaction?.Dispose();
-        _transaction = null;
-    }
-
     private void EnsureTable()
     {
         if (_tableEnsured)
         {
-            if (_transaction is null)
-            {
-                _transaction = _databaseService.CreateTransation();
-            }
             return;
         }
         _databaseService.EnsureTableExists(TableName, "name TEXT PRIMARY KEY, value TEXT");
-        _transaction = _databaseService.CreateTransation();
         _tableEnsured = true;
     }
 
@@ -417,14 +389,9 @@ public class ConfigurationService : IAsyncDisposable, IConfigurationService, IDi
     {
         if (_tableEnsured)
         {
-            if (_transaction is null)
-            {
-                _transaction = await _databaseService.CreateTransationAsync();
-            }
             return;
         }
         await _databaseService.EnsureTableExistsAsync(TableName, "name TEXT PRIMARY KEY, value TEXT");
-        _transaction = await _databaseService.CreateTransationAsync();
         _tableEnsured = true;
     }
 }

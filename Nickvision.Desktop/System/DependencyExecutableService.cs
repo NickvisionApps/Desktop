@@ -59,7 +59,6 @@ public abstract class DependencyExecutableService : IDependencyExecutableService
                 else
                 {
                     _configurationService.Set(configKey, new AppVersion());
-                    _configurationService.Save();
                 }
             }
             field = Environment.FindDependency(_executableName, DependencySearchOption.Global);
