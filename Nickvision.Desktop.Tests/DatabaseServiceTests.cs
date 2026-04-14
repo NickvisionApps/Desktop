@@ -27,7 +27,7 @@ public class DatabaseServiceTests
         Assert.IsTrue(_databaseService.EnsureTableExists("test_table", "id TEXT PRIMARY KEY, name TEXT, age INTEGER"));
         Assert.IsTrue(_databaseService.TableExists("test_table"));
         Assert.IsFalse(_databaseService.TableExists("missing_table"));
-        using var transaction = _databaseService.CreateTransation();
+        using var transaction = _databaseService.CreateTransaction();
         Assert.IsNotNull(transaction);
         transaction.Commit();
     }
@@ -96,7 +96,7 @@ public class DatabaseServiceTests
         Assert.IsTrue(await _databaseService.EnsureTableExistsAsync(asyncTable, "id TEXT PRIMARY KEY, name TEXT, age INTEGER"));
         Assert.IsTrue(await _databaseService.TableExistsAsync(asyncTable));
         Assert.IsFalse(await _databaseService.TableExistsAsync("missing_table_async"));
-        await using (var transaction = await _databaseService.CreateTransationAsync())
+        await using (var transaction = await _databaseService.CreateTransactionAsync())
         {
             Assert.IsNotNull(transaction);
             await transaction.CommitAsync();

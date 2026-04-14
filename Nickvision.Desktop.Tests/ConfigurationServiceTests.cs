@@ -80,10 +80,10 @@ public class ConfigurationServiceTests
     }
 
     [TestMethod]
-    public void Case003_CreateTransation()
+    public void Case003_CreateTransaction()
     {
         Assert.IsNotNull(_configurationService);
-        using var transaction = _configurationService.CreateTransation();
+        using var transaction = _configurationService.CreateTransaction();
         transaction.Commit();
     }
 
@@ -106,10 +106,10 @@ public class ConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task Case005_CreateTransationAsync()
+    public async Task Case005_CreateTransactionAsync()
     {
         Assert.IsNotNull(_configurationService);
-        await using var transaction = await _configurationService.CreateTransationAsync();
+        await using var transaction = await _configurationService.CreateTransactionAsync();
         await transaction.CommitAsync();
     }
 

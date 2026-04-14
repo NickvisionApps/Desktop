@@ -15,8 +15,8 @@ public interface IDatabaseService
     Task<int> CountInTableAsync(string tableName);
     bool ContainsInTable<T>(string tableName, string columnName, T matchingValue);
     Task<bool> ContainsInTableAsync<T>(string tableName, string columnName, T matchingValue);
-    SqliteTransaction CreateTransation();
-    Task<SqliteTransaction> CreateTransationAsync();
+    SqliteTransaction CreateTransaction();
+    Task<SqliteTransaction> CreateTransactionAsync();
     bool DeleteFromTable<T>(string tableName, string columnName, T matchingValue);
     Task<bool> DeleteFromTableAsync<T>(string tableName, string columnName, T matchingValue);
     bool DropTable(string tableName);

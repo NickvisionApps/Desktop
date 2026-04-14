@@ -10,8 +10,8 @@ public interface IConfigurationService
 {
     event EventHandler<ConfigurationSavedEventArgs>? Saved;
 
-    SqliteTransaction CreateTransation();
-    Task<SqliteTransaction> CreateTransationAsync();
+    SqliteTransaction CreateTransaction();
+    Task<SqliteTransaction> CreateTransactionAsync();
     Dictionary<string, string> GetAllRaw();
     Task<Dictionary<string, string>> GetAllRawAsync();
     T Get<T>(string name, T defaultValue) where T : notnull;

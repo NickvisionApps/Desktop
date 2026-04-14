@@ -114,14 +114,14 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         return result;
     }
 
-    public SqliteTransaction CreateTransation()
+    public SqliteTransaction CreateTransaction()
     {
         EnsureDatabase();
         _logger.LogInformation("Created database transaction.");
         return _connection!.BeginTransaction();
     }
 
-    public async Task<SqliteTransaction> CreateTransationAsync()
+    public async Task<SqliteTransaction> CreateTransactionAsync()
     {
         await EnsureDatabaseAsync();
         _logger.LogInformation("Created database transaction.");

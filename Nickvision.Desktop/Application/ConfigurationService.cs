@@ -33,16 +33,16 @@ public class ConfigurationService : IConfigurationService
         _tableEnsured = false;
     }
 
-    public SqliteTransaction CreateTransation()
+    public SqliteTransaction CreateTransaction()
     {
         EnsureTable();
-        return _databaseService.CreateTransation();
+        return _databaseService.CreateTransaction();
     }
 
-    public async Task<SqliteTransaction> CreateTransationAsync()
+    public async Task<SqliteTransaction> CreateTransactionAsync()
     {
         await EnsureTableAsync();
-        return await _databaseService.CreateTransationAsync();
+        return await _databaseService.CreateTransactionAsync();
     }
 
     public Dictionary<string, string> GetAllRaw()
@@ -205,7 +205,7 @@ public class ConfigurationService : IConfigurationService
         }
         _logger.LogInformation($"Importing configuration properties from JSON file ({path})...");
         using var json = JsonDocument.Parse(await File.ReadAllTextAsync(path));
-        await using var transaction = await CreateTransationAsync();
+        await using var transaction = await CreateTransactionAsync();
         var imported = 0;
         foreach (var property in json.RootElement.EnumerateObject())
         {
