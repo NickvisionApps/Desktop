@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using Nickvision.Desktop.Application;
 using Nickvision.Desktop.Filesystem;
 using Nickvision.Desktop.Network;
@@ -53,14 +53,14 @@ public abstract class DependencyExecutableService : IDependencyExecutableService
             {
                 return field;
             }
-            _logger.LogInformation($"Searching for {_executableName} executable...");
+            _logger.LogDebug($"Searching for {_executableName} executable...");
             var configKey = $"installed_{_executableName}_appversion";
             if (_configurationService.Get(configKey, BundledVersion, AppVersionJsonContext.Default.AppVersion) > BundledVersion)
             {
                 var local = Environment.FindDependency(_executableName, DependencySearchOption.Local);
                 if (!string.IsNullOrEmpty(local) && File.Exists(local))
                 {
-                    _logger.LogInformation($"Found updated {_executableName} executable: {local}");
+                    _logger.LogDebug($"Found updated {_executableName} executable: {local}");
                     field = local;
                     return field;
                 }
@@ -70,7 +70,7 @@ public abstract class DependencyExecutableService : IDependencyExecutableService
                 }
             }
             field = Environment.FindDependency(_executableName, DependencySearchOption.Global);
-            _logger.LogInformation($"Found bundled {_executableName} executable: {field}");
+            _logger.LogDebug($"Found bundled {_executableName} executable: {field}");
             return field ?? _executableName;
         }
     }

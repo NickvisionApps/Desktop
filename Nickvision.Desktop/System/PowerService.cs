@@ -39,7 +39,7 @@ public class PowerService : IDisposable, IPowerService
 
     public async Task<bool> AllowSuspendAsync()
     {
-        _logger.LogInformation("Allowing system suspend...");
+        _logger.LogDebug("Allowing system suspend...");
         if (OperatingSystem.IsWindows())
         {
 #pragma warning disable CA1416
@@ -47,7 +47,7 @@ public class PowerService : IDisposable, IPowerService
 #pragma warning restore CA1416
             if (result)
             {
-                _logger.LogInformation("Allowed system suspend.");
+                _logger.LogDebug("Allowed system suspend.");
             }
             else
             {
@@ -64,7 +64,7 @@ public class PowerService : IDisposable, IPowerService
             }
             await ScreenSaverProxy.UnInhibitAsync(_dbus, _inhibitCookie);
             _inhibitCookie = 0;
-            _logger.LogInformation("Allowed system suspend.");
+            _logger.LogDebug("Allowed system suspend.");
             return true;
         }
         else if (OperatingSystem.IsMacOS())
@@ -77,7 +77,7 @@ public class PowerService : IDisposable, IPowerService
             _preventSuspendProcess.Kill();
             _preventSuspendProcess.Dispose();
             _preventSuspendProcess = null;
-            _logger.LogInformation("Allowed system suspend.");
+            _logger.LogDebug("Allowed system suspend.");
             return true;
         }
         else
@@ -89,7 +89,7 @@ public class PowerService : IDisposable, IPowerService
 
     public async Task<bool> PreventSuspendAsync()
     {
-        _logger.LogInformation("Preventing system suspend...");
+        _logger.LogDebug("Preventing system suspend...");
         if (OperatingSystem.IsWindows())
         {
 #pragma warning disable CA1416
@@ -97,7 +97,7 @@ public class PowerService : IDisposable, IPowerService
 #pragma warning restore CA1416
             if (result)
             {
-                _logger.LogInformation("Prevented system suspend.");
+                _logger.LogDebug("Prevented system suspend.");
             }
             else
             {
@@ -132,7 +132,7 @@ public class PowerService : IDisposable, IPowerService
                 _logger.LogError($"Failed to inhibit FreeDesktop ScreenSaver: {e}");
                 return false;
             }
-            _logger.LogInformation("Prevented system suspend.");
+            _logger.LogDebug("Prevented system suspend.");
             return true;
         }
         else if (OperatingSystem.IsMacOS())
@@ -158,7 +158,7 @@ public class PowerService : IDisposable, IPowerService
                 }
             };
             _preventSuspendProcess.Start();
-            _logger.LogInformation("Prevented system suspend.");
+            _logger.LogDebug("Prevented system suspend.");
             return true;
         }
         else

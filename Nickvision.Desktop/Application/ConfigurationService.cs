@@ -47,7 +47,7 @@ public class ConfigurationService : IConfigurationService
 
     public Dictionary<string, string> GetAllRaw()
     {
-        _logger.LogInformation("Getting all raw configuration properties...");
+        _logger.LogDebug("Getting all raw configuration properties...");
         var dict = new Dictionary<string, string>();
         EnsureTable();
         using var command = _databaseService.SelectAllFromTable(TableName);
@@ -60,13 +60,13 @@ public class ConfigurationService : IConfigurationService
             }
             catch { }
         }
-        _logger.LogInformation($"Found ({dict.Count}) raw configuration properties in database.");
+        _logger.LogDebug($"Found ({dict.Count}) raw configuration properties in database.");
         return dict;
     }
 
     public async Task<Dictionary<string, string>> GetAllRawAsync()
     {
-        _logger.LogInformation("Getting all raw configuration properties...");
+        _logger.LogDebug("Getting all raw configuration properties...");
         await EnsureTableAsync();
         var dict = new Dictionary<string, string>();
         await using var command = await _databaseService.SelectAllFromTableAsync(TableName);
@@ -76,20 +76,20 @@ public class ConfigurationService : IConfigurationService
             try
             {
                 dict[reader.GetString(0)] = reader.GetString(1);
-                _logger.LogInformation($"Found raw configuration property ({reader.GetString(0)}) in database with value ({reader.GetString(1)}).");
+                _logger.LogDebug($"Found raw configuration property ({reader.GetString(0)}) in database with value ({reader.GetString(1)}).");
             }
             catch { }
         }
-        _logger.LogInformation($"Found ({dict.Count}) raw configuration properties in database.");
+        _logger.LogDebug($"Found ({dict.Count}) raw configuration properties in database.");
         return dict;
     }
 
     public T Get<T>(string name, T defaultValue) where T : notnull
     {
-        _logger.LogInformation($"Getting configuration property ({name})...");
+        _logger.LogDebug($"Getting configuration property ({name})...");
         if (_cache.TryGetValue(name, out var value) && value is T t)
         {
-            _logger.LogInformation($"Value ({value}) found for configuration property ({name}) in cache.");
+            _logger.LogDebug($"Value ({value}) found for configuration property ({name}) in cache.");
             return t;
         }
         _cache[name] = defaultValue;
@@ -112,16 +112,16 @@ public class ConfigurationService : IConfigurationService
             }
             catch { }
         }
-        _logger.LogInformation($"Value ({_cache[name]}) found for configuration property ({name}) in database.");
+        _logger.LogDebug($"Value ({_cache[name]}) found for configuration property ({name}) in database.");
         return (T)_cache[name];
     }
 
     public T Get<T>(string name, T defaultValue, JsonTypeInfo<T> info) where T : notnull, new()
     {
-        _logger.LogInformation($"Getting object configuration property ({name})...");
+        _logger.LogDebug($"Getting object configuration property ({name})...");
         if (_cache.TryGetValue(name, out var value) && value is T t)
         {
-            _logger.LogInformation($"Value ({value}) found for configuration property ({name}) in cache.");
+            _logger.LogDebug($"Value ({value}) found for configuration property ({name}) in cache.");
             return t;
         }
         _cache[name] = defaultValue;
@@ -133,23 +133,23 @@ public class ConfigurationService : IConfigurationService
             try
             {
                 var obj = JsonSerializer.Deserialize(reader.GetString(1), info);
-                if(obj is not null)
+                if (obj is not null)
                 {
                     _cache[name] = obj;
                 }
             }
             catch { }
         }
-        _logger.LogInformation($"Value ({_cache[name]}) found for configuration property ({name}) in database.");
+        _logger.LogDebug($"Value ({_cache[name]}) found for configuration property ({name}) in database.");
         return (T)_cache[name];
     }
 
     public async Task<T> GetAsync<T>(string name, T defaultValue) where T : notnull
     {
-        _logger.LogInformation($"Getting configuration property ({name})...");
+        _logger.LogDebug($"Getting configuration property ({name})...");
         if (_cache.TryGetValue(name, out var value) && value is T t)
         {
-            _logger.LogInformation($"Value ({value}) found for configuration property ({name}) in cache.");
+            _logger.LogDebug($"Value ({value}) found for configuration property ({name}) in cache.");
             return t;
         }
         _cache[name] = defaultValue;
@@ -172,16 +172,16 @@ public class ConfigurationService : IConfigurationService
             }
             catch { }
         }
-        _logger.LogInformation($"Value ({_cache[name]}) found for configuration property ({name}) in database.");
+        _logger.LogDebug($"Value ({_cache[name]}) found for configuration property ({name}) in database.");
         return (T)_cache[name];
     }
 
     public async Task<T> GetAsync<T>(string name, T defaultValue, JsonTypeInfo<T> info) where T : notnull, new()
     {
-        _logger.LogInformation($"Getting object configuration property ({name})...");
+        _logger.LogDebug($"Getting object configuration property ({name})...");
         if (_cache.TryGetValue(name, out var value) && value is T t)
         {
-            _logger.LogInformation($"Value ({value}) found for configuration property ({name}) in cache.");
+            _logger.LogDebug($"Value ({value}) found for configuration property ({name}) in cache.");
             return t;
         }
         _cache[name] = defaultValue;
@@ -200,7 +200,7 @@ public class ConfigurationService : IConfigurationService
             }
             catch { }
         }
-        _logger.LogInformation($"Value ({_cache[name]}) found for configuration property ({name}) in database.");
+        _logger.LogDebug($"Value ({_cache[name]}) found for configuration property ({name}) in database.");
         return (T)_cache[name];
     }
 
@@ -211,7 +211,7 @@ public class ConfigurationService : IConfigurationService
             _logger.LogError($"Failed to import configuration properties from JSON file ({path}) because it does not exist.");
             return 0;
         }
-        _logger.LogInformation($"Importing configuration properties from JSON file ({path})...");
+        _logger.LogDebug($"Importing configuration properties from JSON file ({path})...");
         using var json = JsonDocument.Parse(await File.ReadAllTextAsync(path));
         await using var transaction = await CreateTransactionAsync();
         var imported = 0;
@@ -225,11 +225,11 @@ public class ConfigurationService : IConfigurationService
             {
                 await SetAsync(property.Name, property.Value.GetRawText());
             }
-            _logger.LogInformation($"Found and imported configuration property ({property.Name}) in JSON file ({path}).");
+            _logger.LogDebug($"Found and imported configuration property ({property.Name}) in JSON file ({path}).");
             imported++;
         }
         await transaction.CommitAsync();
-        _logger.LogInformation($"Imported {imported} configuration properties from JSON file ({path}).");
+        _logger.LogDebug($"Imported {imported} configuration properties from JSON file ({path}).");
         return imported;
     }
 
@@ -240,53 +240,53 @@ public class ConfigurationService : IConfigurationService
         switch (value)
         {
             case bool b:
-                _logger.LogInformation($"Setting boolean configuration property ({name}) to value ({b})...");
+                _logger.LogDebug($"Setting boolean configuration property ({name}) to value ({b})...");
                 _databaseService.ReplaceIntoTable(TableName, new Dictionary<string, object>()
                 {
                     { "name", name },
                     { "value", b.ToString() }
                 });
-                _logger.LogInformation($"Value ({b}) set for configuration property ({name}).");
+                _logger.LogDebug($"Value ({b}) set for configuration property ({name}).");
                 Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, b, b.GetType()));
                 return;
             case double d:
-                _logger.LogInformation($"Setting double configuration property ({name}) to value ({d})...");
+                _logger.LogDebug($"Setting double configuration property ({name}) to value ({d})...");
                 _databaseService.ReplaceIntoTable(TableName, new Dictionary<string, object>()
                 {
                     { "name", name },
                     { "value", d.ToString() }
                 });
-                _logger.LogInformation($"Value ({d}) set for configuration property ({name}).");
+                _logger.LogDebug($"Value ({d}) set for configuration property ({name}).");
                 Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, d, d.GetType()));
                 return;
             case int i:
-                _logger.LogInformation($"Setting integer configuration property ({name}) to value ({i})...");
+                _logger.LogDebug($"Setting integer configuration property ({name}) to value ({i})...");
                 _databaseService.ReplaceIntoTable(TableName, new Dictionary<string, object>()
                 {
                     { "name", name },
                     { "value", i.ToString() }
                 });
-                _logger.LogInformation($"Value ({i}) set for configuration property ({name}).");
+                _logger.LogDebug($"Value ({i}) set for configuration property ({name}).");
                 Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, i, i.GetType()));
                 return;
             case string s:
-                _logger.LogInformation($"Setting string configuration property ({name}) to value ({s})...");
+                _logger.LogDebug($"Setting string configuration property ({name}) to value ({s})...");
                 _databaseService.ReplaceIntoTable(TableName, new Dictionary<string, object>()
                 {
                     { "name", name },
                     { "value", s }
                 });
-                _logger.LogInformation($"Value ({s}) set for configuration property ({name}).");
+                _logger.LogDebug($"Value ({s}) set for configuration property ({name}).");
                 Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, s, s.GetType()));
                 return;
             case T t when typeof(T).IsEnum:
-                _logger.LogInformation($"Setting integer configuration property ({name}) to value ({Convert.ToInt32(t)})...");
+                _logger.LogDebug($"Setting integer configuration property ({name}) to value ({Convert.ToInt32(t)})...");
                 _databaseService.ReplaceIntoTable(TableName, new Dictionary<string, object>()
                 {
                     { "name", name },
                     { "value", Convert.ToInt32(t).ToString() }
                 });
-                _logger.LogInformation($"Value ({Convert.ToInt32(t)}) set for configuration property ({name}).");
+                _logger.LogDebug($"Value ({Convert.ToInt32(t)}) set for configuration property ({name}).");
                 Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, t, t.GetType()));
                 return;
             default:
@@ -301,53 +301,53 @@ public class ConfigurationService : IConfigurationService
         switch (value)
         {
             case bool b:
-                _logger.LogInformation($"Setting boolean configuration property ({name}) to value ({b})...");
+                _logger.LogDebug($"Setting boolean configuration property ({name}) to value ({b})...");
                 await _databaseService.ReplaceIntoTableAsync(TableName, new Dictionary<string, object>()
                 {
                     { "name", name },
                     { "value", b.ToString() }
                 });
-                _logger.LogInformation($"Value ({b}) set for configuration property ({name}).");
+                _logger.LogDebug($"Value ({b}) set for configuration property ({name}).");
                 Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, b, b.GetType()));
                 return;
             case double d:
-                _logger.LogInformation($"Setting double configuration property ({name}) to value ({d})...");
+                _logger.LogDebug($"Setting double configuration property ({name}) to value ({d})...");
                 await _databaseService.ReplaceIntoTableAsync(TableName, new Dictionary<string, object>()
                 {
                     { "name", name },
                     { "value", d.ToString() }
                 });
-                _logger.LogInformation($"Value ({d}) set for configuration property ({name}).");
+                _logger.LogDebug($"Value ({d}) set for configuration property ({name}).");
                 Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, d, d.GetType()));
                 return;
             case int i:
-                _logger.LogInformation($"Setting integer configuration property ({name}) to value ({i})...");
+                _logger.LogDebug($"Setting integer configuration property ({name}) to value ({i})...");
                 await _databaseService.ReplaceIntoTableAsync(TableName, new Dictionary<string, object>()
                 {
                     { "name", name },
                     { "value", i.ToString() }
                 });
-                _logger.LogInformation($"Value ({i}) set for configuration property ({name}).");
+                _logger.LogDebug($"Value ({i}) set for configuration property ({name}).");
                 Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, i, i.GetType()));
                 return;
             case string s:
-                _logger.LogInformation($"Setting string configuration property ({name}) to value ({s})...");
+                _logger.LogDebug($"Setting string configuration property ({name}) to value ({s})...");
                 await _databaseService.ReplaceIntoTableAsync(TableName, new Dictionary<string, object>()
                 {
                     { "name", name },
                     { "value", s }
                 });
-                _logger.LogInformation($"Value ({s}) set for configuration property ({name}).");
+                _logger.LogDebug($"Value ({s}) set for configuration property ({name}).");
                 Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, s, s.GetType()));
                 return;
             case T t when typeof(T).IsEnum:
-                _logger.LogInformation($"Setting integer configuration property ({name}) to value ({Convert.ToInt32(t)})...");
+                _logger.LogDebug($"Setting integer configuration property ({name}) to value ({Convert.ToInt32(t)})...");
                 await _databaseService.ReplaceIntoTableAsync(TableName, new Dictionary<string, object>()
                 {
                     { "name", name },
                     { "value", Convert.ToInt32(t).ToString() }
                 });
-                _logger.LogInformation($"Value ({Convert.ToInt32(t)}) set for configuration property ({name}).");
+                _logger.LogDebug($"Value ({Convert.ToInt32(t)}) set for configuration property ({name}).");
                 Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, t, t.GetType()));
                 return;
             default:
@@ -357,7 +357,7 @@ public class ConfigurationService : IConfigurationService
 
     public void Set<T>(string name, T value, JsonTypeInfo<T> info) where T : notnull, new()
     {
-        _logger.LogInformation($"Setting object configuration property ({name}) to value ({value})...");
+        _logger.LogDebug($"Setting object configuration property ({name}) to value ({value})...");
         _cache[name] = value;
         EnsureTable();
         _databaseService.ReplaceIntoTable(TableName, new Dictionary<string, object>()
@@ -365,13 +365,13 @@ public class ConfigurationService : IConfigurationService
             { "name", name },
             { "value", JsonSerializer.Serialize(value, info) }
         });
-        _logger.LogInformation($"Value ({value}) set for configuration property ({name}).");
+        _logger.LogDebug($"Value ({value}) set for configuration property ({name}).");
         Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, value, value.GetType()));
     }
 
     public async Task SetAsync<T>(string name, T value, JsonTypeInfo<T> info) where T : notnull, new()
     {
-        _logger.LogInformation($"Setting object configuration property ({name}) to value ({value})...");
+        _logger.LogDebug($"Setting object configuration property ({name}) to value ({value})...");
         _cache[name] = value;
         await EnsureTableAsync();
         await _databaseService.ReplaceIntoTableAsync(TableName, new Dictionary<string, object>()
@@ -379,7 +379,7 @@ public class ConfigurationService : IConfigurationService
             { "name", name },
             { "value", JsonSerializer.Serialize(value, info) }
         });
-        _logger.LogInformation($"Value ({value}) set for configuration property ({name}).");
+        _logger.LogDebug($"Value ({value}) set for configuration property ({name}).");
         Saved?.Invoke(this, new ConfigurationSavedEventArgs(name, value, value.GetType()));
     }
 

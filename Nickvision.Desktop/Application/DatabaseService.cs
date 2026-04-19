@@ -33,62 +33,62 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public bool ClearTable(string tableName)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Clearing table {tableName}...");
+        _logger.LogDebug($"Clearing table {tableName}...");
         using var command = _connection!.CreateCommand();
         command.CommandText = $"DELETE FROM {tableName}";
         command.ExecuteNonQuery();
-        _logger.LogInformation($"Cleared table {tableName}.");
+        _logger.LogDebug($"Cleared table {tableName}.");
         return true;
     }
 
     public async Task<bool> ClearTableAsync(string tableName)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Clearing table {tableName}...");
+        _logger.LogDebug($"Clearing table {tableName}...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = $"DELETE FROM {tableName}";
         await command.ExecuteNonQueryAsync();
-        _logger.LogInformation($"Cleared table {tableName}.");
+        _logger.LogDebug($"Cleared table {tableName}.");
         return true;
     }
 
     public int CountInTable(string tableName)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Counting rows in table {tableName}...");
+        _logger.LogDebug($"Counting rows in table {tableName}...");
         using var command = _connection!.CreateCommand();
         command.CommandText = $"SELECT COUNT(*) FROM {tableName}";
         var count = Convert.ToInt32(command.ExecuteScalar());
-        _logger.LogInformation($"Counted ({count}) rows in table {tableName}.");
+        _logger.LogDebug($"Counted ({count}) rows in table {tableName}.");
         return count;
     }
 
     public async Task<int> CountInTableAsync(string tableName)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Counting rows in table {tableName}...");
+        _logger.LogDebug($"Counting rows in table {tableName}...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = $"SELECT COUNT(*) FROM {tableName}";
         var count = Convert.ToInt32(await command.ExecuteScalarAsync());
-        _logger.LogInformation($"Counted ({count}) rows in table {tableName}.");
+        _logger.LogDebug($"Counted ({count}) rows in table {tableName}.");
         return count;
     }
 
     public bool ContainsInTable<T>(string tableName, string columnName, T matchingValue)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Checking if {tableName} contains typed value ({typeof(T).Name}) in column ({columnName})...");
+        _logger.LogDebug($"Checking if {tableName} contains typed value ({typeof(T).Name}) in column ({columnName})...");
         using var command = _connection!.CreateCommand();
         command.CommandText = $"SELECT COUNT(*) FROM {tableName} WHERE {columnName} = $matchingValueParam";
         command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
         var result = Convert.ToInt32(command.ExecuteScalar()) >= 1;
         if (result)
         {
-            _logger.LogInformation($"Found matching typed column ({columnName}) value in {tableName}.");
+            _logger.LogDebug($"Found matching typed column ({columnName}) value in {tableName}.");
         }
         else
         {
-            _logger.LogInformation($"Failed to find matching typed column ({columnName}) value in {tableName}.");
+            _logger.LogDebug($"Failed to find matching typed column ({columnName}) value in {tableName}.");
         }
         return result;
     }
@@ -96,18 +96,18 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public async Task<bool> ContainsInTableAsync<T>(string tableName, string columnName, T matchingValue)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Checking if {tableName} contains typed value in column ({columnName})...");
+        _logger.LogDebug($"Checking if {tableName} contains typed value in column ({columnName})...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = $"SELECT COUNT(*) FROM {tableName} WHERE {columnName} = $matchingValueParam";
         command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
         var result = Convert.ToInt32(await command.ExecuteScalarAsync()) >= 1;
         if (result)
         {
-            _logger.LogInformation($"Found matching typed column ({columnName}) value in {tableName}.");
+            _logger.LogDebug($"Found matching typed column ({columnName}) value in {tableName}.");
         }
         else
         {
-            _logger.LogInformation($"Failed to find matching typed column ({columnName}) value in {tableName}.");
+            _logger.LogDebug($"Failed to find matching typed column ({columnName}) value in {tableName}.");
         }
         return result;
     }
@@ -115,28 +115,28 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public SqliteTransaction CreateTransaction()
     {
         EnsureDatabase();
-        _logger.LogInformation("Created database transaction.");
+        _logger.LogDebug("Created database transaction.");
         return _connection!.BeginTransaction();
     }
 
     public async Task<SqliteTransaction> CreateTransactionAsync()
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation("Created database transaction.");
+        _logger.LogDebug("Created database transaction.");
         return _connection!.BeginTransaction();
     }
 
     public bool DeleteFromTable<T>(string tableName, string columnName, T matchingValue)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Deleting row from {tableName}...");
+        _logger.LogDebug($"Deleting row from {tableName}...");
         using var command = _connection!.CreateCommand();
         command.CommandText = $"DELETE FROM {tableName} WHERE {columnName} = $matchingValueParam";
         command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
         var result = command.ExecuteNonQuery() > 0;
         if (result)
         {
-            _logger.LogInformation($"Deleted row from {tableName} successfully.");
+            _logger.LogDebug($"Deleted row from {tableName} successfully.");
 
         }
         else
@@ -149,14 +149,14 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public async Task<bool> DeleteFromTableAsync<T>(string tableName, string columnName, T matchingValue)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Deleting row from {tableName}...");
+        _logger.LogDebug($"Deleting row from {tableName}...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = $"DELETE FROM {tableName} WHERE {columnName} = $matchingValueParam";
         command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
         var result = await command.ExecuteNonQueryAsync() > 0;
         if (result)
         {
-            _logger.LogInformation($"Deleted row from {tableName} successfully.");
+            _logger.LogDebug($"Deleted row from {tableName} successfully.");
 
         }
         else
@@ -182,51 +182,51 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public bool DropTable(string tableName)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Dropping table ({tableName})...");
+        _logger.LogDebug($"Dropping table ({tableName})...");
         using var command = _connection!.CreateCommand();
         command.CommandText = $"DROP TABLE IF EXISTS {tableName}";
         command.ExecuteNonQuery();
-        _logger.LogInformation($"Dropped table ({tableName}).");
+        _logger.LogDebug($"Dropped table ({tableName}).");
         return true;
     }
 
     public async Task<bool> DropTableAsync(string tableName)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Dropping table ({tableName})...");
+        _logger.LogDebug($"Dropping table ({tableName})...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = $"DROP TABLE IF EXISTS {tableName}";
         await command.ExecuteNonQueryAsync();
-        _logger.LogInformation($"Dropped table ({tableName}).");
+        _logger.LogDebug($"Dropped table ({tableName}).");
         return true;
     }
 
     public bool EnsureTableExists(string tableName, string layout)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Ensuring table ({tableName}) exists...");
+        _logger.LogDebug($"Ensuring table ({tableName}) exists...");
         using var command = _connection!.CreateCommand();
         command.CommandText = $"CREATE TABLE IF NOT EXISTS {tableName} ({layout})";
         command.ExecuteNonQuery();
-        _logger.LogInformation($"Table ({tableName}) exists.");
+        _logger.LogDebug($"Table ({tableName}) exists.");
         return true;
     }
 
     public async Task<bool> EnsureTableExistsAsync(string tableName, string layout)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Ensuring table ({tableName}) exists...");
+        _logger.LogDebug($"Ensuring table ({tableName}) exists...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = $"CREATE TABLE IF NOT EXISTS {tableName} ({layout})";
         await command.ExecuteNonQueryAsync();
-        _logger.LogInformation($"Table ({tableName}) exists.");
+        _logger.LogDebug($"Table ({tableName}) exists.");
         return true;
     }
 
     public int ExecuteNonQuery(string sql, Dictionary<string, object>? parameters = null)
     {
         EnsureDatabase();
-        _logger.LogInformation("Executing SQL non-query command...");
+        _logger.LogDebug("Executing SQL non-query command...");
         using var command = _connection!.CreateCommand();
         command.CommandText = sql;
         if (parameters is not null)
@@ -237,14 +237,14 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
             }
         }
         var affected = command.ExecuteNonQuery();
-        _logger.LogInformation($"Executed SQL non-query command successfully. Affected rows: {affected}");
+        _logger.LogDebug($"Executed SQL non-query command successfully. Affected rows: {affected}");
         return affected;
     }
 
     public async Task<int> ExecuteNonQueryAsync(string sql, Dictionary<string, object>? parameters = null)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation("Executing SQL non-query command...");
+        _logger.LogDebug("Executing SQL non-query command...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = sql;
         if (parameters is not null)
@@ -255,14 +255,14 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
             }
         }
         var affected = await command.ExecuteNonQueryAsync();
-        _logger.LogInformation($"Executed SQL non-query command successfully. Affected rows: {affected}");
+        _logger.LogDebug($"Executed SQL non-query command successfully. Affected rows: {affected}");
         return affected;
     }
 
     public bool InsertIntoTable(string tableName, Dictionary<string, object> data)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Inserting data into {tableName}...");
+        _logger.LogDebug($"Inserting data into {tableName}...");
         using var command = _connection!.CreateCommand();
         command.CommandText = $"INSERT INTO {tableName} ({string.Join(", ", data.Keys)}) VALUES ({string.Join(", ", data.Keys.Select(k => $"${k}"))})";
         foreach (var pair in data)
@@ -272,7 +272,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         var result = command.ExecuteNonQuery() > 0;
         if (result)
         {
-            _logger.LogInformation($"Inserted data into {tableName} successfully.");
+            _logger.LogDebug($"Inserted data into {tableName} successfully.");
         }
         else
         {
@@ -284,7 +284,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public async Task<bool> InsertIntoTableAsync(string tableName, Dictionary<string, object> data)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Inserting data into {tableName}...");
+        _logger.LogDebug($"Inserting data into {tableName}...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = $"INSERT INTO {tableName} ({string.Join(", ", data.Keys)}) VALUES ({string.Join(", ", data.Keys.Select(k => $"${k}"))})";
         foreach (var pair in data)
@@ -294,7 +294,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         var result = await command.ExecuteNonQueryAsync() > 0;
         if (result)
         {
-            _logger.LogInformation($"Inserted data into {tableName} successfully.");
+            _logger.LogDebug($"Inserted data into {tableName} successfully.");
         }
         else
         {
@@ -306,7 +306,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public bool ReplaceIntoTable(string tableName, Dictionary<string, object> data)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Replacing data into {tableName}...");
+        _logger.LogDebug($"Replacing data into {tableName}...");
         using var command = _connection!.CreateCommand();
         command.CommandText = $"INSERT OR REPLACE INTO {tableName} ({string.Join(", ", data.Keys)}) VALUES ({string.Join(", ", data.Keys.Select(k => $"${k}"))})";
         foreach (var pair in data)
@@ -316,7 +316,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         var result = command.ExecuteNonQuery() > 0;
         if (result)
         {
-            _logger.LogInformation($"Inserted data into {tableName} successfully.");
+            _logger.LogDebug($"Inserted data into {tableName} successfully.");
         }
         else
         {
@@ -328,7 +328,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public async Task<bool> ReplaceIntoTableAsync(string tableName, Dictionary<string, object> data)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Inserting data into {tableName}...");
+        _logger.LogDebug($"Inserting data into {tableName}...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = $"INSERT OR REPLACE INTO {tableName} ({string.Join(", ", data.Keys)}) VALUES ({string.Join(", ", data.Keys.Select(k => $"${k}"))})";
         foreach (var pair in data)
@@ -338,7 +338,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         var result = await command.ExecuteNonQueryAsync() > 0;
         if (result)
         {
-            _logger.LogInformation($"Inserted data into {tableName} successfully.");
+            _logger.LogDebug($"Inserted data into {tableName} successfully.");
         }
         else
         {
@@ -350,74 +350,74 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public SqliteCommand SelectFromTable<T>(string tableName, string columnName, T matchingValue)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Selecting data from table {tableName} with matching column ({columnName})...");
+        _logger.LogDebug($"Selecting data from table {tableName} with matching column ({columnName})...");
         var command = _connection!.CreateCommand();
         command.CommandText = $"SELECT * FROM {tableName} WHERE {columnName} = $matchingValueParam";
         command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
-        _logger.LogInformation($"Selected data from table {tableName} with matching column ({columnName}).");
+        _logger.LogDebug($"Selected data from table {tableName} with matching column ({columnName}).");
         return command;
     }
 
     public async Task<SqliteCommand> SelectFromTableAsync<T>(string tableName, string columnName, T matchingValue)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Selecting data from table {tableName} with matching column ({columnName})...");
+        _logger.LogDebug($"Selecting data from table {tableName} with matching column ({columnName})...");
         var command = _connection!.CreateCommand();
         command.CommandText = $"SELECT * FROM {tableName} WHERE {columnName} = $matchingValueParam";
         command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
-        _logger.LogInformation($"Selected data from table {tableName} with matching column ({columnName}).");
+        _logger.LogDebug($"Selected data from table {tableName} with matching column ({columnName}).");
         return command;
     }
 
     public SqliteCommand SelectAllFromTable(string tableName)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Selecting all data from table {tableName}...");
+        _logger.LogDebug($"Selecting all data from table {tableName}...");
         var command = _connection!.CreateCommand();
         command.CommandText = $"SELECT * FROM {tableName}";
-        _logger.LogInformation($"Selected all data from table {tableName}.");
+        _logger.LogDebug($"Selected all data from table {tableName}.");
         return command;
     }
 
     public async Task<SqliteCommand> SelectAllFromTableAsync(string tableName)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Selecting all data from table {tableName}...");
+        _logger.LogDebug($"Selecting all data from table {tableName}...");
         var command = _connection!.CreateCommand();
         command.CommandText = $"SELECT * FROM {tableName}";
-        _logger.LogInformation($"Selected all data from table {tableName}.");
+        _logger.LogDebug($"Selected all data from table {tableName}.");
         return command;
     }
 
     public bool TableExists(string tableName)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Checking if table ({tableName}) exists...");
+        _logger.LogDebug($"Checking if table ({tableName}) exists...");
         using var command = _connection!.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = $tableNameParam";
         command.Parameters.AddWithValue("$tableNameParam", tableName);
         var exists = Convert.ToInt32(command.ExecuteScalar()) >= 1;
-        _logger.LogInformation(exists ? $"Table ({tableName}) exists." : $"Table ({tableName}) does not exist.");
+        _logger.LogDebug(exists ? $"Table ({tableName}) exists." : $"Table ({tableName}) does not exist.");
         return exists;
     }
 
     public async Task<bool> TableExistsAsync(string tableName)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Checking if table ({tableName}) exists...");
+        _logger.LogDebug($"Checking if table ({tableName}) exists...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = $tableNameParam";
         command.Parameters.AddWithValue("$tableNameParam", tableName);
         var result = await command.ExecuteScalarAsync();
         var exists = Convert.ToInt32(result) >= 1;
-        _logger.LogInformation(exists ? $"Table ({tableName}) exists." : $"Table ({tableName}) does not exist.");
+        _logger.LogDebug(exists ? $"Table ({tableName}) exists." : $"Table ({tableName}) does not exist.");
         return exists;
     }
 
     public bool UpdateInTable<T>(string tableName, string columnName, T matchingValue, Dictionary<string, object> newData)
     {
         EnsureDatabase();
-        _logger.LogInformation($"Updating data in {tableName}...");
+        _logger.LogDebug($"Updating data in {tableName}...");
         using var command = _connection!.CreateCommand();
         command.CommandText = $"UPDATE {tableName} SET {string.Join(", ", newData.Keys.Select(k => $"{k} = ${k}"))} WHERE {columnName} = $matchingValueParam";
         command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
@@ -428,7 +428,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         var result = command.ExecuteNonQuery() > 0;
         if (result)
         {
-            _logger.LogInformation($"Updated data in {tableName} successfully.");
+            _logger.LogDebug($"Updated data in {tableName} successfully.");
         }
         else
         {
@@ -440,7 +440,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     public async Task<bool> UpdateInTableAsync<T>(string tableName, string columnName, T matchingValue, Dictionary<string, object> newData)
     {
         await EnsureDatabaseAsync();
-        _logger.LogInformation($"Updating data in {tableName}...");
+        _logger.LogDebug($"Updating data in {tableName}...");
         await using var command = _connection!.CreateCommand();
         command.CommandText = $"UPDATE {tableName} SET {string.Join(", ", newData.Keys.Select(k => $"{k} = ${k}"))} WHERE {columnName} = $matchingValueParam";
         command.Parameters.AddWithValue("$matchingValueParam", matchingValue);
@@ -451,7 +451,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         var result = await command.ExecuteNonQueryAsync() > 0;
         if (result)
         {
-            _logger.LogInformation($"Updated data in {tableName} successfully.");
+            _logger.LogDebug($"Updated data in {tableName} successfully.");
         }
         else
         {
@@ -467,7 +467,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
             return;
         }
         var path = Path.Combine(_appInfo.IsPortable ? System.Environment.ExecutingDirectory : Path.Combine(UserDirectories.Config, _appInfo.Name), "app.db");
-        _logger.LogInformation($"Opening application database ({path})...");
+        _logger.LogDebug($"Opening application database ({path})...");
         var secret = string.Empty;
         if (!_appInfo.IsPortable && (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsLinux()))
         {
@@ -483,7 +483,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         try
         {
             _connection.Open();
-            _logger.LogInformation($"Opened application database ({path}).");
+            _logger.LogDebug($"Opened application database ({path}).");
         }
         catch (SqliteException e)
         {
@@ -501,7 +501,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
             return;
         }
         var path = Path.Combine(_appInfo.IsPortable ? System.Environment.ExecutingDirectory : Path.Combine(UserDirectories.Config, _appInfo.Name), "app.db");
-        _logger.LogInformation($"Opening application database ({path})...");
+        _logger.LogDebug($"Opening application database ({path})...");
         var secret = string.Empty;
         if (!_appInfo.IsPortable && (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsLinux()))
         {
@@ -517,7 +517,7 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         try
         {
             await _connection.OpenAsync();
-            _logger.LogInformation($"Opened application database ({path}).");
+            _logger.LogDebug($"Opened application database ({path}).");
         }
         catch (SqliteException e)
         {

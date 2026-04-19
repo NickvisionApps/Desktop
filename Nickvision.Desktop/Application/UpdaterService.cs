@@ -82,7 +82,7 @@ public class UpdaterService : IDisposable, IUpdaterService
 
     public async Task<bool> DownloadReleaseAssetAsync(AppVersion version, string path, string assertName, bool exactMatch = true, IProgress<DownloadProgress>? progress = null)
     {
-        _logger.LogInformation($"Starting download of asset ({assertName}{(exactMatch ? string.Empty : "*")}) for {_owner}/{_name} version {version}...");
+        _logger.LogDebug($"Starting download of asset ({assertName}{(exactMatch ? string.Empty : "*")}) for {_owner}/{_name} version {version}...");
         foreach (var release in await GetReleasesAsync())
         {
             if (!AppVersion.TryParse(release.TagName.TrimStart('v'), out var releaseVersion))
@@ -97,12 +97,12 @@ public class UpdaterService : IDisposable, IUpdaterService
             {
                 if ((!exactMatch || asset.Name.ToLower() != assertName.ToLower()) && (exactMatch || !asset.Name.ToLower().Contains(assertName.ToLower())))
                 {
-                    _logger.LogInformation($"Skipping asset {asset.Name} as it does not match the requested name ({assertName}{(exactMatch ? string.Empty : "*")}).");
+                    _logger.LogDebug($"Skipping asset {asset.Name} as it does not match the requested name ({assertName}{(exactMatch ? string.Empty : "*")}).");
                     continue;
                 }
                 try
                 {
-                    _logger.LogInformation($"Downloading asset {asset.Name} from {asset.BrowserDownloadUrl} to {path}...");
+                    _logger.LogDebug($"Downloading asset {asset.Name} from {asset.BrowserDownloadUrl} to {path}...");
                     using var response = await _httpClient.GetAsync(asset.BrowserDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
                     response.EnsureSuccessStatusCode();
                     var totalBytesToRead = response.Content.Headers.ContentLength ?? 0L;
@@ -128,7 +128,7 @@ public class UpdaterService : IDisposable, IUpdaterService
                             var actualHash = string.Join(null, (await _hasher.ComputeHashAsync(fileStream)).Select(x => x.ToString("x2")));
                             if (expectedHash == actualHash)
                             {
-                                _logger.LogInformation($"Downloaded asset {asset.Name} to {path} successfully.");
+                                _logger.LogDebug($"Downloaded asset {asset.Name} to {path} successfully.");
                                 return true;
                             }
                             else
@@ -187,7 +187,7 @@ public class UpdaterService : IDisposable, IUpdaterService
 
     public async Task<bool> WindowsApplicationUpdateAsync(AppVersion version, IProgress<DownloadProgress>? progress = null)
     {
-        _logger.LogInformation($"Starting Windows application update for {_owner}/{_name} version {version}...");
+        _logger.LogDebug($"Starting Windows application update for {_owner}/{_name} version {version}...");
         if (!OperatingSystem.IsWindows())
         {
             _logger.LogError($"Unable to perform update as system is not Windows.");
@@ -196,7 +196,7 @@ public class UpdaterService : IDisposable, IUpdaterService
         var setupPath = Path.Combine(UserDirectories.Cache, $"{_owner}_{_name}_Setup.exe");
         if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
         {
-            _logger.LogInformation($"Downloading ARM64 installer...");
+            _logger.LogDebug($"Downloading ARM64 installer...");
             if (!await DownloadReleaseAssetAsync(version, setupPath, "setup-arm64.exe", false, progress))
             {
                 if (!await DownloadReleaseAssetAsync(version, setupPath, "setup.exe", false, progress))
@@ -208,7 +208,7 @@ public class UpdaterService : IDisposable, IUpdaterService
         }
         else
         {
-            _logger.LogInformation($"Downloading x64 installer...");
+            _logger.LogDebug($"Downloading x64 installer...");
             if (!await DownloadReleaseAssetAsync(version, setupPath, "setup-x64.exe", false, progress))
             {
                 if (!await DownloadReleaseAssetAsync(version, setupPath, "setup.exe", false, progress))
@@ -218,7 +218,7 @@ public class UpdaterService : IDisposable, IUpdaterService
                 }
             }
         }
-        _logger.LogInformation($"Starting downloaded installer ({setupPath})...");
+        _logger.LogDebug($"Starting downloaded installer ({setupPath})...");
         using var res = Process.Start(new ProcessStartInfo
         {
             FileName = setupPath,
@@ -230,7 +230,7 @@ public class UpdaterService : IDisposable, IUpdaterService
             _logger.LogError($"Failed to start installer process.");
             return false;
         }
-        _logger.LogInformation($"Started downloaded installer. Update complete.");
+        _logger.LogDebug($"Started downloaded installer. Update complete.");
         return true;
     }
 
@@ -245,10 +245,10 @@ public class UpdaterService : IDisposable, IUpdaterService
 
     private async Task<IReadOnlyList<GitHubRelease>> GetReleasesAsync()
     {
-        _logger.LogInformation($"Fetching all releases for {_owner}/{_name}...");
+        _logger.LogDebug($"Fetching all releases for {_owner}/{_name}...");
         try
         {
-            _logger.LogInformation($"Checking for releases in cache ({_cacheReleasesPath})...");
+            _logger.LogDebug($"Checking for releases in cache ({_cacheReleasesPath})...");
             if (File.Exists(_cacheReleasesPath) && DateTime.UtcNow - File.GetLastAccessTimeUtc(_cacheReleasesPath) > TimeSpan.FromHours(6))
             {
                 File.Delete(_cacheReleasesPath);
@@ -257,17 +257,17 @@ public class UpdaterService : IDisposable, IUpdaterService
             IReadOnlyList<GitHubRelease> releases = [];
             if (File.Exists(_cacheReleasesPath))
             {
-                _logger.LogInformation($"Cache file found, loading releases from cache...");
+                _logger.LogDebug($"Cache file found, loading releases from cache...");
                 releases = JsonSerializer.Deserialize(await File.ReadAllTextAsync(_cacheReleasesPath), GitHubJsonContext.Default.ListGitHubRelease) ?? [];
-                _logger.LogInformation($"Loaded {releases.Count} releases from cache.");
+                _logger.LogDebug($"Loaded {releases.Count} releases from cache.");
             }
             if (releases.Count == 0)
             {
-                _logger.LogInformation($"No releases found in cache, fetching from GitHub API...");
+                _logger.LogDebug($"No releases found in cache, fetching from GitHub API...");
                 releases = await _httpClient.GetFromJsonAsync($"https://api.github.com/repos/{_owner}/{_name}/releases", GitHubJsonContext.Default.ListGitHubRelease) ?? [];
                 await File.WriteAllTextAsync(_cacheReleasesPath, JsonSerializer.Serialize(releases, GitHubJsonContext.Default.ListGitHubRelease));
                 File.SetLastWriteTimeUtc(_cacheReleasesPath, DateTime.UtcNow);
-                _logger.LogInformation($"Fetched {releases.Count} releases from GitHub API and saved to cache.");
+                _logger.LogDebug($"Fetched {releases.Count} releases from GitHub API and saved to cache.");
             }
             return releases;
         }

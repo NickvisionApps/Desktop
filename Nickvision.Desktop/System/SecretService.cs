@@ -24,7 +24,7 @@ public class SecretService : ISecretService
 
     public async Task<bool> AddAsync(Secret secret)
     {
-        _logger.LogInformation($"Adding system secret ({secret.Name}).");
+        _logger.LogDebug($"Adding system secret ({secret.Name}).");
         if (secret.Empty)
         {
             _logger.LogError($"Unable to add system secret ({secret.Name}) as it is empty.");
@@ -67,7 +67,7 @@ public class SecretService : ISecretService
             });
             if (res)
             {
-                _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
+                _logger.LogDebug($"Added system secret ({secret.Name}) successfully.");
             }
             else
             {
@@ -93,7 +93,7 @@ public class SecretService : ISecretService
             await process.WaitForExitAsync();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
+                _logger.LogDebug($"Added system secret ({secret.Name}) successfully.");
             }
             else
             {
@@ -124,7 +124,7 @@ public class SecretService : ISecretService
             var res = !string.IsNullOrEmpty(itemPath);
             if (res)
             {
-                _logger.LogInformation($"Added system secret ({secret.Name}) successfully.");
+                _logger.LogDebug($"Added system secret ({secret.Name}) successfully.");
             }
             else
             {
@@ -141,7 +141,7 @@ public class SecretService : ISecretService
 
     public async Task<Secret?> CreateAsync(string name)
     {
-        _logger.LogInformation($"Creating system secret ({name}).");
+        _logger.LogDebug($"Creating system secret ({name}).");
         if (string.IsNullOrEmpty(name))
         {
             _logger.LogError("Unable to create system secret as the name is null or empty.");
@@ -155,14 +155,14 @@ public class SecretService : ISecretService
         }
         else
         {
-            _logger.LogInformation($"Created system secret ({name}) successfully.");
+            _logger.LogDebug($"Created system secret ({name}) successfully.");
         }
         return result;
     }
 
     public async Task<bool> DeleteAsync(string name)
     {
-        _logger.LogInformation($"Deleting system secret ({name}).");
+        _logger.LogDebug($"Deleting system secret ({name}).");
         if (string.IsNullOrEmpty(name))
         {
             _logger.LogError("Unable to delete system secret as the name is null or empty.");
@@ -179,7 +179,7 @@ public class SecretService : ISecretService
             });
             if (res)
             {
-                _logger.LogInformation($"Deleted system secret ({name}) successfully.");
+                _logger.LogDebug($"Deleted system secret ({name}) successfully.");
             }
             else
             {
@@ -205,7 +205,7 @@ public class SecretService : ISecretService
             await process.WaitForExitAsync();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Deleted system secret ({name}) successfully.");
+                _logger.LogDebug($"Deleted system secret ({name}) successfully.");
             }
             else
             {
@@ -234,7 +234,7 @@ public class SecretService : ISecretService
                 return false;
             }
             await svc.DeleteItemAsync(itemPath);
-            _logger.LogInformation($"Deleted system secret ({name}) successfully.");
+            _logger.LogDebug($"Deleted system secret ({name}) successfully.");
             return true;
         }
         else
@@ -246,7 +246,7 @@ public class SecretService : ISecretService
 
     public async Task<Secret?> GetAsync(string name)
     {
-        _logger.LogInformation($"Getting system secret ({name}).");
+        _logger.LogDebug($"Getting system secret ({name}).");
         if (string.IsNullOrEmpty(name))
         {
             _logger.LogError("Unable to get system secret as the name is null or empty.");
@@ -282,7 +282,7 @@ public class SecretService : ISecretService
             });
             if (value is null)
             {
-                _logger.LogInformation($"System secret ({name}) not found.");
+                _logger.LogDebug($"System secret ({name}) not found.");
                 return null;
             }
             return new Secret(name, value);
@@ -305,7 +305,7 @@ public class SecretService : ISecretService
             await process.WaitForExitAsync();
             if (process.ExitCode != 0)
             {
-                _logger.LogInformation($"System secret ({name}) not found.");
+                _logger.LogDebug($"System secret ({name}) not found.");
                 return null;
             }
             var stdout = process.StandardOutput.ReadToEnd();
@@ -336,7 +336,7 @@ public class SecretService : ISecretService
             }
             if (itemPath is null)
             {
-                _logger.LogInformation($"System secret ({name}) not found.");
+                _logger.LogDebug($"System secret ({name}) not found.");
                 return null;
             }
             var value = await svc.GetSecretAsync(itemPath);
@@ -351,7 +351,7 @@ public class SecretService : ISecretService
 
     public async Task<bool> UpdateAsync(Secret secret)
     {
-        _logger.LogInformation($"Updating system secret ({secret.Name}).");
+        _logger.LogDebug($"Updating system secret ({secret.Name}).");
         if (secret.Empty)
         {
             _logger.LogError($"Unable to update system secret ({secret.Name}) as it is empty.");
@@ -394,7 +394,7 @@ public class SecretService : ISecretService
             });
             if (res)
             {
-                _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
+                _logger.LogDebug($"Updated system secret ({secret.Name}) successfully.");
             }
             else
             {
@@ -420,7 +420,7 @@ public class SecretService : ISecretService
             await process.WaitForExitAsync();
             if (process.ExitCode == 0)
             {
-                _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
+                _logger.LogDebug($"Updated system secret ({secret.Name}) successfully.");
             }
             else
             {
@@ -457,7 +457,7 @@ public class SecretService : ISecretService
                 return false;
             }
             await svc.SetSecretAsync(itemPath, secret.Value);
-            _logger.LogInformation($"Updated system secret ({secret.Name}) successfully.");
+            _logger.LogDebug($"Updated system secret ({secret.Name}) successfully.");
             return true;
         }
         else

@@ -58,11 +58,11 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
 
     public static bool operator <(AppVersion? pv1, AppVersion? pv2)
     {
-        if(pv1 is null)
+        if (pv1 is null)
         {
             return pv2 is not null;
         }
-        if(pv2 is null)
+        if (pv2 is null)
         {
             return false;
         }
@@ -89,7 +89,7 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
         {
             return false;
         }
-        if(pv2 is null)
+        if (pv2 is null)
         {
             return true;
         }

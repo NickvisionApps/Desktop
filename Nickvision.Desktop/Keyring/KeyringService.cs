@@ -40,7 +40,7 @@ public class KeyringService : IKeyringService
     public async Task<bool> AddCredentialAsync(Credential credential)
     {
         await EnsureTableAsync();
-        _logger.LogInformation($"Adding keyring credential ({credential.Name})...");
+        _logger.LogDebug($"Adding keyring credential ({credential.Name})...");
         if (_credentials.Any(c => c.Name == credential.Name))
         {
             _logger.LogError($"Unable to add keyring credential ({credential.Name}) as it already exists.");
@@ -56,7 +56,7 @@ public class KeyringService : IKeyringService
         if (result)
         {
             _credentials.Add(credential);
-            _logger.LogInformation($"Added keyring credential ({credential.Name}) successfully.");
+            _logger.LogDebug($"Added keyring credential ({credential.Name}) successfully.");
         }
         else
         {
@@ -68,12 +68,12 @@ public class KeyringService : IKeyringService
     public async Task<bool> DeleteCredentialAsync(Credential credential)
     {
         await EnsureTableAsync();
-        _logger.LogInformation($"Deleting keyring credential ({credential.Name})...");
+        _logger.LogDebug($"Deleting keyring credential ({credential.Name})...");
         var result = await _databaseService.DeleteFromTableAsync(TableName, "name", credential.Name);
         if (result)
         {
             _credentials.Remove(credential);
-            _logger.LogInformation($"Removed keyring credential ({credential.Name}) successfully.");
+            _logger.LogDebug($"Removed keyring credential ({credential.Name}) successfully.");
         }
         else
         {
@@ -91,7 +91,7 @@ public class KeyringService : IKeyringService
     public async Task<bool> UpdateCredentialAsync(Credential credential)
     {
         await EnsureTableAsync();
-        _logger.LogInformation($"Updating keyring credential ({credential.Name})...");
+        _logger.LogDebug($"Updating keyring credential ({credential.Name})...");
         var index = _credentials.IndexOf(credential);
         if (index == -1)
         {
@@ -107,7 +107,7 @@ public class KeyringService : IKeyringService
         if (result)
         {
             _credentials[index] = credential;
-            _logger.LogInformation($"Updated keyring credential ({credential.Name}) successfully.");
+            _logger.LogDebug($"Updated keyring credential ({credential.Name}) successfully.");
         }
         else
         {
@@ -133,13 +133,13 @@ public class KeyringService : IKeyringService
         var ring2Path = Path.Combine(UserDirectories.Config, "Nickvision", "Keyring", $"{_appInfo.Id}.ring2");
         if (File.Exists(ring2Path))
         {
-            _logger.LogInformation($"Found old keyring ring2 file ({ring2Path}), migrating credentials...");
+            _logger.LogDebug($"Found old keyring ring2 file ({ring2Path}), migrating credentials...");
             var secret = await _secretService.GetAsync(_appInfo.Id);
             if (secret is null)
             {
                 _logger.LogError($"Unable to migrate old keyring ring2 file ({ring2Path}) as no secret were found for the app.");
                 File.Delete(ring2Path);
-                _logger.LogInformation($"Deleted old keyring ring2 file ({ring2Path}).");
+                _logger.LogDebug($"Deleted old keyring ring2 file ({ring2Path}).");
                 return;
             }
             var oldCredentialDb = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{ring2Path}'")
@@ -160,7 +160,7 @@ public class KeyringService : IKeyringService
                     await AddCredentialAsync(credential);
                 }
                 await oldCredentialDb.CloseAsync();
-                _logger.LogInformation($"Migrated keyring credentials from ring2 file ({ring2Path}) successfully.");
+                _logger.LogDebug($"Migrated keyring credentials from ring2 file ({ring2Path}) successfully.");
             }
             catch (Exception ex)
             {
@@ -168,7 +168,7 @@ public class KeyringService : IKeyringService
             }
             await oldCredentialDb.DisposeAsync();
             File.Delete(ring2Path);
-            _logger.LogInformation($"Deleted old keyring ring2 file ({ring2Path}).");
+            _logger.LogDebug($"Deleted old keyring ring2 file ({ring2Path}).");
         }
     }
 }
