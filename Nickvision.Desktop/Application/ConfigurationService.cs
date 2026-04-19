@@ -132,7 +132,11 @@ public class ConfigurationService : IConfigurationService
         {
             try
             {
-                _cache[name] = JsonSerializer.Deserialize(reader.GetString(1), info)!;
+                var obj = JsonSerializer.Deserialize(reader.GetString(1), info);
+                if(obj is not null)
+                {
+                    _cache[name] = obj;
+                }
             }
             catch { }
         }
@@ -188,7 +192,11 @@ public class ConfigurationService : IConfigurationService
         {
             try
             {
-                _cache[name] = JsonSerializer.Deserialize(reader.GetString(1), info)!;
+                var obj = JsonSerializer.Deserialize(reader.GetString(1), info);
+                if (obj is not null)
+                {
+                    _cache[name] = obj;
+                }
             }
             catch { }
         }

@@ -33,10 +33,10 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
     }
 
     [JsonConstructor]
-    public AppVersion(Version baseVersion, string previewLabel)
+    public AppVersion(Version? baseVersion, string? previewLabel)
     {
-        BaseVersion = baseVersion;
-        PreviewLabel = previewLabel;
+        BaseVersion = baseVersion ?? new Version(0, 0, 0);
+        PreviewLabel = previewLabel ?? string.Empty;
     }
 
     [JsonIgnore]
@@ -58,13 +58,21 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
 
     public static bool operator <(AppVersion? pv1, AppVersion? pv2)
     {
-        if (pv1?.BaseVersion < pv2?.BaseVersion)
+        if(pv1 is null)
+        {
+            return pv2 is not null;
+        }
+        if(pv2 is null)
+        {
+            return false;
+        }
+        if (pv1.BaseVersion < pv2.BaseVersion)
         {
             return true;
         }
-        else if (pv1?.BaseVersion == pv2?.BaseVersion)
+        else if (pv1.BaseVersion == pv2.BaseVersion)
         {
-            return ComparePreviewLabels(pv1?.PreviewLabel, pv2?.PreviewLabel) < 0;
+            return ComparePreviewLabels(pv1.PreviewLabel, pv2.PreviewLabel) < 0;
         }
         return false;
     }
@@ -81,13 +89,17 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
         {
             return false;
         }
-        if (pv1.BaseVersion > pv2?.BaseVersion)
+        if(pv2 is null)
         {
             return true;
         }
-        if (pv1.BaseVersion == pv2?.BaseVersion)
+        if (pv1.BaseVersion > pv2.BaseVersion)
         {
-            return ComparePreviewLabels(pv1.PreviewLabel, pv2?.PreviewLabel) > 0;
+            return true;
+        }
+        if (pv1.BaseVersion == pv2.BaseVersion)
+        {
+            return ComparePreviewLabels(pv1.PreviewLabel, pv2.PreviewLabel) > 0;
         }
         return false;
     }
@@ -147,7 +159,7 @@ public class AppVersion : IComparable<AppVersion>, IEquatable<AppVersion>
         var _ => false
     };
 
-    public override int GetHashCode() => ToString().GetHashCode();
+    public override int GetHashCode() => HashCode.Combine(BaseVersion, PreviewLabel);
 
     public override string ToString() => string.IsNullOrEmpty(PreviewLabel) ? BaseVersion.ToString() : $"{BaseVersion}-{PreviewLabel}";
 }

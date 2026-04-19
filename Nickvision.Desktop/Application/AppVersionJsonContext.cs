@@ -2,7 +2,7 @@
 
 namespace Nickvision.Desktop.Application;
 
-[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower, WriteIndented = true)]
+[JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, WriteIndented = true)]
 [JsonSerializable(typeof(AppVersion))]
 internal partial class AppVersionJsonContext : JsonSerializerContext
 {

@@ -19,6 +19,7 @@ public abstract class DependencyExecutableService : IDependencyExecutableService
     protected readonly string _assetName;
     protected readonly IConfigurationService _configurationService;
     protected readonly IUpdaterService _updaterService;
+    protected readonly IUpdaterService? _previewUpdaterService;
     protected AppVersion? _latestStableVersion;
     protected AppVersion? _latestPreviewVersion;
 
@@ -26,15 +27,22 @@ public abstract class DependencyExecutableService : IDependencyExecutableService
 
     public virtual AppVersion InstalledVersion => _configurationService.Get($"installed_{_executableName}_appversion", BundledVersion, AppVersionJsonContext.Default.AppVersion);
 
-    public DependencyExecutableService(ILogger logger, string executableName, AppVersion bundledVersion, string assetName, IConfigurationService configurationService, IUpdaterService updaterService)
+    public DependencyExecutableService(ILogger logger, string executableName, AppVersion bundledVersion, string assetName, IConfigurationService configurationService, IUpdaterService updaterService, IUpdaterService? previewUpdaterService)
     {
         _logger = logger;
         _executableName = executableName;
         _assetName = assetName;
         _configurationService = configurationService;
         _updaterService = updaterService;
+        _previewUpdaterService = previewUpdaterService;
         _latestStableVersion = null;
+        _latestPreviewVersion = null;
         BundledVersion = bundledVersion;
+    }
+
+    public DependencyExecutableService(ILogger logger, string executableName, AppVersion bundledVersion, string assetName, IConfigurationService configurationService, IUpdaterService updaterService) : this(logger, executableName, bundledVersion, assetName, configurationService, updaterService, null)
+    {
+
     }
 
     public virtual string ExecutablePath
@@ -58,7 +66,7 @@ public abstract class DependencyExecutableService : IDependencyExecutableService
                 }
                 else
                 {
-                    _configurationService.Set(configKey, new AppVersion());
+                    _configurationService.Set(configKey, BundledVersion, AppVersionJsonContext.Default.AppVersion);
                 }
             }
             field = Environment.FindDependency(_executableName, DependencySearchOption.Global);
@@ -144,23 +152,7 @@ public abstract class DependencyExecutableService : IDependencyExecutableService
         return null;
     }
 
-    public virtual async Task<AppVersion?> GetLatestStableVersionAsync()
-    {
-        if (_latestStableVersion is null)
-        {
-            var _ = ExecutablePath;
-            _latestStableVersion = await _updaterService.GetLatestStableVersionAsync();
-        }
-        return _latestStableVersion;
-    }
+    public virtual async Task<AppVersion?> GetLatestStableVersionAsync() => _latestStableVersion ??= await _updaterService.GetLatestStableVersionAsync();
 
-    public virtual async Task<AppVersion?> GetLatestPreviewVersionAsync()
-    {
-        if (_latestPreviewVersion is null)
-        {
-            var _ = ExecutablePath;
-            _latestPreviewVersion = await _updaterService.GetLatestPreviewVersionAsync();
-        }
-        return _latestPreviewVersion;
-    }
+    public virtual async Task<AppVersion?> GetLatestPreviewVersionAsync() => _latestPreviewVersion ??= _previewUpdaterService is null ? await _updaterService.GetLatestPreviewVersionAsync() : await _previewUpdaterService.GetLatestStableVersionAsync();
 }
