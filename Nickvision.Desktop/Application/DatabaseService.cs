@@ -17,8 +17,6 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     private readonly AppInfo _appInfo;
     private SqliteConnection? _connection;
 
-    public event EventHandler<PasswordRequiredEventArgs>? PasswordRequired;
-
     public DatabaseService(ILogger<DatabaseService> logger, AppInfo appInfo, ISecretService secretService)
     {
         _logger = logger;
@@ -475,13 +473,6 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         {
             secret = ((Task.Run(() => _secretService.GetAsync(_appInfo.Id)).GetAwaiter().GetResult()) ?? (Task.Run(() => _secretService.CreateAsync(_appInfo.Id)).GetAwaiter().GetResult()))?.Value;
         }
-        while (string.IsNullOrEmpty(secret))
-        {
-            _logger.LogInformation("Empty secret value. Sending password required event...");
-            var args = new PasswordRequiredEventArgs();
-            PasswordRequired?.Invoke(this, args);
-            secret = args.Password;
-        }
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{path}'")
         {
@@ -515,13 +506,6 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         if (!_appInfo.IsPortable && (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsLinux()))
         {
             secret = ((await _secretService.GetAsync(_appInfo.Id)) ?? (await _secretService.CreateAsync(_appInfo.Id)))?.Value;
-        }
-        while (string.IsNullOrEmpty(secret))
-        {
-            _logger.LogInformation("Empty secret value. Sending password required event...");
-            var args = new PasswordRequiredEventArgs();
-            PasswordRequired?.Invoke(this, args);
-            secret = args.Password;
         }
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{path}'")

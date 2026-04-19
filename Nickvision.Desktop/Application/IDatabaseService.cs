@@ -7,8 +7,6 @@ namespace Nickvision.Desktop.Application;
 
 public interface IDatabaseService
 {
-    event EventHandler<PasswordRequiredEventArgs>? PasswordRequired;
-
     bool ClearTable(string tableName);
     Task<bool> ClearTableAsync(string tableName);
     int CountInTable(string tableName);
