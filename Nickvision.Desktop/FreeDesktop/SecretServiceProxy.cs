@@ -73,14 +73,61 @@ internal sealed class SecretServiceProxy : IDisposable
             writer.WriteString(alias);
             buffer = writer.CreateMessage();
         }
-        return await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
+        var path = await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
         {
             var reader = m.GetBodyReader();
             reader.AlignStruct();
-            var collection = reader.ReadObjectPathAsString();
-            reader.ReadObjectPath(); // prompt (ignored)
-            return collection;
+            return reader.ReadObjectPathAsString();
         }, null);
+        if (string.IsNullOrEmpty(path) || path == "/")
+        {
+            if (!string.IsNullOrEmpty(path) && path != "/")
+            {
+                return await PromptForObjectPathAsync(path);
+            }
+            return null;
+        }
+        return path;
+    }
+
+    private async Task<string?> PromptForObjectPathAsync(string promptPath)
+    {
+        var tcs = new TaskCompletionSource<string?>();
+        using var subscription = await _connection.WatchSignalAsync(SecretsBus, promptPath, "org.freedesktop.Secret.Prompt", "Completed", static (Message m, object? _) =>
+        {
+            var reader = m.GetBodyReader();
+            var dismissed = reader.ReadBool();
+            if (dismissed)
+            {
+                return (Dismissed: true, Path: (string?)null);
+            }
+            var variant = reader.ReadVariantValue();
+            var path = variant.Type == VariantValueType.ObjectPath ? variant.GetObjectPath().ToString() : null;
+            return (Dismissed: false, Path: path);
+        }, (Exception? ex, (bool Dismissed, string? Path) result) =>
+        {
+            if (ex is not null)
+            {
+                tcs.TrySetException(ex);
+            }
+            else if (result.Dismissed)
+            {
+                tcs.TrySetResult(null);
+            }
+            else
+            {
+                tcs.TrySetResult(result.Path);
+            }
+        }, null, false, ObserverFlags.None);
+        MessageBuffer buffer;
+        {
+            using var writer = _connection.GetMessageWriter();
+            writer.WriteMethodCallHeader(SecretsBus, promptPath, "org.freedesktop.Secret.Prompt", "Prompt", "s", MessageFlags.None);
+            writer.WriteString(""); // no parent window-id
+            buffer = writer.CreateMessage();
+        }
+        await _connection.CallMethodAsync(buffer);
+        return await tcs.Task;
     }
 
     internal async Task<bool> UnlockAsync(string objectPath)
@@ -110,25 +157,21 @@ internal sealed class SecretServiceProxy : IDisposable
     private async Task<bool> PromptAsync(string promptPath)
     {
         var tcs = new TaskCompletionSource<bool>();
-        using var subscription = await _connection.WatchSignalAsync(
-            SecretsBus, promptPath, "org.freedesktop.Secret.Prompt", "Completed",
-            static (Message m, object? _) =>
+        using var subscription = await _connection.WatchSignalAsync(SecretsBus, promptPath, "org.freedesktop.Secret.Prompt", "Completed", static (Message m, object? _) =>
+        {
+            var reader = m.GetBodyReader();
+            return reader.ReadBool(); // dismissed
+        }, (Exception? ex, bool dismissed) =>
+        {
+            if (ex is not null)
             {
-                var reader = m.GetBodyReader();
-                return reader.ReadBool(); // dismissed
-            },
-            (Exception? ex, bool dismissed) =>
+                tcs.TrySetException(ex);
+            }
+            else
             {
-                if (ex is not null)
-                {
-                    tcs.TrySetException(ex);
-                }
-                else
-                {
-                    tcs.TrySetResult(!dismissed);
-                }
-            },
-            null, /* emitOnCapturedContext */ false, ObserverFlags.None);
+                tcs.TrySetResult(!dismissed);
+            }
+        }, null, false, ObserverFlags.None);
         MessageBuffer buffer;
         {
             using var writer = _connection.GetMessageWriter();

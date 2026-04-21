@@ -114,7 +114,7 @@ public class SecretService : ISecretService
             {
                 collPath = await svc.CreateCollectionAsync("Default keyring", "default");
             }
-            if (string.IsNullOrEmpty(collPath))
+            if (string.IsNullOrEmpty(collPath) || collPath == "/")
             {
                 _logger.LogError($"Failed to add system secret ({secret.Name}) as the keyring collection could not be accessed.");
                 return false;
