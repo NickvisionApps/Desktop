@@ -73,61 +73,24 @@ internal sealed class SecretServiceProxy : IDisposable
             writer.WriteString(alias);
             buffer = writer.CreateMessage();
         }
-        var path = await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
+        var (collectionPath, promptPath) = await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
         {
             var reader = m.GetBodyReader();
             reader.AlignStruct();
-            return reader.ReadObjectPathAsString();
+            var collection = reader.ReadObjectPathAsString();
+            var prompt = reader.ReadObjectPathAsString();
+            return (collection, prompt);
         }, null);
-        if (string.IsNullOrEmpty(path) || path == "/")
+        if (string.IsNullOrEmpty(collectionPath) || collectionPath == "/")
         {
-            if (!string.IsNullOrEmpty(path) && path != "/")
+            if (!string.IsNullOrEmpty(promptPath) && promptPath != "/")
             {
-                return await PromptForObjectPathAsync(path);
+                var result = await PromptAsync(promptPath);
+                return result.Dismissed ? null : result.Path;
             }
             return null;
         }
-        return path;
-    }
-
-    private async Task<string?> PromptForObjectPathAsync(string promptPath)
-    {
-        var tcs = new TaskCompletionSource<string?>();
-        using var subscription = await _connection.WatchSignalAsync(SecretsBus, promptPath, "org.freedesktop.Secret.Prompt", "Completed", static (Message m, object? _) =>
-        {
-            var reader = m.GetBodyReader();
-            var dismissed = reader.ReadBool();
-            if (dismissed)
-            {
-                return (Dismissed: true, Path: (string?)null);
-            }
-            var variant = reader.ReadVariantValue();
-            var path = variant.Type == VariantValueType.ObjectPath ? variant.GetObjectPath().ToString() : null;
-            return (Dismissed: false, Path: path);
-        }, (Exception? ex, (bool Dismissed, string? Path) result) =>
-        {
-            if (ex is not null)
-            {
-                tcs.TrySetException(ex);
-            }
-            else if (result.Dismissed)
-            {
-                tcs.TrySetResult(null);
-            }
-            else
-            {
-                tcs.TrySetResult(result.Path);
-            }
-        }, null, false, ObserverFlags.None);
-        MessageBuffer buffer;
-        {
-            using var writer = _connection.GetMessageWriter();
-            writer.WriteMethodCallHeader(SecretsBus, promptPath, "org.freedesktop.Secret.Prompt", "Prompt", "s", MessageFlags.None);
-            writer.WriteString(""); // no parent window-id
-            buffer = writer.CreateMessage();
-        }
-        await _connection.CallMethodAsync(buffer);
-        return await tcs.Task;
+        return collectionPath;
     }
 
     internal async Task<bool> UnlockAsync(string objectPath)
@@ -151,17 +114,24 @@ internal sealed class SecretServiceProxy : IDisposable
             // Object was already unlocked, no user prompt required
             return true;
         }
-        return await PromptAsync(promptPath);
+        return !(await PromptAsync(promptPath)).Dismissed;
     }
 
-    private async Task<bool> PromptAsync(string promptPath)
+    private async Task<(bool Dismissed, string? Path)> PromptAsync(string promptPath)
     {
-        var tcs = new TaskCompletionSource<bool>();
+        var tcs = new TaskCompletionSource<(bool Dismissed, string? Path)>();
         using var subscription = await _connection.WatchSignalAsync(SecretsBus, promptPath, "org.freedesktop.Secret.Prompt", "Completed", static (Message m, object? _) =>
         {
             var reader = m.GetBodyReader();
-            return reader.ReadBool(); // dismissed
-        }, (Exception? ex, bool dismissed) =>
+            var dismissed = reader.ReadBool();
+            if (dismissed)
+            {
+                return (Dismissed: true, Path: (string?)null);
+            }
+            var variant = reader.ReadVariantValue();
+            var path = variant.Type == VariantValueType.ObjectPath ? variant.GetObjectPath().ToString() : null;
+            return (Dismissed: false, Path: path);
+        }, (Exception? ex, (bool Dismissed, string? Path) result) =>
         {
             if (ex is not null)
             {
@@ -169,7 +139,7 @@ internal sealed class SecretServiceProxy : IDisposable
             }
             else
             {
-                tcs.TrySetResult(!dismissed);
+                tcs.TrySetResult(result);
             }
         }, null, false, ObserverFlags.None);
         MessageBuffer buffer;
