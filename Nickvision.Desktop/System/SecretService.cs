@@ -233,7 +233,11 @@ public class SecretService : ISecretService
                 _logger.LogError($"Failed to delete system secret ({name}): the user dismissed the unlock prompt.");
                 return false;
             }
-            await svc.DeleteItemAsync(itemPath);
+            if (!await svc.DeleteItemAsync(itemPath))
+            {
+                _logger.LogError($"Failed to delete system secret ({name}): the user dismissed the deletion prompt.");
+                return false;
+            }
             _logger.LogDebug($"Deleted system secret ({name}) successfully.");
             return true;
         }

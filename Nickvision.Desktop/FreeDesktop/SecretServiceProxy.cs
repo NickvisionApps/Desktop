@@ -177,14 +177,24 @@ internal sealed class SecretServiceProxy : IDisposable
             writer.WriteBool(replace);
             buffer = writer.CreateMessage();
         }
-        return await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
+        var (itemPath, promptPath) = await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
         {
             var reader = m.GetBodyReader();
             reader.AlignStruct();
             var item = reader.ReadObjectPathAsString();
-            reader.ReadObjectPath(); // prompt (ignored)
-            return item;
+            var prompt = reader.ReadObjectPathAsString();
+            return (item, prompt);
         }, null);
+        if (string.IsNullOrEmpty(itemPath) || itemPath == "/")
+        {
+            if (!string.IsNullOrEmpty(promptPath) && promptPath != "/")
+            {
+                var result = await PromptAsync(promptPath);
+                return result.Dismissed ? null : result.Path;
+            }
+            return null;
+        }
+        return itemPath;
     }
 
     internal async Task<(string[] Unlocked, string[] Locked)> SearchItemsAsync(Dictionary<string, string> attributes)
@@ -245,14 +255,10 @@ internal sealed class SecretServiceProxy : IDisposable
                 return Encoding.UTF8.GetString(valueBytes);
             }, null);
         }
-        catch (DBusErrorReplyException e)
+        catch (DBusErrorReplyException)
         {
-            if (e.ErrorName == "org.freedesktop.Secret.Error.IsLocked")
-            {
-                return null;
-            }
+            return null;
         }
-        return null;
     }
 
     internal async Task SetSecretAsync(string itemPath, string value)
@@ -271,7 +277,7 @@ internal sealed class SecretServiceProxy : IDisposable
         await _connection.CallMethodAsync(buffer);
     }
 
-    internal async Task DeleteItemAsync(string itemPath)
+    internal async Task<bool> DeleteItemAsync(string itemPath)
     {
         MessageBuffer buffer;
         {
@@ -279,12 +285,16 @@ internal sealed class SecretServiceProxy : IDisposable
             writer.WriteMethodCallHeader(SecretsBus, itemPath, ItemInterface, "Delete", null, MessageFlags.None);
             buffer = writer.CreateMessage();
         }
-        await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
+        var promptPath = await _connection.CallMethodAsync(buffer, static (Message m, object? _) =>
         {
             var reader = m.GetBodyReader();
-            reader.ReadObjectPath(); // prompt (ignored)
-            return true;
+            return reader.ReadObjectPathAsString(); // prompt path, or "/" if no prompt is needed
         }, null);
+        if (string.IsNullOrEmpty(promptPath) || promptPath == "/")
+        {
+            return true;
+        }
+        return !(await PromptAsync(promptPath)).Dismissed;
     }
 
     private static async Task<string> OpenSessionAsync(DBusConnection connection)
