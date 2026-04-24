@@ -32,7 +32,7 @@
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.1721" />
-		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260317003" />
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260416003" />
 		<PackageReference Include="Nickvision.Desktop" Version="2026.4.7" />
 	</ItemGroup>
 	
