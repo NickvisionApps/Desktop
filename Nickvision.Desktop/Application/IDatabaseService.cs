@@ -6,6 +6,7 @@ namespace Nickvision.Desktop.Application;
 
 public interface IDatabaseService
 {
+    bool IsEncrypted { get; }
     bool ClearTable(string tableName);
     Task<bool> ClearTableAsync(string tableName);
     int CountInTable(string tableName);

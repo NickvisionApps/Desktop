@@ -18,6 +18,7 @@ public class DatabaseServiceTests
     {
         _databaseService = new DatabaseService(new MockLogger<DatabaseService>(), new AppInfo("org.nickvision.desktop.test.database", "Nickvision.Desktop.Test.Database", "Test Database"), new SecretService(new MockLogger<SecretService>()));
         Assert.IsNotNull(_databaseService);
+        Assert.IsFalse(_databaseService.IsEncrypted);
     }
 
     [TestMethod]
@@ -25,6 +26,7 @@ public class DatabaseServiceTests
     {
         Assert.IsNotNull(_databaseService);
         Assert.IsTrue(_databaseService.EnsureTableExists("test_table", "id TEXT PRIMARY KEY, name TEXT, age INTEGER"));
+        Assert.IsTrue(_databaseService.IsEncrypted);
         Assert.IsTrue(_databaseService.TableExists("test_table"));
         Assert.IsFalse(_databaseService.TableExists("missing_table"));
         using var transaction = _databaseService.CreateTransaction();
