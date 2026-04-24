@@ -17,12 +17,15 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
     private readonly AppInfo _appInfo;
     private SqliteConnection? _connection;
 
+    public bool IsEncrypted { get; private set; }
+
     public DatabaseService(ILogger<DatabaseService> logger, AppInfo appInfo, ISecretService secretService)
     {
         _logger = logger;
         _secretService = secretService;
         _appInfo = appInfo;
         _connection = null;
+        IsEncrypted = false;
     }
 
     ~DatabaseService()
@@ -471,18 +474,26 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         var secret = string.Empty;
         if (!_appInfo.IsPortable && (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsLinux()))
         {
-            secret = ((Task.Run(() => _secretService.GetAsync(_appInfo.Id)).GetAwaiter().GetResult()) ?? (Task.Run(() => _secretService.CreateAsync(_appInfo.Id)).GetAwaiter().GetResult()))?.Value;
+            try
+            {
+                secret = ((Task.Run(() => _secretService.GetAsync(_appInfo.Id)).GetAwaiter().GetResult()) ?? (Task.Run(() => _secretService.CreateAsync(_appInfo.Id)).GetAwaiter().GetResult()))?.Value;
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning($"Secret service unavailable: {e.Message}. The database will not be encrypted.");
+            }
         }
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{path}'")
         {
             Mode = SqliteOpenMode.ReadWriteCreate,
-            Password = secret,
+            Password = secret ?? string.Empty,
             Pooling = false
         }.ToString());
         try
         {
             _connection.Open();
+            IsEncrypted = !string.IsNullOrEmpty(secret);
             _logger.LogDebug($"Opened application database ({path}).");
         }
         catch (SqliteException e)
@@ -490,7 +501,17 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
             _logger.LogError($"Failed to open application database: {e}");
             _connection.Dispose();
             _connection = null;
-            throw;
+            if (string.IsNullOrEmpty(secret))
+            {
+                _logger.LogWarning("The database may be encrypted but the secret service is unavailable. Falling back to an in-memory database.");
+                _connection = new SqliteConnection("Data Source=:memory:");
+                _connection.Open();
+                IsEncrypted = false;
+            }
+            else
+            {
+                throw;
+            }
         }
     }
 
@@ -505,18 +526,26 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
         var secret = string.Empty;
         if (!_appInfo.IsPortable && (OperatingSystem.IsWindows() || OperatingSystem.IsMacOS() || OperatingSystem.IsLinux()))
         {
-            secret = ((await _secretService.GetAsync(_appInfo.Id)) ?? (await _secretService.CreateAsync(_appInfo.Id)))?.Value;
+            try
+            {
+                secret = ((await _secretService.GetAsync(_appInfo.Id)) ?? (await _secretService.CreateAsync(_appInfo.Id)))?.Value;
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning($"Secret service unavailable: {e.Message}. The database will not be encrypted.");
+            }
         }
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{path}'")
         {
             Mode = SqliteOpenMode.ReadWriteCreate,
-            Password = secret,
+            Password = secret ?? string.Empty,
             Pooling = false
         }.ToString());
         try
         {
             await _connection.OpenAsync();
+            IsEncrypted = !string.IsNullOrEmpty(secret);
             _logger.LogDebug($"Opened application database ({path}).");
         }
         catch (SqliteException e)
@@ -524,7 +553,17 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
             _logger.LogError($"Failed to open application database: {e}");
             await _connection.DisposeAsync();
             _connection = null;
-            throw;
+            if (string.IsNullOrEmpty(secret))
+            {
+                _logger.LogWarning("The database may be encrypted but the secret service is unavailable. Falling back to an in-memory database.");
+                _connection = new SqliteConnection("Data Source=:memory:");
+                await _connection.OpenAsync();
+                IsEncrypted = false;
+            }
+            else
+            {
+                throw;
+            }
         }
     }
 

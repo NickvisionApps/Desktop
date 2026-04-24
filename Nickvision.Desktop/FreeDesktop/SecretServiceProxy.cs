@@ -33,15 +33,24 @@ internal sealed class SecretServiceProxy : IDisposable
         {
             return null;
         }
-        var connection = new DBusConnection(sessionAddress);
-        await connection.ConnectAsync();
-        var sessionPath = await OpenSessionAsync(connection);
-        if (string.IsNullOrEmpty(sessionPath) || sessionPath == "/")
+        DBusConnection? connection = null;
+        try
         {
-            connection.Dispose();
+            connection = new DBusConnection(sessionAddress);
+            await connection.ConnectAsync();
+            var sessionPath = await OpenSessionAsync(connection);
+            if (string.IsNullOrEmpty(sessionPath) || sessionPath == "/")
+            {
+                connection.Dispose();
+                return null;
+            }
+            return new SecretServiceProxy(connection, sessionPath);
+        }
+        catch (Exception)
+        {
+            connection?.Dispose();
             return null;
         }
-        return new SecretServiceProxy(connection, sessionPath);
     }
 
     internal async Task<string?> GetDefaultCollectionPathAsync()
