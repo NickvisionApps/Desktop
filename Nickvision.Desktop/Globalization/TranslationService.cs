@@ -36,7 +36,7 @@ public class TranslationService : ITranslationService
             }
             else
             {
-                _catalog = !AvailableLanguages.Contains(field) ? new Catalog(_domainName, System.Environment.ExecutingDirectory) : _catalog = new Catalog(_domainName, System.Environment.ExecutingDirectory, new CultureInfo(field));
+                _catalog = !AvailableLanguages.Contains(field) ? new Catalog(_domainName, System.Environment.ExecutingDirectory) : new Catalog(_domainName, System.Environment.ExecutingDirectory, new CultureInfo(field));
             }
         }
     }
@@ -59,17 +59,17 @@ public class TranslationService : ITranslationService
 
     public string _(string text) => _catalog?.GetString(text) ?? text;
 
-    public string _(string text, params object[] args) => _catalog?.GetString(text, args) ?? text;
+    public string _(string text, params object[] args) => _catalog?.GetString(text, args) ?? string.Format(text, args);
 
     public string _n(string text, string pluralText, long n) => _catalog?.GetPluralString(text, pluralText, n) ?? (n == 1 ? text : pluralText);
 
-    public string _n(string text, string pluralText, long n, params object[] args) => _catalog?.GetPluralString(text, pluralText, n, args) ?? (n == 1 ? text : pluralText);
+    public string _n(string text, string pluralText, long n, params object[] args) => _catalog?.GetPluralString(text, pluralText, n, args) ?? string.Format(n == 1 ? text : pluralText, args);
 
     public string _p(string context, string text) => _catalog?.GetParticularString(context, text) ?? text;
 
-    public string _p(string context, string text, params object[] args) => _catalog?.GetParticularString(context, text, args) ?? text;
+    public string _p(string context, string text, params object[] args) => _catalog?.GetParticularString(context, text, args) ?? string.Format(text, args);
 
     public string _pn(string context, string text, string pluralText, long n) => _catalog?.GetParticularPluralString(context, text, pluralText, n) ?? (n == 1 ? text : pluralText);
 
-    public string _pn(string context, string text, string pluralText, long n, params object[] args) => _catalog?.GetParticularPluralString(context, text, pluralText, n, args) ?? (n == 1 ? text : pluralText);
+    public string _pn(string context, string text, string pluralText, long n, params object[] args) => _catalog?.GetParticularPluralString(context, text, pluralText, n, args) ?? string.Format(n == 1 ? text : pluralText, args);
 }
