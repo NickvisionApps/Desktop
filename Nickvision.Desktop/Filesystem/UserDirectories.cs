@@ -21,7 +21,7 @@ public static class UserDirectories
             }
             else if (OperatingSystem.IsMacOS())
             {
-                res = Path.Combine(Home, "Library", "ApplicationSupport");
+                res = Path.Combine(Home, "Library", "Application Support");
             }
             else if (OperatingSystem.IsLinux())
             {
