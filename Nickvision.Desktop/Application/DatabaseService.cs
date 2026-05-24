@@ -502,6 +502,31 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
             _logger.LogError($"Failed to open application database: {e}");
             _connection.Dispose();
             _connection = null;
+            if (File.Exists(path))
+            {
+                _logger.LogWarning($"Deleting corrupt or incompatible database ({path}) and retrying...");
+                File.Delete(path);
+                _connection = new SqliteConnection(new SqliteConnectionStringBuilder()
+                {
+                    DataSource = path,
+                    Mode = SqliteOpenMode.ReadWriteCreate,
+                    Password = secret ?? string.Empty,
+                    Pooling = false
+                }.ToString());
+                try
+                {
+                    _connection.Open();
+                    IsEncrypted = !string.IsNullOrEmpty(secret);
+                    _logger.LogDebug($"Opened fresh application database ({path}) after deleting corrupt file.");
+                    return;
+                }
+                catch (SqliteException retryEx)
+                {
+                    _logger.LogError($"Failed to open fresh database after retry: {retryEx}");
+                    _connection.Dispose();
+                    _connection = null;
+                }
+            }
             if (string.IsNullOrEmpty(secret))
             {
                 _logger.LogWarning("The database may be encrypted but the secret service is unavailable. Falling back to an in-memory database.");
@@ -555,6 +580,31 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
             _logger.LogError($"Failed to open application database: {e}");
             await _connection.DisposeAsync();
             _connection = null;
+            if (File.Exists(path))
+            {
+                _logger.LogWarning($"Deleting corrupt or incompatible database ({path}) and retrying...");
+                File.Delete(path);
+                _connection = new SqliteConnection(new SqliteConnectionStringBuilder()
+                {
+                    DataSource = path,
+                    Mode = SqliteOpenMode.ReadWriteCreate,
+                    Password = secret ?? string.Empty,
+                    Pooling = false
+                }.ToString());
+                try
+                {
+                    await _connection.OpenAsync();
+                    IsEncrypted = !string.IsNullOrEmpty(secret);
+                    _logger.LogDebug($"Opened fresh application database ({path}) after deleting corrupt file.");
+                    return;
+                }
+                catch (SqliteException retryEx)
+                {
+                    _logger.LogError($"Failed to open fresh database after retry: {retryEx}");
+                    await _connection.DisposeAsync();
+                    _connection = null;
+                }
+            }
             if (string.IsNullOrEmpty(secret))
             {
                 _logger.LogWarning("The database may be encrypted but the secret service is unavailable. Falling back to an in-memory database.");
