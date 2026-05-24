@@ -484,8 +484,9 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
             }
         }
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{path}'")
+        _connection = new SqliteConnection(new SqliteConnectionStringBuilder()
         {
+            DataSource = path,
             Mode = SqliteOpenMode.ReadWriteCreate,
             Password = secret ?? string.Empty,
             Pooling = false
@@ -536,8 +537,9 @@ public class DatabaseService : IAsyncDisposable, IDisposable, IDatabaseService
             }
         }
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        _connection = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{path}'")
+        _connection = new SqliteConnection(new SqliteConnectionStringBuilder()
         {
+            DataSource = path,
             Mode = SqliteOpenMode.ReadWriteCreate,
             Password = secret ?? string.Empty,
             Pooling = false

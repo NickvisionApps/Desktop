@@ -142,8 +142,9 @@ public class KeyringService : IKeyringService
                 _logger.LogDebug($"Deleted old keyring ring2 file ({ring2Path}).");
                 return;
             }
-            var oldCredentialDb = new SqliteConnection(new SqliteConnectionStringBuilder($"Data Source='{ring2Path}'")
+            var oldCredentialDb = new SqliteConnection(new SqliteConnectionStringBuilder()
             {
+                DataSource = ring2Path,
                 Mode = SqliteOpenMode.ReadWriteCreate,
                 Password = secret.Value,
                 Pooling = false
