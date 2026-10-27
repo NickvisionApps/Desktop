@@ -100,6 +100,7 @@ public class UpdaterService : IDisposable, IUpdaterService
                     _logger.LogDebug($"Skipping asset {asset.Name} as it does not match the requested name ({assertName}{(exactMatch ? string.Empty : "*")}).");
                     continue;
                 }
+                var temporaryPath = $"{path}.{Guid.NewGuid():N}.tmp";
                 try
                 {
                     _logger.LogDebug($"Downloading asset {asset.Name} from {asset.BrowserDownloadUrl} to {path}...");
@@ -110,47 +111,64 @@ public class UpdaterService : IDisposable, IUpdaterService
                     var bytesSinceLastReport = 0L;
                     var buffer = new byte[81920];
                     await using var downloadStream = await response.Content.ReadAsStreamAsync();
-                    await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 8192, true);
-                    while (true)
+                    await using (var fileStream = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 8192, true))
                     {
-                        var bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length);
-                        if (bytesRead == 0)
+                        while (true)
                         {
-                            fileStream.Seek(0, SeekOrigin.Begin);
-                            progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, true));
-                            var assetWithDigest = await _httpClient.GetFromJsonAsync(asset.Url, GitHubJsonContext.Default.GitHubReleaseAsset);
-                            if (assetWithDigest is null)
+                            var bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length);
+                            if (bytesRead == 0)
                             {
-                                _logger.LogError($"Failed to get asset information for {asset.Name} from GitHub API.");
-                                return false;
+                                break;
                             }
-                            var expectedHash = assetWithDigest.Digest.Replace("sha256:", string.Empty);
-                            var actualHash = string.Join(null, (await _hasher.ComputeHashAsync(fileStream)).Select(x => x.ToString("x2")));
-                            if (expectedHash == actualHash)
+                            await fileStream.WriteAsync(buffer, 0, bytesRead);
+                            totalBytesRead += bytesRead;
+                            bytesSinceLastReport += bytesRead;
+                            if (bytesSinceLastReport >= 524288)
                             {
-                                _logger.LogDebug($"Downloaded asset {asset.Name} to {path} successfully.");
-                                return true;
-                            }
-                            else
-                            {
-                                _logger.LogError($"Error in downloaded asset ({asset.Name}). File size does not match expected size (expected: {expectedHash}, actual: {actualHash}).");
-                                return false;
+                                progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, false));
+                                bytesSinceLastReport = 0;
                             }
                         }
-                        await fileStream.WriteAsync(buffer, 0, bytesRead);
-                        totalBytesRead += bytesRead;
-                        bytesSinceLastReport += bytesRead;
-                        if (bytesSinceLastReport >= 524288)
+                        fileStream.Seek(0, SeekOrigin.Begin);
+                        var assetWithDigest = await _httpClient.GetFromJsonAsync(asset.Url, GitHubJsonContext.Default.GitHubReleaseAsset);
+                        if (assetWithDigest is null)
                         {
-                            progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, false));
-                            bytesSinceLastReport = 0;
+                            _logger.LogError($"Failed to get asset information for {asset.Name} from GitHub API.");
+                            return false;
+                        }
+                        var expectedHash = assetWithDigest.Digest.Replace("sha256:", string.Empty);
+                        var actualHash = string.Join(null, (await _hasher.ComputeHashAsync(fileStream)).Select(x => x.ToString("x2")));
+                        if (expectedHash != actualHash)
+                        {
+                            _logger.LogError($"Error in downloaded asset ({asset.Name}). SHA256 checksum does not match (expected: {expectedHash}, actual: {actualHash}).");
+                            return false;
                         }
                     }
+                    if (!OperatingSystem.IsWindows() && File.Exists(path))
+                    {
+                        File.SetUnixFileMode(temporaryPath, File.GetUnixFileMode(path));
+                    }
+                    // A sibling temporary file can replace a running executable without opening it for writing.
+                    File.Move(temporaryPath, path, true);
+                    progress?.Report(new DownloadProgress(totalBytesToRead, totalBytesRead, true));
+                    _logger.LogDebug($"Downloaded asset {asset.Name} to {path} successfully.");
+                    return true;
                 }
                 catch (Exception e)
                 {
                     _logger.LogError($"Failed to download asset {asset.Name} from {asset.BrowserDownloadUrl}: {e}");
                     return false;
+                }
+                finally
+                {
+                    try
+                    {
+                        File.Delete(temporaryPath);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogWarning($"Failed to remove temporary download {temporaryPath}: {e}");
+                    }
                 }
             }
         }
